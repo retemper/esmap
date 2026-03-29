@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/config" },
+    { "path": "packages/cli" },
+    { "path": "packages/runtime" },
+    { "path": "packages/react" },
+    { "path": "packages/communication" },
+    { "path": "packages/sandbox" },
+    { "path": "packages/devtools" },
+    { "path": "packages/server" },
+    { "path": "packages/guard" },
+    { "path": "packages/monitor" },
+    { "path": "packages/compat" },
+    { "path": "packages/vite-plugin" },
+    { "path": "packages/test" }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@esmap/runtime",
+  "version": "0.0.1",
+  "description": "Browser runtime for import map loading, MFE lifecycle, and routing",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@esmap/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.0.18",
+    "jsdom": "^26.0.0",
+    "@vitest/browser": "^4.0.18"
+  },
+  "license": "MIT",
+  "sideEffects": false
+}

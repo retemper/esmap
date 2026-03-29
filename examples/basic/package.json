@@ -1,0 +1,27 @@
+{
+  "name": "@esmap-examples/basic",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Basic demo: import map generation from manifests",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx src/demo.ts",
+    "demo:migration": "tsx src/demo-migration.ts",
+    "build": "echo 'no build needed'",
+    "test": "echo 'no tests'"
+  },
+  "dependencies": {
+    "@esmap/shared": "workspace:*",
+    "@esmap/config": "workspace:*",
+    "@esmap/cli": "workspace:*",
+    "@esmap/compat": "workspace:*",
+    "@esmap/runtime": "workspace:*",
+    "@esmap/devtools": "workspace:*",
+    "@esmap/guard": "workspace:*",
+    "@esmap/monitor": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "typescript": "^5.6.0"
+  }
+}

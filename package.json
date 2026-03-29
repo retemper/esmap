@@ -1,0 +1,45 @@
+{
+  "private": true,
+  "type": "module",
+  "name": "esmap",
+  "description": "Import Map all-in-one framework for micro-frontends",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/niceplugin/esmap"
+  },
+  "bugs": "https://github.com/niceplugin/esmap/issues",
+  "homepage": "https://github.com/niceplugin/esmap#readme",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "keywords": [
+    "micro-frontends",
+    "import-map",
+    "mfe",
+    "module-federation",
+    "esm",
+    "micro-frontend-framework"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "test": "turbo test",
+    "type-check": "turbo type-check",
+    "lint": "turbo lint",
+    "dev": "turbo dev",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.0",
+    "eslint": "^10.1.0",
+    "playwright": "^1.58.2",
+    "prettier": "^3.4.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.57.1"
+  },
+  "packageManager": "pnpm@10.22.0"
+}
