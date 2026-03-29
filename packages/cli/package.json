@@ -1,0 +1,40 @@
+{
+  "name": "@esmap/cli",
+  "version": "0.0.1",
+  "description": "CLI for import map generation, build post-processing, and deployment",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "bin": {
+    "esmap": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@esmap/config": "workspace:*",
+    "@esmap/runtime": "workspace:*",
+    "@esmap/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.0.18"
+  },
+  "license": "MIT",
+  "sideEffects": false
+}

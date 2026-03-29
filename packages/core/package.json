@@ -1,0 +1,37 @@
+{
+  "name": "@esmap/core",
+  "version": "0.0.1",
+  "description": "Unified kernel for the esmap micro-frontend framework",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@esmap/communication": "workspace:*",
+    "@esmap/devtools": "workspace:*",
+    "@esmap/guard": "workspace:*",
+    "@esmap/monitor": "workspace:*",
+    "@esmap/runtime": "workspace:*",
+    "@esmap/sandbox": "workspace:*",
+    "@esmap/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.0.18"
+  },
+  "license": "MIT",
+  "sideEffects": false
+}

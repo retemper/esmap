@@ -1,0 +1,7 @@
+{
+  "name": "@enterprise/platform-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Import map delivery server with SSE hot-deploy and rollback",
+  "type": "module"
+}
