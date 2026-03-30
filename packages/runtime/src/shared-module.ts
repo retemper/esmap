@@ -1,64 +1,64 @@
 import { satisfiesRange, compareVersions } from './semver.js';
 
-/** 공유 모듈 등록 시 필요한 설정 */
+/** Configuration required for shared module registration */
 export interface SharedModuleConfig {
-  /** 모듈 이름 (예: "react") */
+  /** Module name (e.g. "react") */
   readonly name: string;
-  /** 제공하는 버전 (예: "18.3.1") */
+  /** Provided version (e.g. "18.3.1") */
   readonly version: string;
-  /** 요구 버전 범위 (예: "^18.0.0") */
+  /** Required version range (e.g. "^18.0.0") */
   readonly requiredVersion?: string;
-  /** 단일 인스턴스 강제 여부 */
+  /** Whether to enforce a single instance */
   readonly singleton?: boolean;
-  /** 즉시 로딩 여부. true이면 register 시점에 바로 로드한다. */
+  /** Whether to load immediately. When true, loading starts at register time. */
   readonly eager?: boolean;
-  /** 버전 불일치 시 에러 throw 여부 */
+  /** Whether to throw an error on version mismatch */
   readonly strictVersion?: boolean;
-  /** 모듈 인스턴스를 생성하는 팩토리 함수 */
+  /** Factory function that creates the module instance */
   readonly factory: () => Promise<unknown>;
-  /** 버전 협상 실패 시 사용할 대체 팩토리. strictVersion보다 우선한다. */
+  /** Fallback factory used when version negotiation fails. Takes priority over strictVersion. */
   readonly fallback?: () => Promise<unknown>;
-  /** subpath exports 매핑 (예: { "./client": factory }) */
+  /** Subpath exports mapping (e.g. { "./client": factory }) */
   readonly subpaths?: Readonly<Record<string, () => Promise<unknown>>>;
-  /** 이 모듈을 등록한 앱 이름 (소유권 추적용) */
+  /** Name of the app that registered this module (for ownership tracking) */
   readonly from?: string;
 }
 
-/** 로드된 모듈 정보 */
+/** Loaded module information */
 interface LoadedModule {
-  /** 선택된 버전 */
+  /** Selected version */
   readonly version: string;
-  /** 로드된 모듈 인스턴스 */
+  /** Loaded module instance */
   readonly module: unknown;
-  /** 모듈을 제공한 등록자 */
+  /** Registrant that provided the module */
   readonly from?: string;
 }
 
-/** 공유 모듈 레지스트리 인터페이스 */
+/** Shared module registry interface */
 export interface SharedModuleRegistry {
-  /** 공유 모듈을 등록한다. eager: true면 즉시 로드를 시작한다. */
+  /** Registers a shared module. Starts loading immediately when eager is true. */
   register(config: SharedModuleConfig): void;
-  /** 이름으로 공유 모듈을 해결하여 로드한다. 동시 호출 시 중복 로드를 방지한다. */
+  /** Resolves and loads a shared module by name. Prevents duplicate loading on concurrent calls. */
   resolve(name: string): Promise<unknown>;
-  /** subpath로 공유 모듈을 해결한다 (예: resolve('react-dom', './client')). */
+  /** Resolves a shared module by subpath (e.g. resolve('react-dom', './client')). */
   resolveSubpath(name: string, subpath: string): Promise<unknown>;
-  /** 등록된 모든 모듈 설정을 반환한다. */
+  /** Returns all registered module configurations. */
   getRegistered(): ReadonlyMap<string, readonly SharedModuleConfig[]>;
-  /** 이미 로드된 모든 모듈을 반환한다. */
+  /** Returns all already loaded modules. */
   getLoaded(): ReadonlyMap<string, LoadedModule>;
-  /** eager 모듈이 모두 로드될 때까지 기다린다. */
+  /** Waits until all eager modules have finished loading. */
   waitForEager(): Promise<void>;
 }
 
-/** 버전 협상 실패 시 발생하는 에러 */
+/** Error thrown when version negotiation fails */
 export class SharedVersionConflictError extends Error {
-  /** 충돌이 발생한 모듈 이름 */
+  /** Name of the module where the conflict occurred */
   readonly moduleName: string;
 
   /**
-   * 버전 충돌 에러를 생성한다.
-   * @param moduleName - 충돌이 발생한 모듈 이름
-   * @param message - 에러 메시지
+   * Creates a version conflict error.
+   * @param moduleName - name of the module where the conflict occurred
+   * @param message - error message
    */
   constructor(moduleName: string, message: string) {
     super(message);
@@ -68,39 +68,39 @@ export class SharedVersionConflictError extends Error {
 }
 
 /**
- * 공유 모듈 레지스트리를 생성한다.
- * 여러 MFE 앱이 등록한 공유 의존성의 버전을 협상하고,
- * 최적의 버전을 선택하여 단일 인스턴스를 공유한다.
- * @returns SharedModuleRegistry 인스턴스
+ * Creates a shared module registry.
+ * Negotiates versions of shared dependencies registered by multiple MFE apps,
+ * selects the optimal version, and shares a single instance.
+ * @returns SharedModuleRegistry instance
  */
 export function createSharedModuleRegistry(): SharedModuleRegistry {
   const registered = new Map<string, SharedModuleConfig[]>();
   const loaded = new Map<string, LoadedModule>();
-  /** 동시 resolve 중복 호출 방지용 inflight 캐시 */
+  /** Inflight cache to prevent duplicate concurrent resolve calls */
   const inflight = new Map<string, Promise<unknown>>();
-  /** eager 로딩 Promise 추적 */
+  /** Eager loading Promise tracking */
   const eagerPromises: Array<Promise<void>> = [];
-  /** subpath별 로드된 모듈 캐시 */
+  /** Per-subpath loaded module cache */
   const loadedSubpaths = new Map<string, unknown>();
 
   /**
-   * subpath 캐시 키를 생성한다.
-   * @param name - 모듈 이름
-   * @param subpath - subpath (예: "./client")
+   * Generates a subpath cache key.
+   * @param name - module name
+   * @param subpath - subpath (e.g. "./client")
    */
   function subpathKey(name: string, subpath: string): string {
     return `${name}::${subpath}`;
   }
 
   /**
-   * 공유 모듈을 레지스트리에 등록한다. eager가 true면 즉시 로드를 시작한다.
-   * @param config - 등록할 모듈 설정
+   * Registers a shared module in the registry. Starts loading immediately when eager is true.
+   * @param config - module configuration to register
    */
   function register(config: SharedModuleConfig): void {
     const existing = registered.get(config.name) ?? [];
     registered.set(config.name, [...existing, config]);
 
-    // eager: true면 등록 즉시 로드 시작
+    // Start loading immediately when eager is true
     if (config.eager) {
       const promise = resolve(config.name).then(() => undefined).catch(() => undefined);
       eagerPromises.push(promise);
@@ -108,25 +108,25 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
   }
 
   /**
-   * 등록된 후보 중 최적의 버전을 선택하여 모듈을 로드한다.
-   * 동시에 같은 모듈을 resolve하면 inflight 캐시로 중복 로드를 방지한다.
-   * @param name - 해결할 모듈 이름
-   * @returns 로드된 모듈 인스턴스
+   * Selects the optimal version from registered candidates and loads the module.
+   * Uses inflight cache to prevent duplicate loading when the same module is resolved concurrently.
+   * @param name - module name to resolve
+   * @returns loaded module instance
    */
   async function resolve(name: string): Promise<unknown> {
-    // 1. 이미 로드된 모듈 반환
+    // 1. Return already loaded module
     const cachedModule = loaded.get(name);
     if (cachedModule) {
       return cachedModule.module;
     }
 
-    // 2. 이미 로드 중인 모듈이 있으면 같은 Promise 반환 (dedup)
+    // 2. Return the same Promise if already loading (dedup)
     const existing = inflight.get(name);
     if (existing) {
       return existing;
     }
 
-    // 3. 새로 로드 시작
+    // 3. Start new loading
     const promise = doResolve(name);
     inflight.set(name, promise);
 
@@ -138,13 +138,13 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
   }
 
   /**
-   * 실제 모듈 해결 로직. 버전 협상 → 팩토리 호출 → 캐시 저장.
-   * @param name - 해결할 모듈 이름
+   * Actual module resolution logic. Version negotiation -> factory call -> cache storage.
+   * @param name - module name to resolve
    */
   async function doResolve(name: string): Promise<unknown> {
     const candidates = registered.get(name);
     if (!candidates || candidates.length === 0) {
-      throw new SharedVersionConflictError(name, `공유 모듈 "${name}"이 등록되지 않았습니다`);
+      throw new SharedVersionConflictError(name, `Shared module "${name}" is not registered`);
     }
 
     const selected = selectBestCandidate(name, candidates);
@@ -156,38 +156,38 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
   }
 
   /**
-   * subpath로 공유 모듈의 하위 경로를 해결한다.
-   * 부모 모듈의 subpaths 매핑에서 팩토리를 찾아 로드한다.
-   * @param name - 모듈 이름 (예: "react-dom")
-   * @param subpath - 하위 경로 (예: "./client")
+   * Resolves a subpath of a shared module.
+   * Finds and loads the factory from the parent module's subpaths mapping.
+   * @param name - module name (e.g. "react-dom")
+   * @param subpath - subpath (e.g. "./client")
    */
   async function resolveSubpath(name: string, subpath: string): Promise<unknown> {
     const key = subpathKey(name, subpath);
 
-    // 캐시 확인
+    // Check cache
     const cached = loadedSubpaths.get(key);
     if (cached !== undefined) {
       return cached;
     }
 
-    // 부모 모듈의 후보에서 subpath 팩토리 탐색
+    // Search for subpath factory in parent module candidates
     const candidates = registered.get(name);
     if (!candidates || candidates.length === 0) {
       throw new SharedVersionConflictError(
         name,
-        `공유 모듈 "${name}"이 등록되지 않았습니다`,
+        `Shared module "${name}" is not registered`,
       );
     }
 
-    // 선택된 최적 후보의 subpaths에서 해당 subpath 팩토리를 찾는다
+    // Find the subpath factory from the selected best candidate's subpaths
     const selected = selectBestCandidate(name, candidates);
     const subpathFactory = selected.subpaths?.[subpath];
 
     if (!subpathFactory) {
       throw new SharedVersionConflictError(
         name,
-        `공유 모듈 "${name}"에 subpath "${subpath}"가 등록되지 않았습니다. ` +
-        `등록된 subpaths: [${Object.keys(selected.subpaths ?? {}).join(', ')}]`,
+        `Shared module "${name}" does not have subpath "${subpath}" registered. ` +
+        `Registered subpaths: [${Object.keys(selected.subpaths ?? {}).join(', ')}]`,
       );
     }
 
@@ -197,24 +197,24 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
   }
 
   /**
-   * 등록된 모든 모듈 설정을 읽기 전용 Map으로 반환한다.
-   * @returns 등록된 모듈 Map
+   * Returns all registered module configurations as a read-only Map.
+   * @returns registered module Map
    */
   function getRegistered(): ReadonlyMap<string, readonly SharedModuleConfig[]> {
     return registered;
   }
 
   /**
-   * 이미 로드된 모든 모듈을 읽기 전용 Map으로 반환한다.
-   * @returns 로드된 모듈 Map
+   * Returns all already loaded modules as a read-only Map.
+   * @returns loaded module Map
    */
   function getLoaded(): ReadonlyMap<string, LoadedModule> {
     return loaded;
   }
 
   /**
-   * eager로 표시된 모든 모듈이 로드 완료될 때까지 대기한다.
-   * 개별 eager 로드 실패는 무시된다 (register 시점에 catch됨).
+   * Waits until all modules marked as eager have finished loading.
+   * Individual eager load failures are ignored (caught at register time).
    */
   async function waitForEager(): Promise<void> {
     await Promise.all(eagerPromises);
@@ -224,11 +224,11 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
 }
 
 /**
- * 후보 목록에서 모든 requiredVersion 제약을 만족하는 최적의 버전을 선택한다.
- * 만족하는 버전이 없으면 fallback → strictVersion → 경고 순서로 처리한다.
- * @param name - 모듈 이름
- * @param candidates - 등록된 후보 설정 목록
- * @returns 선택된 후보 설정
+ * Selects the optimal version from the candidate list that satisfies all requiredVersion constraints.
+ * When no satisfying version exists, processes in order: fallback -> strictVersion -> warning.
+ * @param name - module name
+ * @param candidates - list of registered candidate configurations
+ * @returns selected candidate configuration
  */
 function selectBestCandidate(
   name: string,
@@ -237,10 +237,10 @@ function selectBestCandidate(
   const requiredVersions = collectRequiredVersions(candidates);
   const isStrict = candidates.some((c) => c.strictVersion);
 
-  // 버전 내림차순 정렬
+  // Sort by version descending
   const sorted = [...candidates].sort((a, b) => compareVersions(b.version, a.version));
 
-  // 모든 requiredVersion 제약을 만족하는 후보 찾기
+  // Find candidates that satisfy all requiredVersion constraints
   const compatible = sorted.filter((candidate) =>
     requiredVersions.every((range) => satisfiesRange(candidate.version, range)),
   );
@@ -249,11 +249,11 @@ function selectBestCandidate(
     return compatible[0];
   }
 
-  // 호환 버전 없음 — fallback factory가 있는 후보 확인
+  // No compatible version — check for candidates with fallback factory
   const withFallback = candidates.find((c) => c.fallback !== undefined);
   if (withFallback?.fallback) {
     console.warn(
-      `[esmap] 공유 모듈 "${name}" 버전 충돌 — fallback factory를 사용합니다.`,
+      `[esmap] Shared module "${name}" version conflict — using fallback factory.`,
     );
     return {
       ...withFallback,
@@ -261,13 +261,13 @@ function selectBestCandidate(
     };
   }
 
-  // fallback 없음 — strict or warn
+  // No fallback — strict or warn
   const highestCandidate = sorted[0];
   const message =
-    `공유 모듈 "${name}" 버전 충돌: ` +
-    `사용 가능한 버전 [${sorted.map((c) => c.version).join(', ')}], ` +
-    `요구 범위 [${requiredVersions.join(', ')}]. ` +
-    `최고 버전 ${highestCandidate.version}을 사용합니다.`;
+    `Shared module "${name}" version conflict: ` +
+    `available versions [${sorted.map((c) => c.version).join(', ')}], ` +
+    `required ranges [${requiredVersions.join(', ')}]. ` +
+    `Using highest version ${highestCandidate.version}.`;
 
   if (isStrict) {
     throw new SharedVersionConflictError(name, message);
@@ -278,9 +278,9 @@ function selectBestCandidate(
 }
 
 /**
- * 후보 목록에서 모든 고유한 requiredVersion 범위를 수집한다.
- * @param candidates - 후보 설정 목록
- * @returns 고유한 requiredVersion 범위 배열
+ * Collects all unique requiredVersion ranges from the candidate list.
+ * @param candidates - list of candidate configurations
+ * @returns array of unique requiredVersion ranges
  */
 function collectRequiredVersions(candidates: readonly SharedModuleConfig[]): readonly string[] {
   const versions = new Set<string>();

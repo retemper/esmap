@@ -6,8 +6,8 @@ describe('createStyleIsolation', () => {
     document.body.innerHTML = '<div id="app"></div>';
   });
 
-  describe('기존 스타일 스코핑', () => {
-    it('컨테이너 내부의 style 요소를 스코핑한다', () => {
+  describe('existing style scoping', () => {
+    it('scopes style elements inside the container', () => {
       const container = document.getElementById('app')!;
       const style = document.createElement('style');
       style.textContent = '.button { color: red; }';
@@ -22,7 +22,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('컨테이너 내부의 link[rel="stylesheet"] 요소를 스코핑한다', () => {
+    it('scopes link[rel="stylesheet"] elements inside the container', () => {
       const container = document.getElementById('app')!;
       const link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -42,7 +42,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('이미 스코핑된 요소는 건너뛴다', () => {
+    it('skips already scoped elements', () => {
       const container = document.getElementById('app')!;
       const style = document.createElement('style');
       style.textContent = '.button { color: red; }';
@@ -56,7 +56,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('style과 link 요소가 여러 개일 때 모두 스코핑한다', () => {
+    it('scopes all style and link elements when there are multiple', () => {
       const container = document.getElementById('app')!;
 
       const style1 = document.createElement('style');
@@ -79,7 +79,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('스타일 요소가 없으면 0을 반환한다', () => {
+    it('returns 0 when there are no style elements', () => {
       const container = document.getElementById('app')!;
       const handle = createStyleIsolation({ appName: 'empty', container });
 
@@ -90,7 +90,7 @@ describe('createStyleIsolation', () => {
   });
 
   describe('destroy', () => {
-    it('style 요소의 원본 CSS를 복원한다', () => {
+    it('restores the original CSS of style elements', () => {
       const container = document.getElementById('app')!;
       const style = document.createElement('style');
       style.textContent = '.button { color: red; }';
@@ -103,7 +103,7 @@ describe('createStyleIsolation', () => {
       expect(style.hasAttribute('data-esmap-scoped')).toBe(false);
     });
 
-    it('link 요소의 원본 상태를 복원하고 wrapper를 제거한다', () => {
+    it('restores the original state of link elements and removes the wrapper', () => {
       const container = document.getElementById('app')!;
       const link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -118,7 +118,7 @@ describe('createStyleIsolation', () => {
       expect(container.querySelector('style[data-esmap-link-wrapper]')).toBeNull();
     });
 
-    it('destroy 후 getScopedCount가 0을 반환한다', () => {
+    it('getScopedCount returns 0 after destroy', () => {
       const container = document.getElementById('app')!;
       const style = document.createElement('style');
       style.textContent = '.x { color: red; }';
@@ -133,7 +133,7 @@ describe('createStyleIsolation', () => {
   });
 
   describe('refresh', () => {
-    it('기존 스코핑을 제거하고 다시 적용한다', () => {
+    it('removes existing scoping and reapplies it', () => {
       const container = document.getElementById('app')!;
       const style = document.createElement('style');
       style.textContent = '.button { color: red; }';
@@ -141,7 +141,7 @@ describe('createStyleIsolation', () => {
 
       const handle = createStyleIsolation({ appName: 'checkout', container });
 
-      // 원본 복원 후 다시 스코핑
+      // Restore original then re-scope
       handle.refresh();
 
       expect(style.textContent).toContain('[data-esmap-scope="checkout"]');
@@ -150,7 +150,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('새로 추가된 스타일도 refresh 시 스코핑한다', () => {
+    it('scopes newly added styles on refresh', () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({ appName: 'checkout', container });
@@ -169,8 +169,8 @@ describe('createStyleIsolation', () => {
     });
   });
 
-  describe('동적 스타일 감시 (observeDynamic)', () => {
-    it('동적으로 추가된 style 요소를 자동 스코핑한다', async () => {
+  describe('dynamic style observation (observeDynamic)', () => {
+    it('automatically scopes dynamically added style elements', async () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({
@@ -183,7 +183,7 @@ describe('createStyleIsolation', () => {
       style.textContent = '.dynamic { color: blue; }';
       container.appendChild(style);
 
-      // MutationObserver는 microtask로 동작하므로 대기
+      // Wait because MutationObserver runs as a microtask
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(style.textContent).toContain('[data-esmap-scope="checkout"]');
@@ -192,7 +192,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('동적으로 추가된 link 요소를 자동 스코핑한다', async () => {
+    it('automatically scopes dynamically added link elements', async () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({
@@ -214,7 +214,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('observeDynamic이 false면 동적 스타일을 감시하지 않는다', async () => {
+    it('does not observe dynamic styles when observeDynamic is false', async () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({
@@ -235,7 +235,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('destroy 후에는 동적 스타일을 감시하지 않는다', async () => {
+    it('does not observe dynamic styles after destroy', async () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({
@@ -257,8 +257,8 @@ describe('createStyleIsolation', () => {
     });
   });
 
-  describe('shadow 전략', () => {
-    it('Shadow DOM을 생성한다', () => {
+  describe('shadow strategy', () => {
+    it('creates a Shadow DOM', () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({
@@ -272,7 +272,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('기존 shadowRoot가 있으면 재사용한다', () => {
+    it('reuses an existing shadowRoot', () => {
       const container = document.getElementById('app')!;
       container.attachShadow({ mode: 'open' });
 
@@ -287,7 +287,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('destroy 시 wrapper를 제거한다', () => {
+    it('removes the wrapper on destroy', () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({
@@ -304,8 +304,8 @@ describe('createStyleIsolation', () => {
     });
   });
 
-  describe('기본값', () => {
-    it('strategy 기본값은 attribute이다', () => {
+  describe('defaults', () => {
+    it('default strategy is attribute', () => {
       const container = document.getElementById('app')!;
       const style = document.createElement('style');
       style.textContent = '.btn { color: red; }';
@@ -319,7 +319,7 @@ describe('createStyleIsolation', () => {
       handle.destroy();
     });
 
-    it('observeDynamic 기본값은 false이다', async () => {
+    it('default observeDynamic is false', async () => {
       const container = document.getElementById('app')!;
 
       const handle = createStyleIsolation({ appName: 'test', container });

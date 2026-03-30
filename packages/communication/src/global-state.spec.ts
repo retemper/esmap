@@ -2,20 +2,20 @@ import { describe, it, expect, vi } from 'vitest';
 import { createGlobalState } from './global-state.js';
 
 describe('createGlobalState', () => {
-  it('getState로 초기 상태를 반환한다', () => {
+  it('returns the initial state with getState', () => {
     const state = createGlobalState({ count: 0, name: 'test' });
 
     expect(state.getState()).toStrictEqual({ count: 0, name: 'test' });
   });
 
-  it('getState가 동결된 객체를 반환한다', () => {
+  it('returns a frozen object from getState', () => {
     const state = createGlobalState({ count: 0 });
     const result = state.getState();
 
     expect(Object.isFrozen(result)).toBe(true);
   });
 
-  it('setState로 부분 상태를 얕은 병합한다', () => {
+  it('shallow merges partial state with setState', () => {
     const state = createGlobalState({ count: 0, name: 'test' });
 
     state.setState({ count: 5 });
@@ -23,7 +23,7 @@ describe('createGlobalState', () => {
     expect(state.getState()).toStrictEqual({ count: 5, name: 'test' });
   });
 
-  it('subscribe로 상태 변경을 구독한다', () => {
+  it('subscribes to state changes with subscribe', () => {
     const state = createGlobalState({ count: 0 });
     const listener = vi.fn();
 
@@ -37,7 +37,7 @@ describe('createGlobalState', () => {
     );
   });
 
-  it('subscribe의 반환값으로 구독을 해제한다', () => {
+  it('unsubscribes using the return value of subscribe', () => {
     const state = createGlobalState({ count: 0 });
     const listener = vi.fn();
 
@@ -49,7 +49,7 @@ describe('createGlobalState', () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
-  it('reset으로 초기 상태로 복원한다', () => {
+  it('restores to initial state with reset', () => {
     const state = createGlobalState({ count: 0, name: 'initial' });
 
     state.setState({ count: 99, name: 'changed' });
@@ -58,7 +58,7 @@ describe('createGlobalState', () => {
     expect(state.getState()).toStrictEqual({ count: 0, name: 'initial' });
   });
 
-  it('reset 시 구독자에게 알린다', () => {
+  it('notifies subscribers on reset', () => {
     const state = createGlobalState({ count: 0 });
     const listener = vi.fn();
 
@@ -72,7 +72,7 @@ describe('createGlobalState', () => {
     );
   });
 
-  it('select로 특정 키의 변경만 구독한다', () => {
+  it('subscribes to changes of a specific key with select', () => {
     const state = createGlobalState({ count: 0, name: 'test' });
     const listener = vi.fn();
 
@@ -87,7 +87,7 @@ describe('createGlobalState', () => {
     expect(listener).toHaveBeenCalledWith(1, 0);
   });
 
-  it('select의 반환값으로 구독을 해제한다', () => {
+  it('unsubscribes using the return value of select', () => {
     const state = createGlobalState({ count: 0 });
     const listener = vi.fn();
 
@@ -99,7 +99,7 @@ describe('createGlobalState', () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
-  it('여러 구독자가 모두 알림을 받는다', () => {
+  it('notifies all subscribers', () => {
     const state = createGlobalState({ count: 0 });
     const listener1 = vi.fn();
     const listener2 = vi.fn();
@@ -112,28 +112,28 @@ describe('createGlobalState', () => {
     expect(listener2).toHaveBeenCalledTimes(1);
   });
 
-  it('동일한 값으로 setState하면 구독자에게 알리지 않는다', () => {
+  it('does not notify subscribers when setState is called with the same value', () => {
     const state = createGlobalState({ count: 0, name: 'test' });
     const listener = vi.fn();
 
     state.subscribe(listener);
-    state.setState({ count: 0 }); // 동일한 값
-    state.setState({ name: 'test' }); // 동일한 값
+    state.setState({ count: 0 }); // same value
+    state.setState({ name: 'test' }); // same value
 
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('일부 키만 변경되면 구독자에게 알린다', () => {
+  it('notifies subscribers when only some keys change', () => {
     const state = createGlobalState({ count: 0, name: 'test' });
     const listener = vi.fn();
 
     state.subscribe(listener);
-    state.setState({ count: 0, name: 'changed' }); // name만 변경
+    state.setState({ count: 0, name: 'changed' }); // only name changed
 
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
-  it('NaN과 NaN은 동일하게 취급한다 (Object.is 사용)', () => {
+  it('treats NaN as equal to NaN (using Object.is)', () => {
     const state = createGlobalState({ value: NaN });
     const listener = vi.fn();
 
@@ -143,12 +143,12 @@ describe('createGlobalState', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('getState 반환값을 수정해도 내부 상태에 영향이 없다', () => {
+  it('modifying getState return value does not affect internal state', () => {
     const state = createGlobalState({ count: 0 });
 
     expect(() => {
       const snapshot = state.getState();
-      // frozen 객체이므로 strict mode에서 에러 발생
+      // Throws in strict mode because the object is frozen
       (snapshot as Record<string, unknown>)['count'] = 999;
     }).toThrow();
 

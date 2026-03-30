@@ -1,7 +1,7 @@
 /**
- * 런타임에 import map으로 해석되는 외부 모듈의 TypeScript 선언.
- * 빌드 시 Vite externals로 처리되어 번들에 포함되지 않으며,
- * 브라우저에서 import map을 통해 실제 URL로 매핑된다.
+ * TypeScript declarations for external modules resolved via import map at runtime.
+ * Processed as Vite externals at build time (not included in bundles),
+ * and mapped to actual URLs in the browser via import map.
  */
 
 declare module '@enterprise/design-system' {

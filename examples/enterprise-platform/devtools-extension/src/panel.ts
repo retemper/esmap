@@ -1,8 +1,8 @@
 /**
- * esmap DevTools Panel — Chrome DevTools 커스텀 패널.
+ * esmap DevTools Panel — Chrome DevTools custom panel.
  *
- * background service worker를 통해 페이지의 postMessage에서 전달된 데이터를 수신하고
- * Topology, Flow, Events, State 4개 탭으로 시각화한다.
+ * Receives data forwarded from the page's postMessage via the background service worker
+ * and visualizes it in 4 tabs: Topology, Flow, Events, and State.
  */
 
 // ─── Types ───
@@ -99,28 +99,28 @@ const MAX_FLOWS = 150;
 
 // ─── Helpers ───
 
-/** 타임스탬프를 HH:MM:SS.mmm 형식으로 변환한다 */
+/** Converts a timestamp to HH:MM:SS.mmm format */
 function fmtTime(ts: number): string {
   const d = new Date(ts);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}.${String(d.getMilliseconds()).padStart(3, '0')}`;
 }
 
-/** 앱 이름에서 @enterprise/ 프리픽스를 제거한다 */
+/** Strips the @enterprise/ prefix from an app name */
 function short(name: string): string { return name.replace('@enterprise/', ''); }
 
-/** HTML 이스케이프 */
+/** HTML escape */
 function esc(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/** SVG 네임스페이스 요소 생성 */
+/** SVG namespace element creation */
 function svg<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}): SVGElementTagNameMap[K] {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
   for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
   return el;
 }
 
-/** JSON 트리 렌더링 */
+/** JSON tree rendering */
 function jsonTree(value: unknown, indent = 0, isLast = true): string {
   const pad = '  '.repeat(indent);
   if (value === null || value === undefined) return `<span class="snull">null</span>${isLast ? '' : ','}`;
@@ -143,7 +143,7 @@ function jsonTree(value: unknown, indent = 0, isLast = true): string {
   return String(value);
 }
 
-/** 두 점 사이의 앵글 */
+/** Angle between two points */
 function angleBetween(x1: number, y1: number, x2: number, y2: number): number {
   return Math.atan2(y2 - y1, x2 - x1);
 }
@@ -196,16 +196,16 @@ const perfPanel = document.getElementById('perf-panel')!;
 const depsPanel = document.getElementById('deps-panel')!;
 const waitingEl = document.getElementById('waiting')!;
 
-/** 앱별 라이프사이클 phase 시작 시각 (성능 데이터 파생용) */
+/** Per-app lifecycle phase start times (for deriving performance data) */
 const phaseStartTimes: Record<string, Record<string, number>> = {};
-/** 라이프사이클 이벤트에서 파생된 성능 데이터 */
+/** Performance data derived from lifecycle events */
 const derivedPerfData: Record<string, { total: number; phases: Record<string, number> }> = {};
 
 // Tab switching
 const tabs = document.querySelectorAll<HTMLButtonElement>('.tab');
 const panels = document.querySelectorAll<HTMLElement>('.panel');
 
-/** 현재 활성 탭 */
+/** Currently active tab */
 const activeTab = { value: 'topology' };
 
 tabs.forEach((tab) => {
@@ -346,7 +346,7 @@ topoContainer.appendChild(topoLegend);
 
 // ─── Render Functions ───
 
-/** 토폴로지 SVG 렌더링 */
+/** Topology SVG rendering */
 function renderTopology(): void {
   if (!state.connected) return;
   waitingEl.style.display = 'none';
@@ -546,7 +546,7 @@ function renderTopology(): void {
   }
 }
 
-/** 이벤트 목록 렌더링 */
+/** Event list rendering */
 function renderFilteredEvents(): void {
   eventsList.innerHTML = '';
   const filtered = state.activeFilter === 'all' ? state.events : state.events.filter((e) => e.category === state.activeFilter);
@@ -554,7 +554,7 @@ function renderFilteredEvents(): void {
   eventsList.scrollTop = eventsList.scrollHeight;
 }
 
-/** 이벤트 행 DOM 생성 */
+/** Event row DOM creation */
 function makeEventRow(entry: EventEntry): HTMLElement {
   const row = document.createElement('div');
   row.className = 'event-row';
@@ -567,7 +567,7 @@ function makeEventRow(entry: EventEntry): HTMLElement {
   return row;
 }
 
-/** 이벤트 추가 */
+/** Add event */
 function addEvent(entry: EventEntry): void {
   state.events.push(entry);
   if (state.events.length > MAX_EVENTS) state.events.shift();
@@ -582,7 +582,7 @@ function addEvent(entry: EventEntry): void {
   }
 }
 
-/** 상태 뷰 렌더링 */
+/** State view rendering */
 function renderState(): void {
   stateCurrent.innerHTML = `
     <div class="section-title">Current State</div>
@@ -600,7 +600,7 @@ function renderState(): void {
   }
 }
 
-/** Flow 뷰 렌더링 */
+/** Flow view rendering */
 function renderFlow(): void {
   for (const content of Object.values(laneContentEls)) content.innerHTML = '';
   flowStatsEl.textContent = `${state.flows.length} flows`;
@@ -646,7 +646,7 @@ function renderFlow(): void {
 
 // ─── Perf Phase Resolution ───
 
-/** 상태 전이를 라이프사이클 phase 이름으로 매핑한다 */
+/** Maps state transitions to lifecycle phase names */
 function resolvePhaseFromTransition(from: string, to: string): { endPhase: string; startPhase: string } | null {
   const f = from.toUpperCase();
   const t = to.toUpperCase();
@@ -660,7 +660,7 @@ function resolvePhaseFromTransition(from: string, to: string): { endPhase: strin
   return null;
 }
 
-/** perf.summarize()에 해당하는 데이터를 구성한다 (perfData + derivedPerfData 병합) */
+/** Composes data equivalent to perf.summarize() (merging perfData + derivedPerfData) */
 function collectPerfSummary(): Map<string, { total: number; phases: Record<string, number> }> {
   const merged = new Map<string, { total: number; phases: Record<string, number> }>(state.perfData);
   for (const [appName, data] of Object.entries(derivedPerfData)) {
@@ -671,12 +671,12 @@ function collectPerfSummary(): Map<string, { total: number; phases: Record<strin
   return merged;
 }
 
-/** 성능 위상(phase)별 색상 */
+/** Colors per performance phase */
 const PHASE_COLORS: Record<string, string> = {
   load: '#58a6ff', bootstrap: '#bc8cff', mount: '#3fb950', unmount: '#da8b45', update: '#d29922',
 };
 
-/** 성능 워터폴 뷰를 렌더링한다 */
+/** Renders the performance waterfall view */
 function renderPerf(): void {
   const summary = collectPerfSummary();
   perfPanel.innerHTML = '';
@@ -700,7 +700,7 @@ function renderPerf(): void {
 
   const maxTotal = Math.max(...Array.from(summary.values()).map((d) => d.total), 1);
 
-  // 스케일 눈금
+  // Scale ticks
   const scale = document.createElement('div');
   scale.style.cssText = 'display:flex;justify-content:space-between;color:#484f58;font-size:10px;margin-bottom:8px;padding-left:80px';
   const ticks = [0, Math.round(maxTotal * 0.25), Math.round(maxTotal * 0.5), Math.round(maxTotal * 0.75), Math.round(maxTotal)];
@@ -711,7 +711,7 @@ function renderPerf(): void {
   }
   container.appendChild(scale);
 
-  // 앱별 워터폴 행
+  // Per-app waterfall rows
   for (const appDef of APP_TOPOLOGY) {
     const data = summary.get(appDef.name);
     if (!data || data.total === 0) continue;
@@ -746,7 +746,7 @@ function renderPerf(): void {
     container.appendChild(row);
   }
 
-  // 범례
+  // Legend
   const legend = document.createElement('div');
   legend.style.cssText = 'display:flex;gap:12px;margin-top:12px;padding-top:8px;border-top:1px solid #21262d';
   for (const [phase, color] of Object.entries(PHASE_COLORS)) {
@@ -760,7 +760,7 @@ function renderPerf(): void {
 
 // ─── Deps Panel ───
 
-/** 공유 모듈 의존성 뷰를 렌더링한다 */
+/** Renders the shared module dependencies view */
 function renderDeps(): void {
   depsPanel.innerHTML = '';
 
@@ -859,7 +859,7 @@ function renderDeps(): void {
     container.appendChild(card);
   }
 
-  // Import Map 엔트리
+  // Import Map entries
   if (state.importMap) {
     const imTitle = document.createElement('div');
     imTitle.style.cssText = 'font-size:13px;font-weight:600;color:#e6edf3;margin:20px 0 10px';
@@ -889,7 +889,7 @@ function renderDeps(): void {
 
 // ─── Message Handling ───
 
-/** 메시지를 처리하고 내부 상태를 갱신한다 */
+/** Processes a message and updates internal state */
 function handleMessage(msg: Record<string, unknown>): void {
   const type = msg['type'] as string;
 
@@ -927,7 +927,7 @@ function handleMessage(msg: Record<string, unknown>): void {
       state.flows.push({ timestamp: ts, from: 'host', to: appName, event: `${from} → ${to}`, category: 'lifecycle' });
       if (state.flows.length > MAX_FLOWS) state.flows.shift();
 
-      // 라이프사이클 전이에서 성능 데이터 파생
+      // Derive performance data from lifecycle transitions
       const phaseInfo = resolvePhaseFromTransition(from, to);
       if (phaseInfo) {
         if (!phaseStartTimes[appName]) phaseStartTimes[appName] = {};
@@ -1045,10 +1045,10 @@ function handleMessage(msg: Record<string, unknown>): void {
 
 const port = chrome.runtime.connect({ name: 'devtools-panel' });
 
-// Panel이 감시할 탭 ID 전달
+// Send the tab ID this panel monitors
 port.postMessage({ type: 'PANEL_INIT', tabId: chrome.devtools.inspectedWindow.tabId });
 
-// 메시지 수신
+// Receive messages
 port.onMessage.addListener((msg: { payload: Record<string, unknown> }) => {
   if (msg.payload) {
     handleMessage(msg.payload);

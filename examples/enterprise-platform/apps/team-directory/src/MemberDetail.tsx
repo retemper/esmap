@@ -15,12 +15,12 @@ interface MemberDetailProps {
 }
 
 /**
- * 팀원 상세 정보 뷰.
- * lazy()로 코드 스플리팅되어 MFE 내부에서 필요할 때만 로드된다.
+ * Team member detail view.
+ * Code-split via lazy() and loaded only when needed inside the MFE.
  *
- * 시연 포인트:
- * - MFE 내부 동적 import (코드 스플리팅) — 별도 MFE가 아닌 서브모듈
- * - 이 파일은 팀원 선택 시에만 다운로드된다
+ * Demo points:
+ * - Dynamic import within MFE (code splitting) — a sub-module, not a separate MFE
+ * - This file is only downloaded when a team member is selected
  */
 export default function MemberDetail({ member, onClose }: MemberDetailProps): ReactNode {
   return (
@@ -32,7 +32,7 @@ export default function MemberDetail({ member, onClose }: MemberDetailProps): Re
             <div style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>{member.role}</div>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
-            닫기
+            Close
           </Button>
         </div>
 
@@ -54,13 +54,13 @@ export default function MemberDetail({ member, onClose }: MemberDetailProps): Re
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 16px', fontSize: '14px' }}>
-          <span style={{ color: '#94a3b8', fontWeight: '500' }}>팀</span>
+          <span style={{ color: '#94a3b8', fontWeight: '500' }}>Team</span>
           <span>{member.team}</span>
 
-          <span style={{ color: '#94a3b8', fontWeight: '500' }}>이메일</span>
+          <span style={{ color: '#94a3b8', fontWeight: '500' }}>Email</span>
           <span>{member.email}</span>
 
-          <span style={{ color: '#94a3b8', fontWeight: '500' }}>입사일</span>
+          <span style={{ color: '#94a3b8', fontWeight: '500' }}>Join Date</span>
           <span>{member.joinDate}</span>
 
           <span style={{ color: '#94a3b8', fontWeight: '500' }}>ID</span>
@@ -79,8 +79,8 @@ export default function MemberDetail({ member, onClose }: MemberDetailProps): Re
             color: '#94a3b8',
           }}
         >
-          이 컴포넌트는 <code>lazy()</code>로 코드 스플리팅되어, 팀원 선택 시에만
-          다운로드됩니다. (MFE 내부 서브모듈)
+          This component is code-split via <code>lazy()</code> and is only
+          downloaded when a team member is selected. (MFE internal sub-module)
         </div>
       </div>
     </Card>

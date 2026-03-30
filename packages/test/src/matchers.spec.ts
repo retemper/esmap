@@ -4,7 +4,7 @@ import type { MfeApp, MfeAppStatus } from '@esmap/shared';
 import { isAppMounted, isAppInStatus, getAppContainer, waitForAppStatus } from './matchers.js';
 import { createMockApp } from './mock-app.js';
 
-/** 테스트 앱을 NOT_MOUNTED 상태로 레지스트리에 직접 주입한다. */
+/** Injects a test app directly into the registry in NOT_MOUNTED status. */
 function registerTestApp(registry: AppRegistry, name: string, app: MfeApp): void {
   registry.registerApp({ name, activeWhen: `/${name}` });
   const registered = registry.getApp(name);
@@ -15,7 +15,7 @@ function registerTestApp(registry: AppRegistry, name: string, app: MfeApp): void
 }
 
 describe('isAppMounted', () => {
-  it('MOUNTED 상태인 앱에 대해 true를 반환한다', async () => {
+  it('returns true for an app in MOUNTED status', async () => {
     const container = document.createElement('div');
     container.id = 'app';
     document.body.appendChild(container);
@@ -30,14 +30,14 @@ describe('isAppMounted', () => {
     container.remove();
   });
 
-  it('NOT_MOUNTED 상태인 앱에 대해 false를 반환한다', () => {
+  it('returns false for an app in NOT_MOUNTED status', () => {
     const registry = new AppRegistry();
     registerTestApp(registry, 'unmounted-app', createMockApp());
 
     expect(isAppMounted(registry, 'unmounted-app')).toBe(false);
   });
 
-  it('등록되지 않은 앱에 대해 false를 반환한다', () => {
+  it('returns false for an unregistered app', () => {
     const registry = new AppRegistry();
 
     expect(isAppMounted(registry, 'nonexistent')).toBe(false);
@@ -45,14 +45,14 @@ describe('isAppMounted', () => {
 });
 
 describe('isAppInStatus', () => {
-  it('앱이 지정한 상태와 일치하면 true를 반환한다', () => {
+  it('returns true when the app matches the specified status', () => {
     const registry = new AppRegistry();
     registerTestApp(registry, 'status-app', createMockApp());
 
     expect(isAppInStatus(registry, 'status-app', 'NOT_MOUNTED')).toBe(true);
   });
 
-  it('앱이 지정한 상태와 일치하지 않으면 false를 반환한다', () => {
+  it('returns false when the app does not match the specified status', () => {
     const registry = new AppRegistry();
     registerTestApp(registry, 'status-app', createMockApp());
 
@@ -66,7 +66,7 @@ describe('getAppContainer', () => {
     if (el) el.remove();
   });
 
-  it('DOM에 존재하는 컨테이너를 반환한다', () => {
+  it('returns a container that exists in the DOM', () => {
     const el = document.createElement('div');
     el.id = 'test-container';
     document.body.appendChild(el);
@@ -74,29 +74,29 @@ describe('getAppContainer', () => {
     expect(getAppContainer('#test-container')).toBe(el);
   });
 
-  it('DOM에 존재하지 않는 셀렉터에 대해 null을 반환한다', () => {
+  it('returns null for a selector not found in the DOM', () => {
     expect(getAppContainer('#nonexistent')).toBeNull();
   });
 });
 
 describe('waitForAppStatus', () => {
-  it('이미 해당 상태이면 즉시 resolve한다', async () => {
+  it('resolves immediately if already in the expected status', async () => {
     const registry = new AppRegistry();
     registerTestApp(registry, 'ready-app', createMockApp());
 
     await expect(waitForAppStatus(registry, 'ready-app', 'NOT_MOUNTED')).resolves.toBeUndefined();
   });
 
-  it('타임아웃 내에 상태가 변경되지 않으면 에러를 던진다', async () => {
+  it('throws an error if the status does not change within the timeout', async () => {
     const registry = new AppRegistry();
     registerTestApp(registry, 'slow-app', createMockApp());
 
     await expect(waitForAppStatus(registry, 'slow-app', 'MOUNTED', 100)).rejects.toThrow(
-      '100ms 내에',
+      'within 100ms',
     );
   });
 
-  it('비동기적으로 상태가 변경되면 resolve한다', async () => {
+  it('resolves when the status changes asynchronously', async () => {
     const container = document.createElement('div');
     container.id = 'app';
     document.body.appendChild(container);
@@ -113,7 +113,7 @@ describe('waitForAppStatus', () => {
     container.remove();
   });
 
-  it('등록되지 않은 앱에 대해 타임아웃 에러를 던진다', async () => {
+  it('throws a timeout error for an unregistered app', async () => {
     const registry = new AppRegistry();
 
     await expect(waitForAppStatus(registry, 'ghost-app', 'MOUNTED', 100)).rejects.toThrow(

@@ -7,8 +7,8 @@ describe('createIntelligentPrefetch', () => {
     localStorage.clear();
   });
 
-  describe('네비게이션 기록', () => {
-    it('네비게이션을 기록하고 historySize가 증가한다', () => {
+  describe('navigation recording', () => {
+    it('records navigation and historySize increases', () => {
       const prefetch = createIntelligentPrefetch();
 
       prefetch.recordNavigation(undefined, 'app-home');
@@ -17,7 +17,7 @@ describe('createIntelligentPrefetch', () => {
       expect(prefetch.historySize).toBe(2);
     });
 
-    it('maxHistory를 초과하면 오래된 기록이 제거된다', () => {
+    it('removes old records when maxHistory is exceeded', () => {
       const prefetch = createIntelligentPrefetch({ maxHistory: 3 });
 
       prefetch.recordNavigation(undefined, 'app-a');
@@ -29,11 +29,11 @@ describe('createIntelligentPrefetch', () => {
     });
   });
 
-  describe('전환 확률 계산', () => {
-    it('전환 빈도 기반으로 우선순위를 계산한다', () => {
+  describe('transition probability calculation', () => {
+    it('calculates priorities based on transition frequency', () => {
       const prefetch = createIntelligentPrefetch();
 
-      // home → settings 3번, home → dashboard 1번
+      // home -> settings 3 times, home -> dashboard 1 time
       prefetch.recordNavigation('app-home', 'app-settings');
       prefetch.recordNavigation('app-home', 'app-settings');
       prefetch.recordNavigation('app-home', 'app-settings');
@@ -48,10 +48,10 @@ describe('createIntelligentPrefetch', () => {
       expect(priorities[1].probability).toBe(0.25);
     });
 
-    it('threshold 미만의 확률은 제외된다', () => {
+    it('excludes probabilities below the threshold', () => {
       const prefetch = createIntelligentPrefetch({ threshold: 0.3 });
 
-      // home → settings 3번, home → dashboard 1번 (25% < 30%)
+      // home -> settings 3 times, home -> dashboard 1 time (25% < 30%)
       prefetch.recordNavigation('app-home', 'app-settings');
       prefetch.recordNavigation('app-home', 'app-settings');
       prefetch.recordNavigation('app-home', 'app-settings');
@@ -63,7 +63,7 @@ describe('createIntelligentPrefetch', () => {
       expect(priorities[0].appName).toBe('app-settings');
     });
 
-    it('maxPrefetch를 초과하는 앱은 잘린다', () => {
+    it('truncates apps exceeding maxPrefetch', () => {
       const prefetch = createIntelligentPrefetch({ maxPrefetch: 1 });
 
       prefetch.recordNavigation('app-home', 'app-settings');
@@ -74,7 +74,7 @@ describe('createIntelligentPrefetch', () => {
       expect(priorities).toHaveLength(1);
     });
 
-    it('기록이 없는 앱에서는 빈 배열을 반환한다', () => {
+    it('returns an empty array for apps with no history', () => {
       const prefetch = createIntelligentPrefetch();
 
       const priorities = prefetch.getPriorities('app-unknown');
@@ -82,7 +82,7 @@ describe('createIntelligentPrefetch', () => {
       expect(priorities).toStrictEqual([]);
     });
 
-    it('from이 undefined인 초기 진입은 전환 카운트에 포함되지 않는다', () => {
+    it('does not include initial entries with undefined from in transition counts', () => {
       const prefetch = createIntelligentPrefetch();
 
       prefetch.recordNavigation(undefined, 'app-home');
@@ -93,8 +93,8 @@ describe('createIntelligentPrefetch', () => {
     });
   });
 
-  describe('전환 통계', () => {
-    it('전체 전환 통계를 반환한다', () => {
+  describe('transition statistics', () => {
+    it('returns overall transition statistics', () => {
       const prefetch = createIntelligentPrefetch();
 
       prefetch.recordNavigation('app-home', 'app-settings');
@@ -104,26 +104,26 @@ describe('createIntelligentPrefetch', () => {
       const stats = prefetch.getStats();
 
       expect(stats).toHaveLength(2);
-      // count 내림차순 정렬
+      // Sorted by count descending
       expect(stats[0].from).toBe('app-home');
       expect(stats[0].to).toBe('app-settings');
       expect(stats[0].count).toBe(2);
-      expect(stats[0].ratio).toBe(1); // home에서의 모든 전환이 settings로
+      expect(stats[0].ratio).toBe(1); // All transitions from home go to settings
     });
   });
 
-  describe('기록 제한과 카운트 정합성', () => {
-    it('maxHistory 초과 시 제거된 기록의 전환 카운트가 차감된다', () => {
+  describe('history limit and count consistency', () => {
+    it('decrements transition counts for evicted records when maxHistory is exceeded', () => {
       const prefetch = createIntelligentPrefetch({ maxHistory: 5 });
 
-      // 5건: home → settings 5번
+      // 5 records: home -> settings 5 times
       for (const _ of Array.from({ length: 5 })) {
         prefetch.recordNavigation('app-home', 'app-settings');
       }
 
       expect(prefetch.getStats()[0].count).toBe(5);
 
-      // 6건째: home → dashboard — 가장 오래된 home→settings 1건이 제거
+      // 6th record: home -> dashboard — the oldest home->settings record is evicted
       prefetch.recordNavigation('app-home', 'app-dashboard');
 
       const stats = prefetch.getStats();
@@ -135,15 +135,15 @@ describe('createIntelligentPrefetch', () => {
       expect(prefetch.historySize).toBe(5);
     });
 
-    it('maxHistory 초과로 카운트가 0이 되면 통계에서 사라진다', () => {
+    it('removes stats entry when count reaches 0 due to maxHistory eviction', () => {
       const prefetch = createIntelligentPrefetch({ maxHistory: 3 });
 
-      // A→B 1번, A→C 2번
+      // A->B 1 time, A->C 2 times
       prefetch.recordNavigation('A', 'B');
       prefetch.recordNavigation('A', 'C');
       prefetch.recordNavigation('A', 'C');
 
-      // 4번째: A→D — 가장 오래된 A→B 제거
+      // 4th record: A->D — the oldest A->B record is evicted
       prefetch.recordNavigation('A', 'D');
 
       const stats = prefetch.getStats();
@@ -153,8 +153,8 @@ describe('createIntelligentPrefetch', () => {
     });
   });
 
-  describe('리셋', () => {
-    it('reset으로 모든 학습 데이터를 초기화한다', () => {
+  describe('reset', () => {
+    it('resets all learned data with reset', () => {
       const prefetch = createIntelligentPrefetch();
 
       prefetch.recordNavigation('app-home', 'app-settings');
@@ -168,8 +168,8 @@ describe('createIntelligentPrefetch', () => {
     });
   });
 
-  describe('영속성 (localStorage)', () => {
-    it('persist로 localStorage에 저장하고 다시 로드할 수 있다', () => {
+  describe('persistence (localStorage)', () => {
+    it('saves to localStorage with persist and loads back', () => {
       const key = 'esmap-test-prefetch';
       const prefetch1 = createIntelligentPrefetch({ persistKey: key });
 
@@ -177,7 +177,7 @@ describe('createIntelligentPrefetch', () => {
       prefetch1.recordNavigation('app-home', 'app-settings');
       prefetch1.persist();
 
-      // 새 인스턴스로 로드
+      // Load with a new instance
       const prefetch2 = createIntelligentPrefetch({ persistKey: key });
 
       expect(prefetch2.historySize).toBe(2);
@@ -186,7 +186,7 @@ describe('createIntelligentPrefetch', () => {
       expect(priorities[0].appName).toBe('app-settings');
     });
 
-    it('reset으로 localStorage 데이터도 삭제된다', () => {
+    it('deletes localStorage data on reset', () => {
       const key = 'esmap-test-prefetch-reset';
       const prefetch = createIntelligentPrefetch({ persistKey: key });
 
@@ -200,7 +200,7 @@ describe('createIntelligentPrefetch', () => {
       expect(localStorage.getItem(key)).toBeNull();
     });
 
-    it('잘못된 localStorage 데이터는 무시한다', () => {
+    it('ignores invalid localStorage data', () => {
       const key = 'esmap-test-invalid';
       localStorage.setItem(key, 'not-json');
 
@@ -208,7 +208,7 @@ describe('createIntelligentPrefetch', () => {
       expect(prefetch.historySize).toBe(0);
     });
 
-    it('persistKey가 없으면 세션 내에서만 유지한다', () => {
+    it('only persists within the session when persistKey is not set', () => {
       const prefetch = createIntelligentPrefetch();
 
       prefetch.recordNavigation('app-home', 'app-settings');

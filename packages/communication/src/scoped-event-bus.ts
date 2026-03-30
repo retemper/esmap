@@ -1,57 +1,57 @@
 import type { EventBus, EventHandler, EventMap, EventRecord, SubscribeOptions } from './event-bus.js';
 
-/** 스코프가 지정된 이벤트 버스 인터페이스. 모든 이벤트에 자동으로 네임스페이스 prefix가 붙는다. */
+/** Scoped event bus interface. All events are automatically prefixed with a namespace. */
 interface ScopedEventBus<E extends EventMap = EventMap> {
-  /** 스코프된 이벤트를 발행한다. 실제 이벤트 이름은 `${scope}:${event}`가 된다. */
+  /** Emits a scoped event. The actual event name becomes `${scope}:${event}`. */
   emit: <K extends keyof E & string>(event: K, payload?: E[K]) => void;
-  /** 스코프된 이벤트를 구독한다. */
+  /** Subscribes to a scoped event. */
   on: <K extends keyof E & string>(
     event: K,
     handler: EventHandler<E[K]>,
     options?: SubscribeOptions,
   ) => () => void;
-  /** 스코프된 이벤트를 한 번만 구독한다. */
+  /** Subscribes to a scoped event only once. */
   once: <K extends keyof E & string>(event: K, handler: EventHandler<E[K]>) => () => void;
-  /** 스코프 내에서 와일드카드 패턴으로 구독한다. 패턴에 스코프 prefix가 자동으로 적용된다. */
+  /** Subscribes with a wildcard pattern within the scope. The scope prefix is automatically applied to the pattern. */
   onAny: (pattern: string, handler: EventHandler<unknown>) => () => void;
-  /** 스코프된 이벤트의 모든 리스너를 제거한다. */
+  /** Removes all listeners for a scoped event. */
   off: <K extends keyof E & string>(event: K) => void;
-  /** 이 스코프의 이벤트 이력을 조회한다. */
+  /** Retrieves event history for this scope. */
   getHistory: (event?: string) => ReadonlyArray<EventRecord>;
   /**
-   * 스코프 내 Request-Response. 이벤트를 발행하고 응답을 기다린다.
-   * 실제로는 `${scope}:${event}` 이벤트가 발행되고, `${scope}:${event}:response`로 응답을 받는다.
+   * Request-Response within the scope. Emits an event and waits for a response.
+   * Internally, `${scope}:${event}` is emitted and the response is received via `${scope}:${event}:response`.
    */
   request: <K extends keyof E & string>(event: K, payload?: E[K], timeout?: number) => Promise<unknown>;
-  /** 이 스코프의 네임스페이스 prefix를 반환한다. */
+  /** Returns the namespace prefix of this scope. */
   readonly scope: string;
 }
 
 /**
- * 기존 EventBus를 감싸서 네임스페이스 격리된 스코프 버스를 생성한다.
- * MFE 앱별로 이벤트 충돌을 방지하는 데 사용한다.
+ * Wraps an existing EventBus to create a namespace-isolated scoped bus.
+ * Used to prevent event collisions between MFE apps.
  *
  * @example
  * ```ts
  * const globalBus = createEventBus();
  * const checkoutBus = createScopedEventBus(globalBus, 'checkout');
- * checkoutBus.emit('loaded', {}); // 실제로는 'checkout:loaded' 이벤트가 발행됨
+ * checkoutBus.emit('loaded', {}); // actually emits a 'checkout:loaded' event
  * ```
  *
- * @param bus - 감쌀 상위 이벤트 버스
- * @param scope - 네임스페이스 prefix (예: "checkout", "app-nav")
- * @returns 스코프가 지정된 이벤트 버스
+ * @param bus - the parent event bus to wrap
+ * @param scope - namespace prefix (e.g., "checkout", "app-nav")
+ * @returns scoped event bus
  */
 function createScopedEventBus<E extends EventMap = EventMap>(
   bus: EventBus,
   scope: string,
 ): ScopedEventBus<E> {
-  /** 이벤트 이름에 스코프 prefix를 추가한다. */
+  /** Adds the scope prefix to the event name. */
   function prefix(event: string): string {
     return `${scope}:${event}`;
   }
 
-  // 내부 구현은 untyped (string/unknown). 제네릭 인터페이스가 호출 시점에서 타입을 강제한다.
+  // Internal implementation is untyped (string/unknown). The generic interface enforces types at call sites.
   const scoped: ScopedEventBus<EventMap> = {
     scope,
 
@@ -68,7 +68,7 @@ function createScopedEventBus<E extends EventMap = EventMap>(
     },
 
     onAny(pattern: string, handler: EventHandler<unknown>): () => void {
-      // 스코프 내 와일드카드: 'sub:*' → 상위 버스에서 'scope:sub:*' 로 변환
+      // Wildcard within scope: 'sub:*' -> converted to 'scope:sub:*' on the parent bus
       return bus.onAny(`${scope}:${pattern}`, handler);
     },
 
@@ -80,7 +80,7 @@ function createScopedEventBus<E extends EventMap = EventMap>(
       if (event !== undefined) {
         return bus.getHistory(prefix(event));
       }
-      // 스코프에 해당하는 모든 이벤트 필터
+      // Filter all events belonging to this scope
       const scopePrefix = `${scope}:`;
       return bus.getHistory().filter((record) => record.event.startsWith(scopePrefix));
     },
@@ -90,7 +90,7 @@ function createScopedEventBus<E extends EventMap = EventMap>(
     },
   };
 
-  // 제네릭 E로 narrowing — 런타임 동작은 동일하나 호출 시 타입이 강제된다
+  // Narrowing via generic E — runtime behavior is identical but types are enforced at call sites
   return scoped as ScopedEventBus<E>;
 }
 

@@ -10,8 +10,8 @@ describe('createScopedStyleCollector', () => {
     document.head.innerHTML = '';
   });
 
-  describe('기존 스타일 스코핑', () => {
-    it('start 시 head에 이미 있는 style 요소를 스코핑한다', () => {
+  describe('existing style scoping', () => {
+    it('scopes style elements already in head on start', () => {
       const style = document.createElement('style');
       style.textContent = '.btn { color: red; }';
       document.head.appendChild(style);
@@ -26,7 +26,7 @@ describe('createScopedStyleCollector', () => {
       collector.destroy();
     });
 
-    it('이미 스코핑된 style 요소는 무시한다', () => {
+    it('skips already scoped style elements', () => {
       const style = document.createElement('style');
       style.textContent = '.btn { color: red; }';
       style.setAttribute('data-esmap-scoped', 'other-app');
@@ -40,7 +40,7 @@ describe('createScopedStyleCollector', () => {
       collector.destroy();
     });
 
-    it('빈 style 요소는 스코핑하지 않는다', () => {
+    it('does not scope empty style elements', () => {
       const style = document.createElement('style');
       style.textContent = '';
       document.head.appendChild(style);
@@ -54,17 +54,17 @@ describe('createScopedStyleCollector', () => {
     });
   });
 
-  describe('동적 스타일 감지', () => {
-    it('start 후 head에 추가되는 style 요소를 자동으로 스코핑한다', async () => {
+  describe('dynamic style detection', () => {
+    it('automatically scopes style elements added to head after start', async () => {
       const collector = createScopedStyleCollector({ appName: 'dashboard' });
       collector.start();
 
-      // CSS-in-JS가 동적으로 style 태그를 삽입하는 시나리오
+      // Scenario: CSS-in-JS dynamically inserts a style tag
       const style = document.createElement('style');
       style.textContent = '.card { padding: 16px; }';
       document.head.appendChild(style);
 
-      // MutationObserver는 microtask로 실행됨
+      // MutationObserver runs as a microtask
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(style.textContent).toContain('[data-esmap-scope="dashboard"] .card');
@@ -73,7 +73,7 @@ describe('createScopedStyleCollector', () => {
       collector.destroy();
     });
 
-    it('stop 후에는 새로운 스타일을 감지하지 않는다', async () => {
+    it('does not detect new styles after stop', async () => {
       const collector = createScopedStyleCollector({ appName: 'checkout' });
       collector.start();
       collector.stop();
@@ -91,8 +91,8 @@ describe('createScopedStyleCollector', () => {
     });
   });
 
-  describe('exclude 필터', () => {
-    it('exclude 함수가 true를 반환하는 요소는 스코핑하지 않는다', () => {
+  describe('exclude filter', () => {
+    it('does not scope elements for which the exclude function returns true', () => {
       const globalStyle = document.createElement('style');
       globalStyle.textContent = '* { box-sizing: border-box; }';
       globalStyle.setAttribute('data-global', 'true');
@@ -117,7 +117,7 @@ describe('createScopedStyleCollector', () => {
   });
 
   describe('destroy', () => {
-    it('destroy 시 모든 스타일을 원본으로 복원한다', () => {
+    it('restores all styles to their originals on destroy', () => {
       const style = document.createElement('style');
       style.textContent = '.btn { color: red; }';
       document.head.appendChild(style);
@@ -133,7 +133,7 @@ describe('createScopedStyleCollector', () => {
       expect(style.hasAttribute('data-esmap-scoped')).toBe(false);
     });
 
-    it('destroy 후 getScopedCount는 0이다', () => {
+    it('getScopedCount returns 0 after destroy', () => {
       const style = document.createElement('style');
       style.textContent = '.btn { color: red; }';
       document.head.appendChild(style);
@@ -146,8 +146,8 @@ describe('createScopedStyleCollector', () => {
     });
   });
 
-  describe('여러 앱 동시 사용', () => {
-    it('앱별로 독립적인 스코핑을 유지한다', () => {
+  describe('multiple apps simultaneous usage', () => {
+    it('maintains independent scoping per app', () => {
       const style1 = document.createElement('style');
       style1.textContent = '.header { color: red; }';
       document.head.appendChild(style1);
@@ -157,20 +157,20 @@ describe('createScopedStyleCollector', () => {
 
       expect(style1.textContent).toContain('[data-esmap-scope="app-a"]');
 
-      // app-b가 나중에 스타일 추가
+      // app-b adds styles later
       const style2 = document.createElement('style');
       style2.textContent = '.footer { color: blue; }';
       document.head.appendChild(style2);
 
-      // app-a의 collector가 style2도 스코핑함 (같은 head를 감시하므로)
-      // 이건 의도된 동작 — 실제로는 앱별 lifecycle에서 start/stop으로 제어
+      // app-a's collector also scopes style2 (since they watch the same head)
+      // This is intentional behavior -- in practice, controlled via start/stop per app lifecycle
 
       collector1.destroy();
     });
   });
 
-  describe('Tailwind CSS 시나리오', () => {
-    it('Tailwind의 @layer 규칙 내부 선택자를 스코핑한다', () => {
+  describe('Tailwind CSS scenario', () => {
+    it('scopes selectors inside Tailwind @layer rules', () => {
       const style = document.createElement('style');
       style.textContent = '@layer base { h1 { font-size: 2rem; } }';
       document.head.appendChild(style);
@@ -178,14 +178,14 @@ describe('createScopedStyleCollector', () => {
       const collector = createScopedStyleCollector({ appName: 'tw-app' });
       collector.start();
 
-      // @layer는 AT_RULE_PATTERN에 포함되어 재귀 스코핑됨
+      // @layer is included in AT_RULE_PATTERN for recursive scoping
       expect(style.textContent).toContain('@layer base');
       expect(style.textContent).toContain('[data-esmap-scope="tw-app"] h1');
 
       collector.destroy();
     });
 
-    it('Tailwind preflight의 전역 리셋을 스코핑한다', () => {
+    it('scopes Tailwind preflight global resets', () => {
       const style = document.createElement('style');
       style.textContent = '*, ::before, ::after { box-sizing: border-box; border: 0; }';
       document.head.appendChild(style);
@@ -203,12 +203,12 @@ describe('createScopedStyleCollector', () => {
     });
   });
 
-  describe('styled-components 시나리오', () => {
-    it('동적으로 주입된 styled-components 스타일을 스코핑한다', async () => {
+  describe('styled-components scenario', () => {
+    it('scopes dynamically injected styled-components styles', async () => {
       const collector = createScopedStyleCollector({ appName: 'sc-app' });
       collector.start();
 
-      // styled-components가 <style data-styled="active"> 태그를 head에 삽입
+      // styled-components inserts a <style data-styled="active"> tag into head
       const style = document.createElement('style');
       style.setAttribute('data-styled', 'active');
       style.textContent = '.sc-abc123 { background: blue; }';
@@ -223,12 +223,12 @@ describe('createScopedStyleCollector', () => {
     });
   });
 
-  describe('Emotion 시나리오', () => {
-    it('Emotion이 주입한 스타일을 스코핑한다', async () => {
+  describe('Emotion scenario', () => {
+    it('scopes styles injected by Emotion', async () => {
       const collector = createScopedStyleCollector({ appName: 'emotion-app' });
       collector.start();
 
-      // Emotion이 <style data-emotion="css"> 태그를 head에 삽입
+      // Emotion inserts a <style data-emotion="css"> tag into head
       const style = document.createElement('style');
       style.setAttribute('data-emotion', 'css');
       style.textContent = '.css-1a2b3c { display: flex; }';

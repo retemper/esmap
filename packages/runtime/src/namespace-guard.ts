@@ -1,57 +1,57 @@
 /**
- * 전역 자원의 네임스페이스 충돌을 감지하고 방지하는 가드.
- * 공유 모듈, 이벤트, 상태 키 등 여러 MFE 앱이 접근하는 자원에
- * 소유권을 추적하여 의도치 않은 덮어쓰기를 차단한다.
+ * Guard that detects and prevents namespace conflicts on global resources.
+ * Tracks ownership of shared modules, events, state keys, etc. accessed by
+ * multiple MFE apps to block unintended overwrites.
  */
 
-/** 네임스페이스 가드 이벤트 종류 */
+/** Namespace guard conflict action type */
 type ConflictAction = 'warn' | 'error' | 'skip';
 
-/** 네임스페이스 가드 옵션 */
+/** Namespace guard options */
 interface NamespaceGuardOptions {
-  /** 충돌 감지 시 동작. 기본값: 'warn' */
+  /** Action on conflict detection. Defaults to 'warn'. */
   readonly onConflict?: ConflictAction;
-  /** 허용된 공유 키 목록. 이 키들은 여러 앱이 등록해도 충돌로 간주하지 않는다 */
+  /** List of allowed shared keys. These keys do not trigger conflicts even when registered by multiple apps. */
   readonly allowedSharedKeys?: ReadonlyArray<string>;
 }
 
-/** 키 소유권 정보 */
+/** Key ownership record */
 interface OwnershipRecord {
-  /** 키를 최초 등록한 앱 이름 */
+  /** Name of the app that first registered the key */
   readonly owner: string;
-  /** 등록 시점 */
+  /** Registration timestamp */
   readonly registeredAt: number;
 }
 
-/** 네임스페이스 가드 인터페이스 */
+/** Namespace guard interface */
 interface NamespaceGuard {
-  /** 키 등록을 시도한다. 이미 다른 앱이 소유한 키면 충돌 정책에 따라 동작한다. */
+  /** Attempts to register a key. Behaves according to the conflict policy if already owned by another app. */
   claim: (key: string, owner: string) => boolean;
-  /** 키 소유권을 해제한다. */
+  /** Releases key ownership. */
   release: (key: string, owner: string) => void;
-  /** 특정 앱이 소유한 모든 키를 해제한다. */
+  /** Releases all keys owned by a specific app. */
   releaseAll: (owner: string) => void;
-  /** 키의 현재 소유자를 조회한다. */
+  /** Returns the current owner of a key. */
   getOwner: (key: string) => string | undefined;
-  /** 등록된 모든 키-소유자 매핑을 반환한다. */
+  /** Returns all key-owner mappings. */
   getAll: () => ReadonlyMap<string, OwnershipRecord>;
-  /** 특정 앱이 소유한 키 목록을 반환한다. */
+  /** Returns the list of keys owned by a specific app. */
   getOwnedBy: (owner: string) => readonly string[];
 }
 
 /**
- * 전역 자원의 네임스페이스 충돌 가드를 생성한다.
+ * Creates a namespace conflict guard for global resources.
  *
  * @example
  * ```ts
  * const guard = createNamespaceGuard({ onConflict: 'error' });
- * guard.claim('theme', 'app-a');     // true — 등록 성공
- * guard.claim('theme', 'app-b');     // throws — 충돌
- * guard.claim('theme', 'app-a');     // true — 같은 소유자의 재등록은 허용
+ * guard.claim('theme', 'app-a');     // true — registration succeeded
+ * guard.claim('theme', 'app-b');     // throws — conflict
+ * guard.claim('theme', 'app-a');     // true — re-registration by the same owner is allowed
  * ```
  *
- * @param options - 가드 설정
- * @returns 네임스페이스 가드 인스턴스
+ * @param options - guard configuration
+ * @returns namespace guard instance
  */
 function createNamespaceGuard(options?: NamespaceGuardOptions): NamespaceGuard {
   const onConflict = options?.onConflict ?? 'warn';
@@ -59,16 +59,16 @@ function createNamespaceGuard(options?: NamespaceGuardOptions): NamespaceGuard {
   const registry = new Map<string, OwnershipRecord>();
 
   /**
-   * 충돌 발생 시 설정된 정책에 따라 처리한다.
-   * @param key - 충돌된 키
-   * @param existingOwner - 기존 소유자
-   * @param newOwner - 새 등록 시도자
-   * @returns claim 성공 여부
+   * Handles conflicts according to the configured policy.
+   * @param key - the conflicting key
+   * @param existingOwner - the existing owner
+   * @param newOwner - the new registration attempt owner
+   * @returns whether the claim succeeded
    */
   function handleConflict(key: string, existingOwner: string, newOwner: string): boolean {
     const message =
-      `[esmap] 네임스페이스 충돌: 키 "${key}"는 "${existingOwner}"이(가) 소유 중. ` +
-      `"${newOwner}"이(가) 등록을 시도했습니다.`;
+      `[esmap] Namespace conflict: key "${key}" is owned by "${existingOwner}". ` +
+      `"${newOwner}" attempted to register.`;
 
     switch (onConflict) {
       case 'error':
@@ -87,7 +87,7 @@ function createNamespaceGuard(options?: NamespaceGuardOptions): NamespaceGuard {
 
   return {
     claim(key: string, owner: string): boolean {
-      // 공유 허용된 키는 항상 성공
+      // Allowed shared keys always succeed
       if (allowedSharedKeys.has(key)) {
         if (!registry.has(key)) {
           registry.set(key, { owner, registeredAt: Date.now() });
@@ -97,18 +97,18 @@ function createNamespaceGuard(options?: NamespaceGuardOptions): NamespaceGuard {
 
       const existing = registry.get(key);
 
-      // 미등록 키
+      // Unregistered key
       if (existing === undefined) {
         registry.set(key, { owner, registeredAt: Date.now() });
         return true;
       }
 
-      // 같은 소유자의 재등록
+      // Re-registration by the same owner
       if (existing.owner === owner) {
         return true;
       }
 
-      // 다른 소유자의 충돌
+      // Conflict with a different owner
       return handleConflict(key, existing.owner, owner);
     },
 

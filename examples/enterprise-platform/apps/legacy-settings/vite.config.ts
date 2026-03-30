@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 import { esmapManifest } from '@esmap/vite-plugin';
 
 /**
- * Legacy Settings MFE 빌드 설정.
- * Vanilla JS (프레임워크 무관) — esmap이 React 외 환경에서도 동작함을 시연.
- * @esmap/compat로 기존 Module Federation 설정을 import map으로 변환한다.
+ * Legacy Settings MFE build configuration.
+ * Vanilla JS (framework agnostic) — demonstrates that esmap works outside React.
+ * Converts existing Module Federation config to import map via @esmap/compat.
  */
 export default defineConfig(({ command }) => ({
   root: __dirname,

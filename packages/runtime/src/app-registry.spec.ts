@@ -4,7 +4,7 @@ import type { ErrorBoundaryOptions } from './app-registry.js';
 import type { MfeApp } from '@esmap/shared';
 import { AppNotFoundError, AppAlreadyRegisteredError, AppLifecycleError } from '@esmap/shared';
 
-/** 테스트용 MfeApp 목 생성 */
+/** Creates a mock MfeApp for testing */
 function createMockApp(): MfeApp {
   return {
     bootstrap: vi.fn().mockResolvedValue(undefined),
@@ -13,7 +13,7 @@ function createMockApp(): MfeApp {
   };
 }
 
-/** 로드 실패하는 MfeApp 목 생성 */
+/** Creates a mock MfeApp that fails to load */
 function createFailingMockApp(): MfeApp {
   return {
     bootstrap: vi.fn().mockRejectedValue(new Error('bootstrap failed')),
@@ -22,7 +22,7 @@ function createFailingMockApp(): MfeApp {
   };
 }
 
-/** 마운트 실패하는 MfeApp 목 생성 */
+/** Creates a mock MfeApp that fails to mount */
 function createMountFailingMockApp(): MfeApp {
   return {
     bootstrap: vi.fn().mockResolvedValue(undefined),
@@ -37,7 +37,7 @@ describe('AppRegistry', () => {
   });
 
   describe('registerApp', () => {
-    it('앱을 등록하면 NOT_LOADED 상태로 시작한다', () => {
+    it('starts with NOT_LOADED status when an app is registered', () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: '@flex/checkout', activeWhen: '/checkout' });
 
@@ -45,7 +45,7 @@ describe('AppRegistry', () => {
       expect(app?.status).toBe('NOT_LOADED');
     });
 
-    it('같은 이름의 앱을 중복 등록하면 AppAlreadyRegisteredError를 던진다', () => {
+    it('throws AppAlreadyRegisteredError when registering an app with a duplicate name', () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: '@flex/checkout', activeWhen: '/checkout' });
 
@@ -63,7 +63,7 @@ describe('AppRegistry', () => {
       }
     });
 
-    it('문자열 패턴으로 activeWhen을 설정한다', () => {
+    it('sets activeWhen with a string pattern', () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: '@flex/checkout', activeWhen: '/checkout' });
 
@@ -72,7 +72,7 @@ describe('AppRegistry', () => {
       expect(app.activeWhen({ pathname: '/people' } as Location)).toBe(false);
     });
 
-    it('배열 패턴으로 activeWhen을 설정한다', () => {
+    it('sets activeWhen with an array pattern', () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: '@flex/checkout', activeWhen: ['/checkout', '/cart'] });
 
@@ -82,7 +82,7 @@ describe('AppRegistry', () => {
       expect(app.activeWhen({ pathname: '/people' } as Location)).toBe(false);
     });
 
-    it('함수로 activeWhen을 설정한다', () => {
+    it('sets activeWhen with a function', () => {
       const registry = new AppRegistry();
       const fn = (loc: Location) => loc.pathname === '/exact';
       registry.registerApp({ name: '@flex/checkout', activeWhen: fn });
@@ -92,7 +92,7 @@ describe('AppRegistry', () => {
       expect(app.activeWhen({ pathname: '/exact/sub' } as Location)).toBe(false);
     });
 
-    it('container를 지정하지 않으면 기본값 #app을 사용한다', () => {
+    it('uses default #app when container is not specified', () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: 'test', activeWhen: '/test' });
 
@@ -100,7 +100,7 @@ describe('AppRegistry', () => {
       expect(app.container).toBe('#app');
     });
 
-    it('container를 커스텀으로 지정할 수 있다', () => {
+    it('allows specifying a custom container', () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: 'test', activeWhen: '/test', container: '#custom' });
 
@@ -110,7 +110,7 @@ describe('AppRegistry', () => {
   });
 
   describe('getApps', () => {
-    it('등록된 모든 앱을 반환한다', () => {
+    it('returns all registered apps', () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: '@flex/a', activeWhen: '/a' });
       registry.registerApp({ name: '@flex/b', activeWhen: '/b' });
@@ -118,14 +118,14 @@ describe('AppRegistry', () => {
       expect(registry.getApps()).toHaveLength(2);
     });
 
-    it('앱이 없으면 빈 배열을 반환한다', () => {
+    it('returns an empty array when no apps are registered', () => {
       const registry = new AppRegistry();
       expect(registry.getApps()).toStrictEqual([]);
     });
   });
 
   describe('loadApp', () => {
-    it('dynamic import 실패 시 LOAD_ERROR 상태가 되고 AppLifecycleError를 던진다', async () => {
+    it('transitions to LOAD_ERROR and throws AppLifecycleError on dynamic import failure', async () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: 'test-app', activeWhen: '/test' });
 
@@ -135,7 +135,7 @@ describe('AppRegistry', () => {
       expect(app.status).toBe('LOAD_ERROR');
 
       try {
-        // LOAD_ERROR에서 다시 로드 시도 가능
+        // Can retry loading from LOAD_ERROR state
         await registry.loadApp('test-app');
       } catch (e) {
         expect(e).toBeInstanceOf(AppLifecycleError);
@@ -146,7 +146,7 @@ describe('AppRegistry', () => {
       }
     });
 
-    it('등록되지 않은 앱을 로드하면 AppNotFoundError를 던진다', async () => {
+    it('throws AppNotFoundError when loading an unregistered app', async () => {
       const registry = new AppRegistry();
       await expect(registry.loadApp('nonexistent')).rejects.toThrow(AppNotFoundError);
 
@@ -161,8 +161,8 @@ describe('AppRegistry', () => {
     });
   });
 
-  describe('loadApp 중복 방지', () => {
-    it('동시에 같은 앱을 두 번 로드해도 loadApp 함수는 한 번만 호출된다', async () => {
+  describe('loadApp deduplication', () => {
+    it('calls loadApp only once even when the same app is loaded twice simultaneously', async () => {
       const loadCount = { value: 0 };
       const registry = new AppRegistry({
         importMap: {
@@ -171,7 +171,7 @@ describe('AppRegistry', () => {
       });
       registry.registerApp({ name: 'test-app', activeWhen: '/test' });
 
-      // loadApp 내부의 dynamic import를 추적하기 위해 상태 변경 이벤트를 관찰
+      // Observe status change events to track internal dynamic imports of loadApp
       const loadingEvents: string[] = [];
       registry.onStatusChange((event) => {
         if (event.to === 'LOADING') {
@@ -180,29 +180,29 @@ describe('AppRegistry', () => {
         }
       });
 
-      // 동시에 두 번 호출
+      // Call twice simultaneously
       const promise1 = registry.loadApp('test-app').catch(() => undefined);
       const promise2 = registry.loadApp('test-app').catch(() => undefined);
 
       await Promise.all([promise1, promise2]);
 
-      // LOADING 상태 전이는 한 번만 발생해야 한다
+      // LOADING status transition should occur only once
       expect(loadCount.value).toBe(1);
     });
   });
 
   describe('unmountApp', () => {
-    it('마운트되지 않은 앱을 언마운트하면 아무것도 하지 않는다', async () => {
+    it('does nothing when unmounting an app that is not mounted', async () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: 'test', activeWhen: '/test' });
 
-      // 에러 없이 완료되어야 함
+      // Should complete without errors
       await registry.unmountApp('test');
     });
   });
 
   describe('unregisterApp', () => {
-    it('등록된 앱을 제거한다', async () => {
+    it('removes a registered app', async () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: 'test', activeWhen: '/test' });
 
@@ -211,14 +211,14 @@ describe('AppRegistry', () => {
       expect(registry.getApp('test')).toBeUndefined();
     });
 
-    it('등록되지 않은 앱을 제거해도 에러가 없다', async () => {
+    it('does not throw when removing an unregistered app', async () => {
       const registry = new AppRegistry();
       await registry.unregisterApp('nonexistent');
     });
   });
 
   describe('onStatusChange', () => {
-    it('상태 변경 리스너를 등록하고 호출한다', async () => {
+    it('registers and invokes status change listeners', async () => {
       const registry = new AppRegistry();
       const events: { appName: string; from: string; to: string }[] = [];
 
@@ -228,11 +228,11 @@ describe('AppRegistry', () => {
 
       registry.registerApp({ name: 'test', activeWhen: '/test' });
 
-      // loadApp 시도 (dynamic import 실패하겠지만 상태 전이 이벤트는 발생)
+      // Attempt loadApp (dynamic import will fail but status transition events will fire)
       try {
         await registry.loadApp('test');
       } catch {
-        // dynamic import 실패 예상
+        // Expected dynamic import failure
       }
 
       expect(events.length).toBeGreaterThan(0);
@@ -241,7 +241,7 @@ describe('AppRegistry', () => {
       expect(events[0].to).toBe('LOADING');
     });
 
-    it('LOAD_ERROR 시 LOADING → LOAD_ERROR 전이가 발생한다', async () => {
+    it('transitions from LOADING to LOAD_ERROR on LOAD_ERROR', async () => {
       const registry = new AppRegistry();
       const events: { from: string; to: string }[] = [];
 
@@ -263,7 +263,7 @@ describe('AppRegistry', () => {
       ]);
     });
 
-    it('리스너 해제 함수로 리스너를 제거한다', async () => {
+    it('removes a listener using the unsubscribe function', async () => {
       const registry = new AppRegistry();
       const events: unknown[] = [];
 
@@ -278,7 +278,7 @@ describe('AppRegistry', () => {
       try {
         await registry.loadApp('test');
       } catch {
-        // dynamic import 실패 예상
+        // Expected dynamic import failure
       }
 
       expect(events).toStrictEqual([]);
@@ -286,7 +286,7 @@ describe('AppRegistry', () => {
   });
 
   describe('destroy', () => {
-    it('모든 앱을 제거하고 레지스트리를 정리한다', async () => {
+    it('removes all apps and cleans up the registry', async () => {
       const registry = new AppRegistry();
       registry.registerApp({ name: 'app-a', activeWhen: '/a' });
       registry.registerApp({ name: 'app-b', activeWhen: '/b' });
@@ -297,7 +297,7 @@ describe('AppRegistry', () => {
       expect(registry.getApp('app-a')).toBeUndefined();
     });
 
-    it('마운트된 앱은 먼저 언마운트한 후 정리한다', async () => {
+    it('unmounts mounted apps before cleaning up', async () => {
       const registry = new AppRegistry();
       const events: string[] = [];
 
@@ -313,23 +313,23 @@ describe('AppRegistry', () => {
     });
   });
 
-  describe('에러 바운더리', () => {
-    describe('loadApp 에러 바운더리', () => {
-      it('전역 에러 바운더리가 설정되면 로드 실패 시 에러를 던지지 않는다', async () => {
+  describe('error boundary', () => {
+    describe('loadApp error boundary', () => {
+      it('does not throw on load failure when global error boundary is configured', async () => {
         const onError = vi.fn();
         const registry = new AppRegistry({
           errorBoundary: { onError },
         });
         registry.registerApp({ name: 'test-app', activeWhen: '/test' });
 
-        // 에러를 던지지 않아야 한다
+        // Should not throw an error
         await registry.loadApp('test-app');
 
         expect(onError).toHaveBeenCalledTimes(1);
         expect(onError).toHaveBeenCalledWith('test-app', expect.any(AppLifecycleError));
       });
 
-      it('에러 바운더리 설정 시 컨테이너에 기본 폴백 UI를 렌더링한다', async () => {
+      it('renders default fallback UI in the container when error boundary is configured', async () => {
         const registry = new AppRegistry({
           errorBoundary: {},
         });
@@ -339,15 +339,15 @@ describe('AppRegistry', () => {
 
         const container = document.querySelector('#app');
         expect(container?.querySelector('.esmap-error-boundary')).not.toBeNull();
-        expect(container?.querySelector('p')?.textContent).toBe('앱을 불러올 수 없습니다');
-        expect(container?.querySelector('button')?.textContent).toBe('다시 시도');
+        expect(container?.querySelector('p')?.textContent).toBe('Unable to load the app');
+        expect(container?.querySelector('button')?.textContent).toBe('Retry');
       });
 
-      it('커스텀 fallback 함수가 HTMLElement를 반환하면 해당 요소를 렌더링한다', async () => {
+      it('renders the returned element when custom fallback function returns an HTMLElement', async () => {
         const fallback = (appName: string, _error: Error) => {
           const div = document.createElement('div');
           div.className = 'custom-fallback';
-          div.textContent = `${appName} 로드 실패`;
+          div.textContent = `${appName} load failed`;
           return div;
         };
 
@@ -360,13 +360,13 @@ describe('AppRegistry', () => {
 
         const container = document.querySelector('#app');
         expect(container?.querySelector('.custom-fallback')?.textContent).toBe(
-          'test-app 로드 실패',
+          'test-app load failed',
         );
       });
 
-      it('커스텀 fallback 함수가 문자열을 반환하면 텍스트로 안전하게 렌더링한다', async () => {
+      it('safely renders as text when custom fallback function returns a string', async () => {
         const fallback = (_appName: string, _error: Error) =>
-          '<div class="string-fallback">에러</div>';
+          '<div class="string-fallback">error</div>';
 
         const registry = new AppRegistry({
           errorBoundary: { fallback },
@@ -376,11 +376,11 @@ describe('AppRegistry', () => {
         await registry.loadApp('test-app');
 
         const container = document.querySelector('#app');
-        expect(container?.textContent).toBe('<div class="string-fallback">에러</div>');
+        expect(container?.textContent).toBe('<div class="string-fallback">error</div>');
         expect(container?.querySelector('.string-fallback')).toBeNull();
       });
 
-      it('onError 콜백에 앱 이름과 에러를 전달한다', async () => {
+      it('passes app name and error to onError callback', async () => {
         const onError = vi.fn();
         const registry = new AppRegistry({
           errorBoundary: { onError },
@@ -394,7 +394,7 @@ describe('AppRegistry', () => {
         expect(error).toBeInstanceOf(AppLifecycleError);
       });
 
-      it('에러 바운더리 없이는 기존처럼 에러를 던진다', async () => {
+      it('throws an error as before when no error boundary is configured', async () => {
         const registry = new AppRegistry();
         registry.registerApp({ name: 'test-app', activeWhen: '/test' });
 
@@ -402,8 +402,8 @@ describe('AppRegistry', () => {
       });
     });
 
-    describe('앱별 에러 바운더리 오버라이드', () => {
-      it('앱별 에러 바운더리가 전역 설정보다 우선한다', async () => {
+    describe('per-app error boundary override', () => {
+      it('per-app error boundary takes precedence over global configuration', async () => {
         const globalOnError = vi.fn();
         const appOnError = vi.fn();
 
@@ -422,7 +422,7 @@ describe('AppRegistry', () => {
         expect(appOnError).toHaveBeenCalledTimes(1);
       });
 
-      it('앱별 에러 바운더리가 없으면 전역 설정을 사용한다', async () => {
+      it('uses global configuration when no per-app error boundary is set', async () => {
         const globalOnError = vi.fn();
 
         const registry = new AppRegistry({
@@ -436,8 +436,8 @@ describe('AppRegistry', () => {
       });
     });
 
-    describe('재시도', () => {
-      it('다시 시도 버튼 클릭 시 재시도 카운트가 증가한다', async () => {
+    describe('retry', () => {
+      it('increments retry count when the retry button is clicked', async () => {
         vi.useFakeTimers();
         const registry = new AppRegistry({
           errorBoundary: { retryDelay: 0 },
@@ -455,7 +455,7 @@ describe('AppRegistry', () => {
         vi.useRealTimers();
       });
 
-      it('재시도 횟수가 retryLimit에 도달하면 재시도 버튼이 없는 영구 폴백을 표시한다', async () => {
+      it('shows permanent fallback without retry button when retry count reaches retryLimit', async () => {
         const registry = new AppRegistry({
           errorBoundary: { retryLimit: 0 },
         });
@@ -465,22 +465,22 @@ describe('AppRegistry', () => {
 
         const container = document.querySelector('#app');
         expect(container?.querySelector('.esmap-error-boundary')).not.toBeNull();
-        expect(container?.querySelector('p')?.textContent).toBe('앱을 불러올 수 없습니다');
+        expect(container?.querySelector('p')?.textContent).toBe('Unable to load the app');
         expect(container?.querySelector('button')).toBeNull();
       });
 
-      it('retryLimit 기본값은 3이다', async () => {
+      it('defaults retryLimit to 3', async () => {
         const registry = new AppRegistry({
           errorBoundary: {},
         });
         registry.registerApp({ name: 'test-app', activeWhen: '/test' });
 
-        // 3번 재시도까지는 버튼이 있어야 한다
+        // Button should be present until 3 retries
         await registry.loadApp('test-app');
         expect(document.querySelector('#app button')).not.toBeNull();
       });
 
-      it('성공적으로 로드하면 재시도 카운트가 초기화된다', async () => {
+      it('resets retry count on successful load', async () => {
         vi.useFakeTimers();
         const onError = vi.fn();
         const registry = new AppRegistry({
@@ -488,10 +488,10 @@ describe('AppRegistry', () => {
         });
         registry.registerApp({ name: 'test-app', activeWhen: '/test' });
 
-        // 첫 로드 실패
+        // First load failure
         await registry.loadApp('test-app');
 
-        // 수동으로 재시도 카운트 확인
+        // Manually verify retry count
         const button = document.querySelector('#app button');
         button?.dispatchEvent(new Event('click'));
         expect(registry.getRetryCount('test-app')).toBe(1);
@@ -499,23 +499,23 @@ describe('AppRegistry', () => {
       });
     });
 
-    describe('mountApp 에러 바운더리', () => {
-      it('mountApp에서 loadApp 실패 시 에러 바운더리가 동작한다', async () => {
+    describe('mountApp error boundary', () => {
+      it('error boundary handles loadApp failure within mountApp', async () => {
         const onError = vi.fn();
         const registry = new AppRegistry({
           errorBoundary: { onError },
         });
         registry.registerApp({ name: 'test-app', activeWhen: '/test' });
 
-        // mountApp은 내부적으로 loadApp을 호출하고, 에러 바운더리가 처리한다
+        // mountApp internally calls loadApp, and the error boundary handles it
         await registry.mountApp('test-app');
 
         expect(onError).toHaveBeenCalledTimes(1);
       });
     });
 
-    describe('unregisterApp과 에러 바운더리', () => {
-      it('앱 제거 시 에러 바운더리 설정과 재시도 카운트도 정리된다', async () => {
+    describe('unregisterApp and error boundary', () => {
+      it('cleans up error boundary config and retry count when an app is removed', async () => {
         const registry = new AppRegistry({
           errorBoundary: {},
         });
@@ -527,19 +527,19 @@ describe('AppRegistry', () => {
 
         await registry.loadApp('test-app');
 
-        // 재시도 카운트를 증가시킨다
+        // Increment the retry count
         const button = document.querySelector('#app button');
         button?.dispatchEvent(new Event('click'));
 
         await registry.unregisterApp('test-app');
 
-        // 제거 후 재시도 카운트가 0이어야 한다
+        // Retry count should be 0 after removal
         expect(registry.getRetryCount('test-app')).toBe(0);
       });
     });
 
-    describe('컨테이너가 없는 경우', () => {
-      it('컨테이너를 찾을 수 없으면 폴백 렌더링을 건너뛴다', async () => {
+    describe('missing container', () => {
+      it('skips fallback rendering when the container cannot be found', async () => {
         const onError = vi.fn();
         const registry = new AppRegistry({
           errorBoundary: { onError },
@@ -550,10 +550,10 @@ describe('AppRegistry', () => {
           container: '#nonexistent',
         });
 
-        // 에러를 던지지 않아야 한다
+        // Should not throw an error
         await registry.loadApp('test-app');
 
-        // onError는 호출되어야 한다
+        // onError should still be called
         expect(onError).toHaveBeenCalledTimes(1);
       });
     });

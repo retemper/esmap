@@ -15,28 +15,28 @@ const VALID_CONFIG: EsmapConfig = {
 };
 
 describe('validateConfig', () => {
-  it('유효한 설정은 에러가 없다', () => {
+  it('returns no errors for a valid config', () => {
     const errors = validateConfig(VALID_CONFIG);
     expect(errors).toStrictEqual([]);
   });
 
-  it('null이면 에러를 반환한다', () => {
+  it('returns an error for null', () => {
     const errors = validateConfig(null);
     expect(errors).toHaveLength(1);
-    expect(errors[0].message).toContain('객체');
+    expect(errors[0].message).toContain('object');
   });
 
-  it('apps가 없으면 에러를 반환한다', () => {
+  it('returns an error when apps is missing', () => {
     const errors = validateConfig({ shared: {} });
     expect(errors.some((e) => e.path === 'apps')).toBe(true);
   });
 
-  it('shared가 없으면 에러를 반환한다', () => {
+  it('returns an error when shared is missing', () => {
     const errors = validateConfig({ apps: {} });
     expect(errors.some((e) => e.path === 'shared')).toBe(true);
   });
 
-  it('apps에 path가 없는 앱이 있으면 에러를 반환한다', () => {
+  it('returns an error when an app in apps is missing path', () => {
     const errors = validateConfig({
       apps: { '@flex/checkout': { notPath: 'x' } },
       shared: {},
@@ -44,7 +44,7 @@ describe('validateConfig', () => {
     expect(errors.some((e) => e.path === 'apps.@flex/checkout.path')).toBe(true);
   });
 
-  it('server.port가 범위를 벗어나면 에러를 반환한다', () => {
+  it('returns an error when server.port is out of range', () => {
     const errors = validateConfig({
       apps: {},
       shared: {},
@@ -53,7 +53,7 @@ describe('validateConfig', () => {
     expect(errors.some((e) => e.path === 'server.port')).toBe(true);
   });
 
-  it('server.port가 0이면 유효하다', () => {
+  it('accepts server.port of 0 as valid', () => {
     const errors = validateConfig({
       apps: {},
       shared: {},
@@ -62,7 +62,7 @@ describe('validateConfig', () => {
     expect(errors.filter((e) => e.path === 'server.port')).toStrictEqual([]);
   });
 
-  it('server.port가 65535이면 유효하다', () => {
+  it('accepts server.port of 65535 as valid', () => {
     const errors = validateConfig({
       apps: {},
       shared: {},
@@ -71,7 +71,7 @@ describe('validateConfig', () => {
     expect(errors.filter((e) => e.path === 'server.port')).toStrictEqual([]);
   });
 
-  it('server.storage가 유효하지 않으면 에러를 반환한다', () => {
+  it('returns an error when server.storage is invalid', () => {
     const errors = validateConfig({
       apps: {},
       shared: {},
@@ -82,12 +82,12 @@ describe('validateConfig', () => {
 });
 
 describe('assertValidConfig', () => {
-  it('유효한 설정을 그대로 반환한다', () => {
+  it('returns a valid config as-is', () => {
     const result = assertValidConfig(VALID_CONFIG);
     expect(result).toStrictEqual(VALID_CONFIG);
   });
 
-  it('유효하지 않은 설정이면 ConfigValidationError를 던진다', () => {
+  it('throws ConfigValidationError for an invalid config', () => {
     expect(() => assertValidConfig(null)).toThrow(ConfigValidationError);
 
     try {
@@ -100,7 +100,7 @@ describe('assertValidConfig', () => {
     }
   });
 
-  it('여러 에러를 한번에 보고한다', () => {
+  it('reports multiple errors at once', () => {
     try {
       assertValidConfig({});
     } catch (e) {

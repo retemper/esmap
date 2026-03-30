@@ -4,7 +4,7 @@ import type { HookContext, HookError } from './hooks.js';
 
 describe('createLifecycleHooks', () => {
   describe('beforeEach', () => {
-    it('글로벌 before 훅이 모든 앱에 대해 실행된다', async () => {
+    it('executes global before hooks for all apps', async () => {
       const hooks = createLifecycleHooks();
       const calls: string[] = [];
 
@@ -18,7 +18,7 @@ describe('createLifecycleHooks', () => {
       expect(calls).toStrictEqual(['global-before-mount', 'global-before-mount']);
     });
 
-    it('다른 phase의 훅은 실행되지 않는다', async () => {
+    it('does not execute hooks for other phases', async () => {
       const hooks = createLifecycleHooks();
       const calls: string[] = [];
 
@@ -36,7 +36,7 @@ describe('createLifecycleHooks', () => {
   });
 
   describe('afterEach', () => {
-    it('글로벌 after 훅이 모든 앱에 대해 실행된다', async () => {
+    it('executes global after hooks for all apps', async () => {
       const hooks = createLifecycleHooks();
       const calls: string[] = [];
 
@@ -50,8 +50,8 @@ describe('createLifecycleHooks', () => {
     });
   });
 
-  describe('before (앱별)', () => {
-    it('지정된 앱에만 before 훅이 실행된다', async () => {
+  describe('before (per-app)', () => {
+    it('executes before hooks only for the specified app', async () => {
       const hooks = createLifecycleHooks();
       const calls: string[] = [];
 
@@ -66,8 +66,8 @@ describe('createLifecycleHooks', () => {
     });
   });
 
-  describe('after (앱별)', () => {
-    it('지정된 앱에만 after 훅이 실행된다', async () => {
+  describe('after (per-app)', () => {
+    it('executes after hooks only for the specified app', async () => {
       const hooks = createLifecycleHooks();
       const calls: string[] = [];
 
@@ -82,8 +82,8 @@ describe('createLifecycleHooks', () => {
     });
   });
 
-  describe('실행 순서', () => {
-    it('글로벌 훅과 앱별 훅이 등록 순서대로 실행된다', async () => {
+  describe('execution order', () => {
+    it('executes global and per-app hooks in registration order', async () => {
       const hooks = createLifecycleHooks();
       const order: number[] = [];
 
@@ -102,7 +102,7 @@ describe('createLifecycleHooks', () => {
       expect(order).toStrictEqual([1, 2, 3]);
     });
 
-    it('before와 after는 별도 timing으로 독립 실행된다', async () => {
+    it('before and after run independently as separate timings', async () => {
       const hooks = createLifecycleHooks();
       const calls: string[] = [];
 
@@ -121,7 +121,7 @@ describe('createLifecycleHooks', () => {
   });
 
   describe('HookContext', () => {
-    it('훅에 올바른 컨텍스트가 전달된다', async () => {
+    it('passes the correct context to hooks', async () => {
       const hooks = createLifecycleHooks();
       const contexts: HookContext[] = [];
 
@@ -135,8 +135,8 @@ describe('createLifecycleHooks', () => {
     });
   });
 
-  describe('비동기 훅', () => {
-    it('비동기 훅이 순차적으로 실행된다', async () => {
+  describe('async hooks', () => {
+    it('executes async hooks sequentially', async () => {
       const hooks = createLifecycleHooks();
       const order: number[] = [];
 
@@ -156,18 +156,18 @@ describe('createLifecycleHooks', () => {
     });
   });
 
-  describe('에러 처리', () => {
-    it('onError 미설정 시 훅 에러가 전파된다', async () => {
+  describe('error handling', () => {
+    it('propagates hook errors when onError is not set', async () => {
       const hooks = createLifecycleHooks();
 
       hooks.beforeEach('mount', () => {
-        throw new Error('훅 에러');
+        throw new Error('hook error');
       });
 
-      await expect(hooks.runHooks('app-a', 'mount', 'before')).rejects.toThrow('훅 에러');
+      await expect(hooks.runHooks('app-a', 'mount', 'before')).rejects.toThrow('hook error');
     });
 
-    it('onError 설정 시 에러를 잡고 나머지 훅을 계속 실행한다', async () => {
+    it('catches errors and continues executing remaining hooks when onError is set', async () => {
       const errors: HookError[] = [];
       const hooks = createLifecycleHooks({
         onError: (hookError) => errors.push(hookError),
@@ -175,7 +175,7 @@ describe('createLifecycleHooks', () => {
       const calls: string[] = [];
 
       hooks.beforeEach('mount', () => {
-        throw new Error('첫 번째 훅 에러');
+        throw new Error('first hook error');
       });
       hooks.beforeEach('mount', () => {
         calls.push('second-hook-executed');
@@ -189,17 +189,17 @@ describe('createLifecycleHooks', () => {
       expect(calls).toStrictEqual(['second-hook-executed']);
     });
 
-    it('onError 설정 시 여러 훅의 에러를 모두 수집한다', async () => {
+    it('collects errors from multiple hooks when onError is set', async () => {
       const errors: HookError[] = [];
       const hooks = createLifecycleHooks({
         onError: (hookError) => errors.push(hookError),
       });
 
       hooks.beforeEach('mount', () => {
-        throw new Error('에러 1');
+        throw new Error('error 1');
       });
       hooks.beforeEach('mount', () => {
-        throw new Error('에러 2');
+        throw new Error('error 2');
       });
 
       await hooks.runHooks('app-a', 'mount', 'before');
@@ -207,24 +207,24 @@ describe('createLifecycleHooks', () => {
       expect(errors).toHaveLength(2);
     });
 
-    it('onError 미설정 시 첫 에러에서 중단하고 나머지 훅은 실행하지 않는다', async () => {
+    it('stops at the first error and does not execute remaining hooks when onError is not set', async () => {
       const hooks = createLifecycleHooks();
       const calls: string[] = [];
 
       hooks.beforeEach('mount', () => {
-        throw new Error('중단');
+        throw new Error('abort');
       });
       hooks.beforeEach('mount', () => {
-        calls.push('도달 불가');
+        calls.push('unreachable');
       });
 
-      await expect(hooks.runHooks('app-a', 'mount', 'before')).rejects.toThrow('중단');
+      await expect(hooks.runHooks('app-a', 'mount', 'before')).rejects.toThrow('abort');
       expect(calls).toStrictEqual([]);
     });
   });
 
-  describe('매칭되는 훅이 없는 경우', () => {
-    it('등록된 훅이 없으면 아무 일도 일어나지 않는다', async () => {
+  describe('no matching hooks', () => {
+    it('does nothing when no hooks are registered', async () => {
       const hooks = createLifecycleHooks();
 
       await hooks.runHooks('app-a', 'mount', 'before');

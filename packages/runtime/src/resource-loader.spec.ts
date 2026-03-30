@@ -8,8 +8,8 @@ describe('createResourceLoader', () => {
     vi.restoreAllMocks();
   });
 
-  describe('기본 로딩', () => {
-    it('JS 리소스를 fetch하여 반환한다', async () => {
+  describe('basic loading', () => {
+    it('fetches and returns a JS resource', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('console.log("hello")', { status: 200 }),
       );
@@ -20,7 +20,7 @@ describe('createResourceLoader', () => {
       expect(result).toBe('console.log("hello")');
     });
 
-    it('CSS 리소스를 fetch하여 반환한다', async () => {
+    it('fetches and returns a CSS resource', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('.app { color: red }', { status: 200 }),
       );
@@ -31,7 +31,7 @@ describe('createResourceLoader', () => {
       expect(result).toBe('.app { color: red }');
     });
 
-    it('fetch 실패 시 에러를 던진다', async () => {
+    it('throws an error on fetch failure', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('Not Found', { status: 404 }),
       );
@@ -39,13 +39,13 @@ describe('createResourceLoader', () => {
       const loader = createResourceLoader({ enableCache: false });
 
       await expect(loader.loadScript('https://cdn.example.com/missing.js')).rejects.toThrow(
-        '리소스 로드 실패',
+        'Failed to load resource',
       );
     });
   });
 
-  describe('캐싱', () => {
-    it('동일 URL의 두 번째 요청은 캐시에서 반환한다', async () => {
+  describe('caching', () => {
+    it('returns the second request for the same URL from cache', async () => {
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('cached-content', { status: 200 }),
       );
@@ -57,7 +57,7 @@ describe('createResourceLoader', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('캐시를 비우면 다시 fetch한다', async () => {
+    it('fetches again after clearing the cache', async () => {
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
         () => Promise.resolve(new Response('content', { status: 200 })),
       );
@@ -71,7 +71,7 @@ describe('createResourceLoader', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(2);
     });
 
-    it('enableCache: false이면 캐시하지 않는다', async () => {
+    it('does not cache when enableCache is false', async () => {
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
         () => Promise.resolve(new Response('content', { status: 200 })),
       );
@@ -84,8 +84,8 @@ describe('createResourceLoader', () => {
     });
   });
 
-  describe('fetch 인터셉터', () => {
-    it('fetch 인터셉터가 URL을 변경할 수 있다', async () => {
+  describe('fetch interceptors', () => {
+    it('allows a fetch interceptor to modify the URL', async () => {
       const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('proxied', { status: 200 }),
       );
@@ -108,7 +108,7 @@ describe('createResourceLoader', () => {
       );
     });
 
-    it('fetch 인터셉터가 응답을 직접 반환할 수 있다', async () => {
+    it('allows a fetch interceptor to return a response directly', async () => {
       const fetchSpy = vi.spyOn(globalThis, 'fetch');
 
       const interceptor: FetchInterceptor = {
@@ -127,7 +127,7 @@ describe('createResourceLoader', () => {
       expect(fetchSpy).not.toHaveBeenCalled();
     });
 
-    it('여러 fetch 인터셉터가 체이닝된다', async () => {
+    it('chains multiple fetch interceptors', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('original', { status: 200 }),
       );
@@ -164,8 +164,8 @@ describe('createResourceLoader', () => {
     });
   });
 
-  describe('JS 변환기', () => {
-    it('JS 소스코드를 변환한다', async () => {
+  describe('JS transformers', () => {
+    it('transforms JS source code', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('var x = 1;', { status: 200 }),
       );
@@ -184,7 +184,7 @@ describe('createResourceLoader', () => {
       expect(result).toBe('"use strict";\nvar x = 1;');
     });
 
-    it('여러 JS 변환기가 순서대로 실행된다', async () => {
+    it('executes multiple JS transformers in order', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('code', { status: 200 }),
       );
@@ -212,8 +212,8 @@ describe('createResourceLoader', () => {
     });
   });
 
-  describe('CSS 변환기', () => {
-    it('CSS 소스코드를 변환한다', async () => {
+  describe('CSS transformers', () => {
+    it('transforms CSS source code', async () => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('.btn { color: red }', { status: 200 }),
       );
@@ -234,7 +234,7 @@ describe('createResourceLoader', () => {
   });
 
   describe('getRegisteredNames', () => {
-    it('등록된 인터셉터/변환기 이름을 반환한다', () => {
+    it('returns registered interceptor/transformer names', () => {
       const loader = createResourceLoader();
 
       loader.addFetchInterceptor({ name: 'proxy', handle: async (_url, next) => next(_url) });

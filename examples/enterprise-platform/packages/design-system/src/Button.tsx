@@ -1,17 +1,17 @@
 import type { ReactNode, ButtonHTMLAttributes } from 'react';
 import { theme } from './theme.js';
 
-/** Button 컴포넌트 props */
+/** Button component props */
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** 버튼 시각적 변형 */
+  /** Button visual variant */
   readonly variant?: 'primary' | 'secondary' | 'ghost';
-  /** 버튼 크기 */
+  /** Button size */
   readonly size?: 'sm' | 'md' | 'lg';
-  /** 버튼 내용 */
+  /** Button content */
   readonly children: ReactNode;
 }
 
-/** 변형별 스타일 맵 */
+/** Style map per variant */
 const variantStyles: Record<string, Record<string, string>> = {
   primary: {
     background: theme.colors.primary,
@@ -30,7 +30,7 @@ const variantStyles: Record<string, Record<string, string>> = {
   },
 };
 
-/** 크기별 패딩 맵 */
+/** Padding map per size */
 const sizeStyles: Record<string, Record<string, string>> = {
   sm: { padding: '4px 12px', fontSize: '13px' },
   md: { padding: '8px 16px', fontSize: '14px' },
@@ -38,8 +38,8 @@ const sizeStyles: Record<string, Record<string, string>> = {
 };
 
 /**
- * 공유 디자인 시스템 Button.
- * 모든 MFE에서 동일한 인스턴스를 사용하여 일관된 UI를 제공한다.
+ * Shared design system Button.
+ * Provides consistent UI by using the same instance across all MFEs.
  */
 export function Button({
   variant = 'primary',

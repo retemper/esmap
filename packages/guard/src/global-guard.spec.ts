@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { snapshotGlobals, diffGlobals, createGlobalGuard } from './global-guard.js';
 
 describe('snapshotGlobals', () => {
-  it('현재 전역 변수 이름의 Set을 반환한다', () => {
+  it('returns a Set of current global variable names', () => {
     const snapshot = snapshotGlobals();
     expect(snapshot).toBeInstanceOf(Set);
     expect(snapshot.size).toBeGreaterThan(0);
@@ -16,7 +16,7 @@ describe('diffGlobals', () => {
     delete win.__test_global_2__;
   });
 
-  it('새로 추가된 전역 변수를 감지한다', () => {
+  it('detects newly added global variables', () => {
     const before = snapshotGlobals();
 
     const win = globalThis as Record<string, unknown>;
@@ -26,7 +26,7 @@ describe('diffGlobals', () => {
     expect(diff).toContain('__test_global_1__');
   });
 
-  it('allowList에 포함된 변수는 제외한다', () => {
+  it('excludes variables in the allowList', () => {
     const before = snapshotGlobals();
 
     const win = globalThis as Record<string, unknown>;
@@ -36,13 +36,13 @@ describe('diffGlobals', () => {
     expect(diff).not.toContain('__test_global_1__');
   });
 
-  it('변경 없으면 빈 배열을 반환한다', () => {
+  it('returns an empty array when there are no changes', () => {
     const before = snapshotGlobals();
     const diff = diffGlobals(before);
     expect(diff).toStrictEqual([]);
   });
 
-  it('여러 변수 추가를 감지한다', () => {
+  it('detects multiple added variables', () => {
     const before = snapshotGlobals();
 
     const win = globalThis as Record<string, unknown>;
@@ -62,20 +62,20 @@ describe('createGlobalGuard', () => {
     delete win.__guard_test_2__;
   });
 
-  it('dispose()는 추가된 전역 변수 목록을 반환한다', async () => {
+  it('dispose() returns the list of added global variables', async () => {
     const guard = createGlobalGuard({ interval: 50 });
 
     const win = globalThis as Record<string, unknown>;
     win.__guard_test__ = 'value';
 
-    // 폴링 간격 대기
+    // Wait for polling interval
     await new Promise((resolve) => setTimeout(resolve, 80));
 
     const added = guard.dispose();
     expect(added).toContain('__guard_test__');
   });
 
-  it('onViolation 콜백을 호출한다', async () => {
+  it('invokes the onViolation callback', async () => {
     const violations: { property: string; type: string }[] = [];
 
     const guard = createGlobalGuard({
@@ -95,7 +95,7 @@ describe('createGlobalGuard', () => {
     expect(violations[0].type).toBe('add');
   });
 
-  it('allowList에 포함된 전역 변수는 무시한다', async () => {
+  it('ignores global variables in the allowList', async () => {
     const violations: { property: string }[] = [];
 
     const guard = createGlobalGuard({
@@ -115,17 +115,17 @@ describe('createGlobalGuard', () => {
     expect(added).not.toContain('__guard_test__');
   });
 
-  it('기본 interval은 1000ms이다', () => {
+  it('uses a default interval of 1000ms', () => {
     const guard = createGlobalGuard();
-    // dispose가 에러 없이 동작해야 한다
+    // dispose should work without errors
     const added = guard.dispose();
     expect(Array.isArray(added)).toBe(true);
   });
 
-  it('check()를 수동 호출하면 즉시 감지한다', () => {
+  it('detects immediately when check() is called manually', () => {
     const violations: { property: string }[] = [];
     const guard = createGlobalGuard({
-      interval: 60_000, // 긴 간격 → 폴링으로는 감지 불가
+      interval: 60_000, // Long interval -- cannot detect via polling
       onViolation: (v) => violations.push(v),
     });
 
@@ -140,7 +140,7 @@ describe('createGlobalGuard', () => {
     guard.dispose();
   });
 
-  it('같은 변수를 중복 감지하지 않는다', async () => {
+  it('does not detect the same variable more than once', async () => {
     const violations: { property: string }[] = [];
     const guard = createGlobalGuard({
       interval: 30,
@@ -150,12 +150,12 @@ describe('createGlobalGuard', () => {
     const win = globalThis as Record<string, unknown>;
     win.__guard_test__ = 'first';
 
-    // 여러 폴링 사이클 대기
+    // Wait for multiple polling cycles
     await new Promise((resolve) => setTimeout(resolve, 100));
 
     guard.dispose();
 
-    // 한 번만 감지됨
+    // Detected only once
     expect(violations).toHaveLength(1);
   });
 });

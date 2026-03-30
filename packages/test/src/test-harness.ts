@@ -4,39 +4,39 @@ import type { RouterOptions } from '@esmap/runtime';
 import { createTestRegistry } from './mock-registry.js';
 import type { InlineAppDefinition, TestRegistry } from './mock-registry.js';
 
-/** createTestHarness에 전달할 옵션 */
+/** Options for createTestHarness */
 export interface TestHarnessOptions {
-  /** 초기에 등록할 인라인 앱 목록 */
+  /** List of inline apps to register initially */
   readonly apps?: readonly InlineAppDefinition[];
-  /** 라우터 옵션 */
+  /** Router options */
   readonly routerOptions?: RouterOptions;
-  /** DOM 컨테이너 셀렉터 (기본값: '#app') */
+  /** DOM container selector (default: '#app') */
   readonly containerSelector?: string;
 }
 
-/** MFE 통합 테스트를 위한 전체 환경 하네스 */
+/** Full environment harness for MFE integration testing */
 export interface TestHarness {
-  /** 테스트 레지스트리 */
+  /** Test registry */
   readonly testRegistry: TestRegistry;
-  /** 라우터 인스턴스 */
+  /** Router instance */
   readonly router: Router;
-  /** DOM 컨테이너 엘리먼트 */
+  /** DOM container element */
   readonly container: HTMLElement;
   /**
-   * 지정한 경로로 프로그래매틱 내비게이션을 수행한다.
-   * @param path - 이동할 URL 경로
+   * Performs programmatic navigation to the specified path.
+   * @param path - URL path to navigate to
    */
   navigate(path: string): Promise<void>;
-  /** 현재 MOUNTED 상태인 앱 목록을 반환한다. */
+  /** Returns the list of currently MOUNTED apps. */
   getActiveApps(): readonly RegisteredApp[];
-  /** DOM 컨테이너, 라우터, 레지스트리를 정리한다. */
+  /** Cleans up the DOM container, router, and registry. */
   cleanup(): Promise<void>;
 }
 
 /**
- * MFE 통합 테스트에 필요한 DOM 컨테이너, 레지스트리, 라우터를 셋업한다.
- * cleanup()을 호출하면 모든 리소스가 정리된다.
- * @param options - 테스트 하네스 구성 옵션
+ * Sets up the DOM container, registry, and router needed for MFE integration testing.
+ * Call cleanup() to release all resources.
+ * @param options - test harness configuration options
  */
 export async function createTestHarness(options?: TestHarnessOptions): Promise<TestHarness> {
   const containerSelector = options?.containerSelector ?? '#app';
@@ -61,8 +61,8 @@ export async function createTestHarness(options?: TestHarnessOptions): Promise<T
   const navigate = async (path: string): Promise<void> => {
     history.pushState(null, '', path);
     /**
-     * Router는 pushState를 패치하여 esmap:navigate 이벤트를 발생시킨다.
-     * 이벤트 핸들링이 비동기이므로 microtask를 한 번 양보한다.
+     * The Router patches pushState to emit esmap:navigate events.
+     * Since event handling is asynchronous, we yield one microtask.
      */
     await new Promise<void>((resolve) => {
       setTimeout(resolve, 0);

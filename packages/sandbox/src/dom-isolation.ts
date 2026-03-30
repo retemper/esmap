@@ -1,35 +1,35 @@
 /**
- * DOM 쿼리 격리.
- * document.querySelector, getElementById 등을 앱 컨테이너 범위로 스코핑한다.
- * micro-app(JD.com)의 Element Isolation 패턴에서 영감을 받았다.
+ * DOM query isolation.
+ * Scopes document.querySelector, getElementById, etc. to the app container boundary.
+ * Inspired by the Element Isolation pattern from micro-app (JD.com).
  *
- * MFE 앱이 `document.querySelector('.my-class')`를 호출하면
- * 실제로는 앱의 컨테이너 내에서만 검색하여 다른 앱의 DOM에 접근하는 것을 방지한다.
+ * When an MFE app calls `document.querySelector('.my-class')`,
+ * it actually searches only within the app's container, preventing access to other apps' DOM.
  */
 
-/** DOM 격리 옵션 */
+/** DOM isolation options */
 export interface DomIsolationOptions {
-  /** 앱 이름 (디버깅용) */
+  /** App name (for debugging) */
   readonly name: string;
-  /** 앱의 DOM 컨테이너 엘리먼트 */
+  /** App's DOM container element */
   readonly container: HTMLElement;
   /**
-   * 격리 대상에서 제외할 셀렉터 패턴.
-   * 예: ['#global-modal', '[data-esmap-global]']
-   * 이 패턴에 매칭되는 쿼리는 document 전체에서 검색한다.
+   * Selector patterns to exclude from isolation.
+   * Example: ['#global-modal', '[data-esmap-global]']
+   * Queries matching these patterns search the entire document.
    */
   readonly globalSelectors?: readonly string[];
 }
 
-/** DOM 격리 핸들. dispose로 원본 메서드를 복원한다. */
+/** DOM isolation handle. Restores original methods via dispose. */
 export interface DomIsolationHandle {
-  /** 격리를 해제하고 원본 document 메서드를 복원한다. */
+  /** Releases isolation and restores original document methods. */
   dispose(): void;
-  /** 격리 대상 컨테이너를 반환한다. */
+  /** Returns the isolated container element. */
   readonly container: HTMLElement;
 }
 
-/** 패치 대상 document 메서드와 원본 참조 */
+/** Patched document methods and their original references */
 interface PatchedMethods {
   readonly querySelector: Document['querySelector'];
   readonly querySelectorAll: Document['querySelectorAll'];
@@ -39,17 +39,17 @@ interface PatchedMethods {
 }
 
 /**
- * 주어진 셀렉터가 글로벌 셀렉터 패턴에 매칭되는지 확인한다.
- * 패턴과 정확히 일치하거나, 패턴 뒤에 CSS 결합자/공백이 오는 경우만 매칭한다.
- * 예: 패턴 '#modal'은 '#modal'과 '#modal > .child'에 매칭되지만, '#modal-overlay'에는 매칭되지 않는다.
- * @param selector - 검사할 CSS 셀렉터
- * @param globalPatterns - 글로벌 셀렉터 패턴 목록
+ * Checks whether the given selector matches any global selector pattern.
+ * Matches only exact patterns or patterns followed by a CSS combinator/whitespace.
+ * Example: pattern '#modal' matches '#modal' and '#modal > .child', but not '#modal-overlay'.
+ * @param selector - CSS selector to check
+ * @param globalPatterns - list of global selector patterns
  */
 function isGlobalSelector(selector: string, globalPatterns: readonly string[]): boolean {
   return globalPatterns.some((pattern) => {
     if (selector === pattern) return true;
     if (!selector.startsWith(pattern)) return false;
-    // 패턴 직후 문자가 CSS 결합자 또는 공백이어야 매칭 (접두사 오매칭 방지)
+    // The character immediately after the pattern must be a CSS combinator or whitespace (prevents prefix false-positives)
     const nextChar = selector[pattern.length];
     return nextChar === ' ' || nextChar === '>' || nextChar === '+' || nextChar === '~'
       || nextChar === ',' || nextChar === ':' || nextChar === '[';
@@ -57,11 +57,11 @@ function isGlobalSelector(selector: string, globalPatterns: readonly string[]): 
 }
 
 /**
- * DOM 쿼리 격리를 생성한다.
- * document의 쿼리 메서드를 패치하여 앱 컨테이너 범위로 제한한다.
+ * Creates DOM query isolation.
+ * Patches document query methods to restrict them to the app container scope.
  *
- * @param options - DOM 격리 옵션
- * @returns DomIsolationHandle (dispose로 복원 가능)
+ * @param options - DOM isolation options
+ * @returns DomIsolationHandle (restorable via dispose)
  */
 export function createDomIsolation(options: DomIsolationOptions): DomIsolationHandle {
   const { container, globalSelectors = [] } = options;
@@ -93,7 +93,7 @@ export function createDomIsolation(options: DomIsolationOptions): DomIsolationHa
   };
 
   document.getElementById = function patchedGetElementById(elementId: string): HTMLElement | null {
-    // getElementById는 ID 기반이므로 globalSelectors 체크를 #id 형태로 수행한다
+    // getElementById is ID-based, so globalSelectors check is performed in #id format
     if (isGlobalSelector(`#${elementId}`, globalSelectors)) {
       return originals.getElementById(elementId);
     }

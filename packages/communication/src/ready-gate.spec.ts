@@ -11,7 +11,7 @@ describe('createReadyGate', () => {
   });
 
   describe('register + markReady', () => {
-    it('자원을 등록하고 준비 완료 처리한다', () => {
+    it('registers a resource and marks it as ready', () => {
       const gate = createReadyGate();
 
       gate.register('auth');
@@ -24,7 +24,7 @@ describe('createReadyGate', () => {
       expect(status[0].readyAt).toBeTypeOf('number');
     });
 
-    it('같은 자원을 두 번 등록해도 중복되지 않는다', () => {
+    it('does not duplicate when registering the same resource twice', () => {
       const gate = createReadyGate();
 
       gate.register('auth');
@@ -33,7 +33,7 @@ describe('createReadyGate', () => {
       expect(gate.getStatus()).toHaveLength(1);
     });
 
-    it('미등록 자원을 markReady하면 암시적으로 등록된다', () => {
+    it('implicitly registers when markReady is called on an unregistered resource', () => {
       const gate = createReadyGate();
 
       gate.markReady('config');
@@ -43,27 +43,27 @@ describe('createReadyGate', () => {
     });
   });
 
-  describe('waitFor — 단일 자원 대기', () => {
-    it('이미 준비된 자원에 대해 즉시 resolve한다', async () => {
+  describe('waitFor — single resource wait', () => {
+    it('resolves immediately for an already ready resource', async () => {
       const gate = createReadyGate();
 
       gate.markReady('auth');
       await gate.waitFor('auth');
-      // resolve 확인 — 에러 없이 통과
+      // Confirm resolve — passes without error
     });
 
-    it('미준비 자원에 대해 markReady될 때까지 대기한다', async () => {
+    it('waits until markReady is called for an unready resource', async () => {
       const gate = createReadyGate();
       gate.register('auth');
 
       const resolved = vi.fn();
       const promise = gate.waitFor('auth').then(resolved);
 
-      // 아직 resolve되지 않음
+      // Not yet resolved
       await vi.advanceTimersByTimeAsync(0);
       expect(resolved).not.toHaveBeenCalled();
 
-      // markReady 호출
+      // Call markReady
       gate.markReady('auth');
       await vi.advanceTimersByTimeAsync(0);
       await promise;
@@ -71,21 +71,21 @@ describe('createReadyGate', () => {
       expect(resolved).toHaveBeenCalled();
     });
 
-    it('타임아웃 시간 내에 준비되지 않으면 reject한다', async () => {
+    it('rejects if not ready within the timeout', async () => {
       const gate = createReadyGate({ timeout: 100 });
       gate.register('auth');
 
       const promise = gate.waitFor('auth');
 
-      // rejection handler를 먼저 등록하여 unhandled rejection 방지
-      const rejection = expect(promise).rejects.toThrow('ReadyGate 타임아웃');
+      // Register rejection handler first to prevent unhandled rejection
+      const rejection = expect(promise).rejects.toThrow('ReadyGate timed out');
 
       await vi.advanceTimersByTimeAsync(100);
 
       await rejection;
     });
 
-    it('미등록 자원을 waitFor하면 암시적으로 등록된다', async () => {
+    it('implicitly registers when waitFor is called on an unregistered resource', async () => {
       const gate = createReadyGate();
 
       const resolved = vi.fn();
@@ -99,8 +99,8 @@ describe('createReadyGate', () => {
     });
   });
 
-  describe('waitForAll — 모든 자원 대기', () => {
-    it('모든 자원이 준비되면 resolve한다', async () => {
+  describe('waitForAll — wait for all resources', () => {
+    it('resolves when all resources are ready', async () => {
       const gate = createReadyGate();
       gate.register('auth');
       gate.register('config');
@@ -119,25 +119,25 @@ describe('createReadyGate', () => {
       expect(resolved).toHaveBeenCalled();
     });
 
-    it('등록된 자원이 없으면 즉시 resolve한다', async () => {
+    it('resolves immediately when no resources are registered', async () => {
       const gate = createReadyGate();
 
       await gate.waitForAll();
-      // 에러 없이 통과
+      // passes without error
     });
 
-    it('모든 자원이 이미 준비되어 있으면 즉시 resolve한다', async () => {
+    it('resolves immediately when all resources are already ready', async () => {
       const gate = createReadyGate();
       gate.markReady('a');
       gate.markReady('b');
 
       await gate.waitForAll();
-      // 에러 없이 통과
+      // passes without error
     });
   });
 
-  describe('waitForMany — 특정 자원 목록 대기', () => {
-    it('지정된 자원만 대기한다', async () => {
+  describe('waitForMany — wait for specific resource list', () => {
+    it('waits only for the specified resources', async () => {
       const gate = createReadyGate();
       gate.register('auth');
       gate.register('config');
@@ -152,13 +152,13 @@ describe('createReadyGate', () => {
       await promise;
 
       expect(resolved).toHaveBeenCalled();
-      // analytics는 아직 미준비지만 상관없음
+      // analytics is not yet ready, but that does not matter
       expect(gate.isAllReady()).toBe(false);
     });
   });
 
   describe('isAllReady', () => {
-    it('모든 자원이 준비되면 true를 반환한다', () => {
+    it('returns true when all resources are ready', () => {
       const gate = createReadyGate();
       gate.register('a');
       gate.register('b');
@@ -172,7 +172,7 @@ describe('createReadyGate', () => {
       expect(gate.isAllReady()).toBe(true);
     });
 
-    it('자원이 없으면 true를 반환한다', () => {
+    it('returns true when no resources are registered', () => {
       const gate = createReadyGate();
 
       expect(gate.isAllReady()).toBe(true);
@@ -180,7 +180,7 @@ describe('createReadyGate', () => {
   });
 
   describe('reset', () => {
-    it('모든 등록과 상태를 초기화한다', () => {
+    it('resets all registrations and states', () => {
       const gate = createReadyGate();
       gate.register('auth');
       gate.markReady('auth');
@@ -192,8 +192,8 @@ describe('createReadyGate', () => {
     });
   });
 
-  describe('여러 대기자 동시 해소', () => {
-    it('같은 자원을 여러 곳에서 waitFor해도 모두 resolve된다', async () => {
+  describe('resolving multiple waiters simultaneously', () => {
+    it('resolves all waiters when multiple waitFor calls target the same resource', async () => {
       const gate = createReadyGate();
       gate.register('auth');
 

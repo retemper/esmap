@@ -4,7 +4,7 @@ import { createDomIsolation } from './dom-isolation.js';
 import type { DomIsolationHandle } from './dom-isolation.js';
 
 describe('createDomIsolation', () => {
-  /** 테스트용 DOM 구조를 설정한다 */
+  /** Sets up the DOM structure for testing */
   function setupDom(): HTMLElement {
     document.body.innerHTML = `
       <div id="global-header">Header</div>
@@ -17,13 +17,13 @@ describe('createDomIsolation', () => {
     return document.querySelector<HTMLElement>('#app-container')!;
   }
 
-  /** 핸들이 있으면 dispose한다 */
+  /** Disposes the handle if it exists */
   function safeDispose(handle: DomIsolationHandle | undefined): void {
     handle?.dispose();
   }
 
-  describe('querySelector 격리', () => {
-    it('컨테이너 내의 요소만 반환한다', () => {
+  describe('querySelector isolation', () => {
+    it('returns only elements inside the container', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
@@ -33,7 +33,7 @@ describe('createDomIsolation', () => {
       safeDispose(handle);
     });
 
-    it('컨테이너 외부의 요소는 찾지 못한다', () => {
+    it('does not find elements outside the container', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
@@ -43,7 +43,7 @@ describe('createDomIsolation', () => {
       safeDispose(handle);
     });
 
-    it('글로벌 셀렉터 패턴은 document 전체에서 검색한다', () => {
+    it('searches the entire document for global selector patterns', () => {
       const container = setupDom();
       const handle = createDomIsolation({
         name: 'test-app',
@@ -58,8 +58,8 @@ describe('createDomIsolation', () => {
     });
   });
 
-  describe('querySelectorAll 격리', () => {
-    it('컨테이너 내의 요소만 반환한다', () => {
+  describe('querySelectorAll isolation', () => {
+    it('returns only elements inside the container', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
@@ -71,8 +71,8 @@ describe('createDomIsolation', () => {
     });
   });
 
-  describe('getElementById 격리', () => {
-    it('컨테이너 내의 ID 요소를 반환한다', () => {
+  describe('getElementById isolation', () => {
+    it('returns the element with the given ID inside the container', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
@@ -82,7 +82,7 @@ describe('createDomIsolation', () => {
       safeDispose(handle);
     });
 
-    it('컨테이너 외부의 ID 요소는 찾지 못한다', () => {
+    it('does not find ID elements outside the container', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
@@ -92,7 +92,7 @@ describe('createDomIsolation', () => {
       safeDispose(handle);
     });
 
-    it('글로벌 셀렉터로 지정된 ID는 document 전체에서 검색한다', () => {
+    it('searches the entire document for IDs specified as global selectors', () => {
       const container = setupDom();
       const handle = createDomIsolation({
         name: 'test-app',
@@ -107,8 +107,8 @@ describe('createDomIsolation', () => {
     });
   });
 
-  describe('getElementsByClassName 격리', () => {
-    it('컨테이너 내의 클래스 요소만 반환한다', () => {
+  describe('getElementsByClassName isolation', () => {
+    it('returns only elements with the class inside the container', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
@@ -119,8 +119,8 @@ describe('createDomIsolation', () => {
     });
   });
 
-  describe('getElementsByTagName 격리', () => {
-    it('컨테이너 내의 태그 요소만 반환한다', () => {
+  describe('getElementsByTagName isolation', () => {
+    it('returns only elements with the tag inside the container', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
@@ -133,18 +133,18 @@ describe('createDomIsolation', () => {
   });
 
   describe('dispose', () => {
-    it('dispose 후 원본 document 메서드가 복원된다', () => {
+    it('restores original document methods after dispose', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 
       handle.dispose();
 
-      // dispose 후에는 document 전체에서 검색
+      // After dispose, searches the entire document
       const results = document.querySelectorAll('.inner-item');
       expect(results).toHaveLength(2);
     });
 
-    it('container 속성을 통해 격리 대상 컨테이너에 접근할 수 있다', () => {
+    it('provides access to the isolated container via the container property', () => {
       const container = setupDom();
       const handle = createDomIsolation({ name: 'test-app', container });
 

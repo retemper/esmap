@@ -16,55 +16,55 @@ const VALID_MANIFEST: MfeManifest = {
 };
 
 describe('parseManifest', () => {
-  it('유효한 JSON 문자열을 파싱한다', () => {
+  it('parses a valid JSON string', () => {
     const result = parseManifest(JSON.stringify(VALID_MANIFEST));
     expect(result).toStrictEqual(VALID_MANIFEST);
   });
 
-  it('잘못된 JSON이면 에러를 던진다', () => {
+  it('throws an error for invalid JSON', () => {
     expect(() => parseManifest('not-json')).toThrow();
   });
 });
 
 describe('validateManifest', () => {
-  it('유효한 매니페스트 객체를 통과시킨다', () => {
+  it('passes a valid manifest object', () => {
     const result = validateManifest(VALID_MANIFEST);
     expect(result).toStrictEqual(VALID_MANIFEST);
   });
 
-  it('null이면 ManifestValidationError를 던진다', () => {
+  it('throws ManifestValidationError for null', () => {
     expect(() => validateManifest(null)).toThrow(ManifestValidationError);
   });
 
-  it('name이 없으면 에러를 던진다', () => {
+  it('throws an error when name is missing', () => {
     expect(() => validateManifest({ ...VALID_MANIFEST, name: '' })).toThrow('"name"');
   });
 
-  it('version이 없으면 에러를 던진다', () => {
+  it('throws an error when version is missing', () => {
     expect(() => validateManifest({ ...VALID_MANIFEST, version: '' })).toThrow('"version"');
   });
 
-  it('entry가 없으면 에러를 던진다', () => {
+  it('throws an error when entry is missing', () => {
     expect(() => validateManifest({ ...VALID_MANIFEST, entry: '' })).toThrow('"entry"');
   });
 
-  it('assets가 배열이 아니면 에러를 던진다', () => {
+  it('throws an error when assets is not an array', () => {
     expect(() => validateManifest({ ...VALID_MANIFEST, assets: 'not-array' })).toThrow('"assets"');
   });
 
-  it('dependencies.shared가 배열이 아니면 에러를 던진다', () => {
+  it('throws an error when dependencies.shared is not an array', () => {
     expect(() =>
       validateManifest({ ...VALID_MANIFEST, dependencies: { shared: 'invalid', internal: [] } }),
     ).toThrow('"dependencies.shared"');
   });
 
-  it('modulepreload가 배열이 아니면 에러를 던진다', () => {
+  it('throws an error when modulepreload is not an array', () => {
     expect(() => validateManifest({ ...VALID_MANIFEST, modulepreload: 'invalid' })).toThrow(
       '"modulepreload"',
     );
   });
 
-  it('여러 에러를 한번에 보고한다', () => {
+  it('reports multiple errors at once', () => {
     try {
       validateManifest({ name: '', version: '', entry: '' });
     } catch (e) {
@@ -77,7 +77,7 @@ describe('validateManifest', () => {
 });
 
 describe('resolveManifestUrls', () => {
-  it('CDN base와 app path로 URL을 생성한다', () => {
+  it('generates URLs from CDN base and app path', () => {
     const result = resolveManifestUrls(VALID_MANIFEST, 'https://cdn.flex.team', 'apps/checkout');
 
     expect(result.entryUrl).toBe('https://cdn.flex.team/apps/checkout/checkout-a1b2c3.js');
@@ -91,12 +91,12 @@ describe('resolveManifestUrls', () => {
     ]);
   });
 
-  it('CDN base 끝의 슬래시를 제거한다', () => {
+  it('strips trailing slash from CDN base', () => {
     const result = resolveManifestUrls(VALID_MANIFEST, 'https://cdn.flex.team/', 'apps/checkout');
     expect(result.entryUrl).toBe('https://cdn.flex.team/apps/checkout/checkout-a1b2c3.js');
   });
 
-  it('app path 앞뒤의 슬래시를 제거한다', () => {
+  it('strips leading and trailing slashes from app path', () => {
     const result = resolveManifestUrls(VALID_MANIFEST, 'https://cdn.flex.team', '/apps/checkout/');
     expect(result.entryUrl).toBe('https://cdn.flex.team/apps/checkout/checkout-a1b2c3.js');
   });

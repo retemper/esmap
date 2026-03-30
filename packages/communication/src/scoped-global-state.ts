@@ -1,33 +1,33 @@
 import type { GlobalState, StateListener } from './global-state.js';
 
-/** 스코프 슬라이스 정의 — 앱이 접근 가능한 키를 타입 수준에서 제한한다 */
+/** Scope slice definition — restricts accessible keys at the type level for each app */
 interface ScopedGlobalStateOptions<
   T extends Record<string, unknown>,
   K extends keyof T,
 > {
-  /** 상위 글로벌 상태 */
+  /** Parent global state */
   readonly state: GlobalState<T>;
-  /** 이 스코프가 접근 가능한 키 목록 */
+  /** List of keys this scope can access */
   readonly keys: readonly K[];
-  /** 읽기 전용 모드. true이면 setState를 호출할 수 없다 */
+  /** Read-only mode. If true, setState cannot be called */
   readonly readonly?: boolean;
 }
 
-/** 스코프된 글로벌 상태 인터페이스. 허용된 키만 접근할 수 있다. */
+/** Scoped global state interface. Only allowed keys are accessible. */
 interface ScopedGlobalState<T extends Record<string, unknown>, K extends keyof T> {
-  /** 허용된 키의 현재 값을 포함하는 부분 상태를 반환한다 */
+  /** Returns a partial state containing the current values of allowed keys */
   getState: () => Readonly<Pick<T, K>>;
-  /** 허용된 키의 부분 상태를 업데이트한다. readonly 모드에서는 에러를 throw한다 */
+  /** Updates the partial state for allowed keys. Throws an error in readonly mode */
   setState: (partial: Partial<Pick<T, K>>) => void;
-  /** 허용된 키 중 하나라도 변경되면 호출되는 리스너를 등록한다 */
+  /** Registers a listener that is called when any of the allowed keys change */
   subscribe: (listener: StateListener<Pick<T, K>>) => () => void;
-  /** 허용된 키 목록을 반환한다 */
+  /** Returns the list of allowed keys */
   readonly allowedKeys: readonly K[];
 }
 
 /**
- * 글로벌 상태의 특정 키만 접근 가능한 스코프 뷰를 생성한다.
- * MFE 앱별로 접근 범위를 제한하여 의도치 않은 상태 변경을 방지한다.
+ * Creates a scoped view that can only access specific keys of the global state.
+ * Restricts access per MFE app to prevent unintended state mutations.
  *
  * @example
  * ```ts
@@ -39,11 +39,11 @@ interface ScopedGlobalState<T extends Record<string, unknown>, K extends keyof T
  * });
  * themeScope.getState(); // { theme: 'dark', locale: 'ko' }
  * themeScope.setState({ theme: 'light' }); // OK
- * themeScope.setState({ user: 'kim' }); // 타입 에러 — user는 허용 키가 아님
+ * themeScope.setState({ user: 'kim' }); // type error — user is not an allowed key
  * ```
  *
- * @param options - 스코프 설정
- * @returns 스코프된 글로벌 상태 인스턴스
+ * @param options - scope configuration
+ * @returns scoped global state instance
  */
 function createScopedGlobalState<
   T extends Record<string, unknown>,
@@ -53,8 +53,8 @@ function createScopedGlobalState<
   const allowedKeySet = new Set<K>(keys);
 
   /**
-   * 허용된 키만 포함하는 부분 상태를 추출한다.
-   * @param full - 전체 상태 객체
+   * Extracts a partial state containing only the allowed keys.
+   * @param full - the full state object
    */
   function pickAllowedKeys(full: Readonly<T>): Readonly<Pick<T, K>> {
     const partial: Record<string, unknown> = {};
@@ -65,15 +65,15 @@ function createScopedGlobalState<
   }
 
   /**
-   * partial의 모든 키가 허용된 키인지 검증한다.
-   * @param partial - 업데이트할 부분 상태
+   * Validates that all keys in partial are allowed keys.
+   * @param partial - the partial state to update
    */
   function validateKeys(partial: Partial<Pick<T, K>>): void {
     for (const key of Object.keys(partial)) {
       if (!allowedKeySet.has(key as K)) {
         throw new Error(
-          `[esmap] 스코프 위반: 키 "${key}"는 이 스코프에서 접근할 수 없습니다. ` +
-          `허용된 키: [${keys.map(String).join(', ')}]`,
+          `[esmap] Scope violation: key "${key}" is not accessible in this scope. ` +
+          `Allowed keys: [${keys.map(String).join(', ')}]`,
         );
       }
     }
@@ -88,7 +88,7 @@ function createScopedGlobalState<
 
     setState(partial: Partial<Pick<T, K>>): void {
       if (isReadonly) {
-        throw new Error('[esmap] 읽기 전용 스코프에서는 상태를 변경할 수 없습니다.');
+        throw new Error('[esmap] Cannot modify state in a read-only scope.');
       }
       validateKeys(partial);
       state.setState(partial as Partial<T>);
@@ -99,7 +99,7 @@ function createScopedGlobalState<
         const newSlice = pickAllowedKeys(newFull);
         const prevSlice = pickAllowedKeys(prevFull);
 
-        // 허용된 키 중 변경된 것이 있을 때만 알림
+        // Only notify when at least one allowed key has changed
         const hasRelevantChange = keys.some(
           (key) => !Object.is(newFull[key], prevFull[key]),
         );

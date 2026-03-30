@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { rollback, parseRollbackFlags } from './rollback.js';
 import type { RollbackOptions } from './rollback.js';
 
-/** 성공하는 fetch 모킹을 생성한다. */
+/** Creates a mock fetch that returns a successful response. */
 function createMockFetch(responseBody: unknown, status = 200): typeof globalThis.fetch {
   return vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
@@ -12,9 +12,9 @@ function createMockFetch(responseBody: unknown, status = 200): typeof globalThis
   });
 }
 
-describe('rollback 커맨드', () => {
+describe('rollback command', () => {
   describe('parseRollbackFlags', () => {
-    it('필수 플래그를 정상적으로 파싱한다', () => {
+    it('parses required flags correctly', () => {
       const result = parseRollbackFlags({
         server: 'http://localhost:3000',
         name: '@flex/checkout',
@@ -26,11 +26,11 @@ describe('rollback 커맨드', () => {
       });
     });
 
-    it('server 플래그가 없으면 에러를 던진다', () => {
+    it('throws an error when server flag is missing', () => {
       expect(() => parseRollbackFlags({ name: 'app' })).toThrow('Missing required flag --server');
     });
 
-    it('name 플래그가 없으면 에러를 던진다', () => {
+    it('throws an error when name flag is missing', () => {
       expect(() => parseRollbackFlags({ server: 'http://x' })).toThrow(
         'Missing required flag --name',
       );
@@ -38,7 +38,7 @@ describe('rollback 커맨드', () => {
   });
 
   describe('rollback', () => {
-    it('POST /rollback/:name 으로 올바른 요청을 보낸다', async () => {
+    it('sends the correct request to POST /rollback/:name', async () => {
       const mockFetch = createMockFetch({
         service: '@flex/checkout',
         rolledBackTo: 'https://cdn/checkout-prev.js',
@@ -57,7 +57,7 @@ describe('rollback 커맨드', () => {
       });
     });
 
-    it('서버 응답에서 name과 url을 추출하여 결과를 반환한다', async () => {
+    it('extracts name and url from the server response and returns the result', async () => {
       const mockFetch = createMockFetch({
         service: '@flex/checkout',
         rolledBackTo: 'https://cdn/checkout-prev.js',
@@ -75,7 +75,7 @@ describe('rollback 커맨드', () => {
       });
     });
 
-    it('서버가 에러를 반환하면 예외를 던진다', async () => {
+    it('throws an exception when the server returns an error', async () => {
       const mockFetch = createMockFetch('Service not found', 404);
 
       await expect(
@@ -83,7 +83,7 @@ describe('rollback 커맨드', () => {
       ).rejects.toThrow('Rollback failed (404)');
     });
 
-    it('서버 URL 끝의 슬래시를 제거한다', async () => {
+    it('strips trailing slash from the server URL', async () => {
       const mockFetch = createMockFetch({ service: 'app', rolledBackTo: 'http://x' });
 
       await rollback({ server: 'http://localhost:3000/', name: 'app' }, mockFetch);
@@ -92,12 +92,12 @@ describe('rollback 커맨드', () => {
       expect(callArgs[0]).toBe('http://localhost:3000/rollback/app');
     });
 
-    it('응답 본문이 기대 형태가 아니면 에러를 던진다', async () => {
+    it('throws an error when the response body has an unexpected shape', async () => {
       const mockFetch = createMockFetch({ status: 'ok' });
 
       await expect(
         rollback({ server: 'http://localhost:3000', name: 'app' }, mockFetch),
-      ).rejects.toThrow('서버 응답 형식이 올바르지 않습니다');
+      ).rejects.toThrow('Unexpected server response format');
     });
   });
 });

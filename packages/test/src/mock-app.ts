@@ -1,55 +1,55 @@
 import type { MfeApp } from '@esmap/shared';
 
-/** 라이프사이클 단계 이름 */
+/** Lifecycle phase name */
 type LifecyclePhase = 'bootstrap' | 'mount' | 'unmount' | 'update';
 
-/** 라이프사이클 메서드 호출을 기록하는 스파이 정보 */
+/** Spy information that records lifecycle method calls */
 export interface SpyCall {
-  /** 호출 시 전달된 인자 */
+  /** Arguments passed at invocation */
   readonly args: readonly unknown[];
-  /** 호출 시점의 타임스탬프 */
+  /** Timestamp at invocation */
   readonly timestamp: number;
 }
 
-/** 호출 추적 기능이 포함된 라이프사이클 스파이 함수 */
+/** Lifecycle spy function with call tracking capability */
 export interface LifecycleSpy {
-  /** 스파이 함수 본체. 호출하면 내부적으로 호출 기록을 남긴다. */
+  /** Spy function body. Internally records calls when invoked. */
   (...args: readonly unknown[]): Promise<void>;
-  /** 누적된 호출 기록 */
+  /** Accumulated call records */
   readonly calls: readonly SpyCall[];
-  /** 호출 횟수 */
+  /** Number of calls */
   readonly callCount: number;
-  /** 호출 기록을 초기화한다. */
+  /** Resets the call records. */
   reset(): void;
 }
 
-/** createMockApp이 반환하는 확장된 MfeApp 인터페이스 */
+/** Extended MfeApp interface returned by createMockApp */
 export interface MockMfeApp extends MfeApp {
-  /** bootstrap 호출 스파이 */
+  /** bootstrap call spy */
   readonly bootstrapSpy: LifecycleSpy;
-  /** mount 호출 스파이 */
+  /** mount call spy */
   readonly mountSpy: LifecycleSpy;
-  /** unmount 호출 스파이 */
+  /** unmount call spy */
   readonly unmountSpy: LifecycleSpy;
-  /** update 호출 스파이 */
+  /** update call spy */
   readonly updateSpy: LifecycleSpy;
 }
 
-/** createMockApp에 전달할 수 있는 오버라이드 옵션 */
+/** Override options that can be passed to createMockApp */
 export interface MockAppOverrides {
-  /** bootstrap 호출 시 실행할 커스텀 로직 */
+  /** Custom logic to execute on bootstrap call */
   readonly bootstrap?: () => Promise<void>;
-  /** mount 호출 시 실행할 커스텀 로직 */
+  /** Custom logic to execute on mount call */
   readonly mount?: (container: HTMLElement) => Promise<void>;
-  /** unmount 호출 시 실행할 커스텀 로직 */
+  /** Custom logic to execute on unmount call */
   readonly unmount?: (container: HTMLElement) => Promise<void>;
-  /** update 호출 시 실행할 커스텀 로직 */
+  /** Custom logic to execute on update call */
   readonly update?: (props: Readonly<Record<string, unknown>>) => Promise<void>;
 }
 
 /**
- * 호출 추적이 가능한 라이프사이클 스파이 함수를 생성한다.
- * @param implementation - 스파이 호출 시 실행할 구현 함수
+ * Creates a lifecycle spy function with call tracking.
+ * @param implementation - implementation function to execute when the spy is called
  */
 function createLifecycleSpy(
   implementation: (...args: readonly unknown[]) => Promise<void> = () => Promise.resolve(),
@@ -77,9 +77,9 @@ function createLifecycleSpy(
 }
 
 /**
- * 테스트용 mock MFE 앱을 생성한다.
- * 각 라이프사이클 메서드는 호출 추적이 가능한 스파이 함수로 구현된다.
- * @param overrides - 라이프사이클 메서드의 커스텀 구현
+ * Creates a mock MFE app for testing.
+ * Each lifecycle method is implemented as a spy function with call tracking.
+ * @param overrides - custom implementations for lifecycle methods
  */
 export function createMockApp(overrides?: MockAppOverrides): MockMfeApp {
   const bootstrapSpy = createLifecycleSpy(overrides?.bootstrap);
@@ -113,9 +113,9 @@ export function createMockApp(overrides?: MockAppOverrides): MockMfeApp {
 }
 
 /**
- * 특정 라이프사이클 단계에서 에러를 발생시키는 mock MFE 앱을 생성한다.
- * @param phase - 에러를 발생시킬 라이프사이클 단계
- * @param error - 발생시킬 에러 객체 (기본값: 해당 phase 이름을 포함하는 Error)
+ * Creates a mock MFE app that throws an error at a specific lifecycle phase.
+ * @param phase - lifecycle phase at which to throw the error
+ * @param error - error object to throw (default: an Error containing the phase name)
  */
 export function createFailingApp(
   phase: LifecyclePhase,

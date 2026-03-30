@@ -1,4 +1,4 @@
-/** 네비게이션 MFE — 모든 페이지에서 항상 활성화되는 GNB */
+/** Navigation MFE — always-active GNB on every page */
 
 export function bootstrap(): Promise<void> {
   console.log('[app-nav] bootstrap');
@@ -16,7 +16,7 @@ export function mount(container: HTMLElement): Promise<void> {
     </nav>
   `;
 
-  // SPA 네비게이션: <a data-link> 클릭 시 pushState 사용
+  // SPA navigation: use pushState on <a data-link> click
   container.addEventListener('click', (e) => {
     const target = e.target;
     if (target instanceof HTMLAnchorElement && target.hasAttribute('data-link')) {

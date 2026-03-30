@@ -1,6 +1,6 @@
 import { useState, useEffect, type ReactNode } from 'react';
 
-/** 대시보드 위젯 데이터 */
+/** Dashboard widget data */
 interface Widget {
   readonly id: string;
   readonly title: string;
@@ -8,15 +8,15 @@ interface Widget {
   readonly trend: 'up' | 'down' | 'stable';
 }
 
-/** 초기 위젯 데이터 */
+/** Initial widget data */
 const INITIAL_WIDGETS: readonly Widget[] = [
-  { id: 'users', title: '활성 사용자', value: 1247, trend: 'up' },
-  { id: 'revenue', title: '매출', value: 89400, trend: 'up' },
-  { id: 'orders', title: '주문', value: 342, trend: 'stable' },
-  { id: 'returns', title: '반품', value: 12, trend: 'down' },
+  { id: 'users', title: 'Active Users', value: 1247, trend: 'up' },
+  { id: 'revenue', title: 'Revenue', value: 89400, trend: 'up' },
+  { id: 'orders', title: 'Orders', value: 342, trend: 'stable' },
+  { id: 'returns', title: 'Returns', value: 12, trend: 'down' },
 ];
 
-/** 트렌드 아이콘을 반환한다 */
+/** Returns the trend icon */
 function trendIcon(trend: Widget['trend']): string {
   switch (trend) {
     case 'up':
@@ -28,7 +28,7 @@ function trendIcon(trend: Widget['trend']): string {
   }
 }
 
-/** 트렌드 색상을 반환한다 */
+/** Returns the trend color */
 function trendColor(trend: Widget['trend']): string {
   switch (trend) {
     case 'up':
@@ -40,7 +40,7 @@ function trendColor(trend: Widget['trend']): string {
   }
 }
 
-/** 위젯 카드 컴포넌트 */
+/** Widget card component */
 function WidgetCard({ widget }: { readonly widget: Widget }): ReactNode {
   return (
     <div
@@ -65,7 +65,7 @@ function WidgetCard({ widget }: { readonly widget: Widget }): ReactNode {
   );
 }
 
-/** React 대시보드 메인 컴포넌트 */
+/** React dashboard main component */
 export function Dashboard(): ReactNode {
   const [widgets] = useState<readonly Widget[]>(INITIAL_WIDGETS);
   const [mounted, setMounted] = useState(false);
@@ -91,7 +91,7 @@ export function Dashboard(): ReactNode {
     >
       <h1 style={{ margin: '0 0 8px', fontSize: '24px', fontWeight: 700 }}>React Dashboard</h1>
       <p style={{ margin: '0 0 24px', color: '#64748b', fontSize: '14px' }}>
-        @esmap/react로 마운트된 React MFE
+        React MFE mounted via @esmap/react
         {mounted && <span style={{ color: '#22c55e', marginLeft: '8px' }}>● Live</span>}
       </p>
 
@@ -111,7 +111,7 @@ export function Dashboard(): ReactNode {
           color: '#94a3b8',
         }}
       >
-        <strong style={{ color: '#f1f5f9' }}>기술 스택:</strong> React{' '}
+        <strong style={{ color: '#f1f5f9' }}>Tech Stack:</strong> React{' '}
         {/* @ts-expect-error React.version exists at runtime */}
         {typeof React !== 'undefined' ? React.version : '19'} + @esmap/react + createReactMfeApp
       </div>

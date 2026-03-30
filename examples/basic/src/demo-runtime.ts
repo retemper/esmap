@@ -1,27 +1,27 @@
 /**
- * 브라우저 런타임 데모.
- * import map 로더, 앱 레지스트리, 라우터, devtools, guard를 통합하여 보여준다.
+ * Browser runtime demo.
+ * Demonstrates the integration of import map loader, app registry, router, devtools, and guard.
  *
- * 이 파일은 직접 실행이 아닌 참조 코드로, 브라우저 환경에서 esmap 프레임워크를
- * 어떻게 사용하는지 보여준다.
+ * This file is reference code (not directly executed) showing how to use the esmap
+ * framework in a browser environment.
  */
 
-// === 1. Import Map 로딩 ===
+// === 1. Import Map Loading ===
 
 import { loadImportMap } from '@esmap/runtime';
 
-// 서버에서 import map을 가져와 DOM에 주입한다.
-// 이 함수는 <script type="importmap"> 태그를 자동 생성하고,
-// modulepreload 링크도 자동 삽입한다.
+// Fetches the import map from the server and injects it into the DOM.
+// This function auto-generates a <script type="importmap"> tag
+// and also auto-inserts modulepreload links.
 async function bootstrapImportMap() {
   const importMap = await loadImportMap({
     importMapUrl: 'https://api.flex.team/importmap',
-    // 또는 정적 import map 사용:
+    // Or use a static import map:
     // inlineImportMap: { imports: { ... } },
     injectPreload: true,
   });
 
-  console.log('Import map 로드 완료:', Object.keys(importMap.imports).length, '개 모듈');
+  console.log('Import map loaded:', Object.keys(importMap.imports).length, 'modules');
   return importMap;
 }
 
@@ -29,37 +29,37 @@ async function bootstrapImportMap() {
 
 import { applyOverrides, installDevtoolsApi, hasActiveOverrides } from '@esmap/devtools';
 
-// window.__ESMAP__에 devtools API를 등록한다.
-// 개발자가 브라우저 콘솔에서 모듈 URL을 override할 수 있다.
+// Registers devtools API on window.__ESMAP__.
+// Allows developers to override module URLs from the browser console.
 //
-// 사용 예시 (브라우저 콘솔):
+// Usage examples (browser console):
 //   __ESMAP__.override('@flex/checkout', 'http://localhost:5173/checkout.js')
-//   __ESMAP__.overrides()     // 현재 override 목록
-//   __ESMAP__.clearOverrides() // 모든 override 해제
+//   __ESMAP__.overrides()     // Current override list
+//   __ESMAP__.clearOverrides() // Clear all overrides
 installDevtoolsApi();
 
 async function loadImportMapWithOverrides() {
   const importMap = await bootstrapImportMap();
 
-  // localStorage에 저장된 override가 있으면 import map에 적용한다.
-  // 개발자가 로컬 빌드를 프로덕션 환경에서 테스트할 수 있다.
+  // Applies overrides stored in localStorage to the import map.
+  // Allows developers to test local builds in the production environment.
   if (hasActiveOverrides()) {
     const overridden = applyOverrides(importMap);
-    console.warn('[esmap] devtools override 활성화됨');
+    console.warn('[esmap] devtools overrides active');
     return overridden;
   }
 
   return importMap;
 }
 
-// === 3. 앱 등록 및 라우팅 ===
+// === 3. App Registration and Routing ===
 
 import { AppRegistry, Router } from '@esmap/runtime';
 
 const registry = new AppRegistry();
 
-// 각 MFE 앱을 등록한다.
-// activeWhen은 URL 패턴으로, 해당 패턴에 맞는 URL로 이동하면 앱이 마운트된다.
+// Register each MFE app.
+// activeWhen is a URL pattern; the app is mounted when the URL matches this pattern.
 registry.registerApp({
   name: '@flex/people',
   activeWhen: '/people',
@@ -78,20 +78,20 @@ registry.registerApp({
   container: '#app-main',
 });
 
-// GNB는 모든 페이지에서 항상 활성화
+// GNB is always active on every page
 registry.registerApp({
   name: '@flex/gnb',
   activeWhen: () => true,
   container: '#app-gnb',
 });
 
-// === 4. 성능 모니터링 ===
+// === 4. Performance Monitoring ===
 
 import { PerfTracker } from '@esmap/monitor';
 
 const perfTracker = new PerfTracker();
 
-// 앱 상태 변경을 추적하여 성능 데이터를 수집한다.
+// Tracks app status changes to collect performance data.
 registry.onStatusChange((event) => {
   if (event.to === 'LOADING') {
     perfTracker.markStart(event.appName, 'load');
@@ -105,11 +105,11 @@ registry.onStatusChange((event) => {
   }
 });
 
-// === 5. CSS 격리 ===
+// === 5. CSS Isolation ===
 
 import { applyCssScope, removeCssScope } from '@esmap/guard';
 
-// 앱이 마운트될 때 CSS 스코프를 적용하고, 언마운트 시 제거
+// Apply CSS scope when the app mounts, and remove it on unmount
 registry.onStatusChange((event) => {
   const container = document.querySelector<HTMLElement>('#app-main');
   if (!container) return;
@@ -121,20 +121,20 @@ registry.onStatusChange((event) => {
   }
 });
 
-// === 6. 전체 부팅 시퀀스 ===
+// === 6. Full Boot Sequence ===
 
 async function boot() {
-  // 1) import map 로드
+  // 1) Load import map
   await loadImportMapWithOverrides();
 
-  // 2) 라우터 시작 — 현재 URL에 맞는 앱을 자동 마운트
+  // 2) Start router — automatically mounts the app matching the current URL
   const router = new Router(registry, { mode: 'history' });
   await router.start();
 
-  // 3) 성능 요약 출력
-  console.log('[esmap] 부팅 완료');
+  // 3) Output performance summary
+  console.log('[esmap] Boot complete');
 
-  // 페이지 로드 완료 후 성능 요약
+  // Performance summary after page load completes
   window.addEventListener('load', () => {
     const summary = perfTracker.summarize();
     for (const [appName, data] of summary) {
@@ -143,5 +143,5 @@ async function boot() {
   });
 }
 
-// boot() 호출은 HTML에서 수행
+// boot() is invoked from HTML
 export { boot, registry, perfTracker };

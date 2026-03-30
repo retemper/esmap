@@ -2,9 +2,9 @@ import type { MfeAppStatus } from '@esmap/shared';
 import type { AppRegistry } from '@esmap/runtime';
 
 /**
- * 지정한 앱이 현재 MOUNTED 상태인지 확인한다.
- * @param registry - 앱 레지스트리
- * @param appName - 확인할 앱 이름
+ * Checks whether the specified app is currently in MOUNTED status.
+ * @param registry - app registry
+ * @param appName - name of the app to check
  */
 export function isAppMounted(registry: AppRegistry, appName: string): boolean {
   const app = registry.getApp(appName);
@@ -12,10 +12,10 @@ export function isAppMounted(registry: AppRegistry, appName: string): boolean {
 }
 
 /**
- * 지정한 앱이 특정 상태인지 확인한다.
- * @param registry - 앱 레지스트리
- * @param appName - 확인할 앱 이름
- * @param status - 기대하는 상태
+ * Checks whether the specified app is in a particular status.
+ * @param registry - app registry
+ * @param appName - name of the app to check
+ * @param status - expected status
  */
 export function isAppInStatus(
   registry: AppRegistry,
@@ -27,26 +27,26 @@ export function isAppInStatus(
 }
 
 /**
- * 주어진 CSS 셀렉터로 DOM에서 앱 컨테이너를 조회한다.
- * @param selector - CSS 셀렉터
+ * Queries the DOM for an app container using the given CSS selector.
+ * @param selector - CSS selector
  */
 export function getAppContainer(selector: string): HTMLElement | null {
   return document.querySelector<HTMLElement>(selector);
 }
 
-/** waitForAppStatus의 기본 타임아웃 (밀리초) */
+/** Default timeout for waitForAppStatus (milliseconds) */
 const DEFAULT_TIMEOUT_MS = 3000;
 
-/** 폴링 간격 (밀리초) */
+/** Polling interval (milliseconds) */
 const POLL_INTERVAL_MS = 50;
 
 /**
- * 앱이 특정 상태에 도달할 때까지 폴링한다.
- * 타임아웃이 초과되면 에러를 던진다.
- * @param registry - 앱 레지스트리
- * @param appName - 대기할 앱 이름
- * @param status - 기대하는 상태
- * @param timeout - 최대 대기 시간 (밀리초, 기본값: 3000)
+ * Polls until an app reaches a specific status.
+ * Throws an error if the timeout is exceeded.
+ * @param registry - app registry
+ * @param appName - name of the app to wait for
+ * @param status - expected status
+ * @param timeout - maximum wait time (milliseconds, default: 3000)
  */
 export async function waitForAppStatus(
   registry: AppRegistry,
@@ -69,7 +69,7 @@ export async function waitForAppStatus(
           const currentStatus = app?.status ?? 'NOT_REGISTERED';
           reject(
             new Error(
-              `앱 "${appName}"이 ${timeout}ms 내에 "${status}" 상태에 도달하지 못했습니다. 현재 상태: "${currentStatus}"`,
+              `App "${appName}" did not reach "${status}" status within ${timeout}ms. Current status: "${currentStatus}"`,
             ),
           );
           return;

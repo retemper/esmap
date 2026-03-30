@@ -1,102 +1,102 @@
 /**
- * 지능형 프리페치 시스템.
- * 사용자 네비게이션 패턴을 학습하여 다음에 방문할 가능성이 높은 앱을 우선 프리페치한다.
- * Garfish(ByteDance)의 intelligent preloading 패턴에서 영감을 받았다.
+ * Intelligent prefetch system.
+ * Learns user navigation patterns to prioritize prefetching apps most likely to be visited next.
+ * Inspired by Garfish (ByteDance)'s intelligent preloading pattern.
  *
- * 동작 원리:
- * 1. 사용자의 페이지 전환(from → to)을 기록한다
- * 2. 각 앱에서 다음 앱으로의 전환 빈도를 집계한다
- * 3. 현재 앱에서 가장 자주 이동하는 앱을 우선 프리페치한다
+ * How it works:
+ * 1. Records user page transitions (from -> to)
+ * 2. Aggregates transition frequency from each app to the next
+ * 3. Prioritizes prefetching the most frequently visited apps from the current app
  */
 
 import { isRecord } from '@esmap/shared';
 
-/** 네비게이션 전환 기록의 단일 항목 */
+/** A single entry in the navigation transition history */
 export interface NavigationRecord {
-  /** 출발 앱 이름 (없으면 초기 진입) */
+  /** Source app name (undefined for initial entry) */
   readonly from: string | undefined;
-  /** 도착 앱 이름 */
+  /** Destination app name */
   readonly to: string;
-  /** 전환 시각 (ms timestamp) */
+  /** Transition timestamp (ms) */
   readonly timestamp: number;
 }
 
-/** 전환 빈도 통계 */
+/** Transition frequency statistics */
 export interface TransitionStats {
-  /** 출발 앱 이름 */
+  /** Source app name */
   readonly from: string;
-  /** 도착 앱 이름 */
+  /** Destination app name */
   readonly to: string;
-  /** 전환 횟수 */
+  /** Transition count */
   readonly count: number;
-  /** 전체 전환 중 비율 (0~1) */
+  /** Ratio of total transitions (0~1) */
   readonly ratio: number;
 }
 
-/** 프리페치 우선순위 정보 */
+/** Prefetch priority information */
 export interface PrefetchPriority {
-  /** 앱 이름 */
+  /** App name */
   readonly appName: string;
-  /** 방문 확률 (0~1). 전환 빈도 기반. */
+  /** Visit probability (0~1). Based on transition frequency. */
   readonly probability: number;
 }
 
-/** 지능형 프리페치 옵션 */
+/** Intelligent prefetch options */
 export interface IntelligentPrefetchOptions {
   /**
-   * 기록할 최대 네비게이션 수. 오래된 기록은 자동 삭제된다.
-   * 기본값 200.
+   * Maximum number of navigations to record. Old records are automatically removed.
+   * Defaults to 200.
    */
   readonly maxHistory?: number;
   /**
-   * 프리페치 트리거 확률 임계값 (0~1).
-   * 이 값 이상의 전환 확률을 가진 앱만 프리페치한다.
-   * 기본값 0.1 (10%).
+   * Prefetch trigger probability threshold (0~1).
+   * Only apps with transition probability at or above this value are prefetched.
+   * Defaults to 0.1 (10%).
    */
   readonly threshold?: number;
   /**
-   * 프리페치할 최대 앱 수.
-   * 기본값 3.
+   * Maximum number of apps to prefetch.
+   * Defaults to 3.
    */
   readonly maxPrefetch?: number;
   /**
-   * localStorage 키. 브라우저 세션 간 학습 데이터를 유지한다.
-   * undefined면 세션 내에서만 유지한다.
+   * localStorage key. Persists learned data across browser sessions.
+   * If undefined, data is only kept within the session.
    */
   readonly persistKey?: string;
 }
 
-/** 지능형 프리페치 컨트롤러 */
+/** Intelligent prefetch controller */
 export interface IntelligentPrefetchController {
-  /** 네비게이션 전환을 기록한다. */
+  /** Records a navigation transition. */
   recordNavigation(from: string | undefined, to: string): void;
-  /** 현재 앱 기준으로 프리페치 우선순위를 계산한다. */
+  /** Calculates prefetch priorities based on the current app. */
   getPriorities(currentApp: string): readonly PrefetchPriority[];
-  /** 전체 전환 통계를 반환한다. */
+  /** Returns overall transition statistics. */
   getStats(): readonly TransitionStats[];
-  /** 기록된 네비게이션 수를 반환한다. */
+  /** Returns the number of recorded navigations. */
   readonly historySize: number;
-  /** 학습 데이터를 초기화한다. */
+  /** Resets all learned data. */
   reset(): void;
-  /** 학습 데이터를 localStorage에 저장한다 (persistKey가 설정된 경우). */
+  /** Saves learned data to localStorage (when persistKey is set). */
   persist(): void;
 }
 
-/** 기본 최대 기록 수 */
+/** Default maximum history size */
 const DEFAULT_MAX_HISTORY = 200;
 
-/** 기본 프리페치 임계값 */
+/** Default prefetch threshold */
 const DEFAULT_THRESHOLD = 0.1;
 
-/** 기본 최대 프리페치 앱 수 */
+/** Default maximum number of apps to prefetch */
 const DEFAULT_MAX_PREFETCH = 3;
 
 /**
- * 지능형 프리페치 컨트롤러를 생성한다.
- * 네비게이션 패턴을 학습하여 다음 방문 앱을 예측한다.
+ * Creates an intelligent prefetch controller.
+ * Learns navigation patterns to predict the next visited app.
  *
- * @param options - 지능형 프리페치 옵션
- * @returns IntelligentPrefetchController 인스턴스
+ * @param options - intelligent prefetch options
+ * @returns IntelligentPrefetchController instance
  */
 export function createIntelligentPrefetch(
   options: IntelligentPrefetchOptions = {},
@@ -108,15 +108,15 @@ export function createIntelligentPrefetch(
     persistKey,
   } = options;
 
-  /** 네비게이션 기록 */
+  /** Navigation history */
   const history: NavigationRecord[] = loadPersistedHistory(persistKey);
 
-  /** 전환 빈도 맵: "from→to" → count */
+  /** Transition frequency map: "from→to" → count */
   const transitionCounts = new Map<string, number>();
-  /** 출발별 전체 전환 횟수: "from" → totalCount */
+  /** Total transitions per source: "from" → totalCount */
   const fromTotals = new Map<string, number>();
 
-  /** 기존 기록에서 전환 카운트를 재구성한다 */
+  /** Rebuilds transition counts from existing history */
   function rebuildCounts(): void {
     transitionCounts.clear();
     fromTotals.clear();
@@ -134,7 +134,7 @@ export function createIntelligentPrefetch(
     recordNavigation(from: string | undefined, to: string): void {
       history.push({ from, to, timestamp: Date.now() });
 
-      // 최대 기록 수 초과 시 오래된 기록의 카운트를 차감 후 제거
+      // Decrement counts of old records and remove when max history is exceeded
       while (history.length > maxHistory) {
         const evicted = history.shift();
         if (evicted?.from !== undefined) {
@@ -164,7 +164,7 @@ export function createIntelligentPrefetch(
         }
       }
 
-      // 확률 내림차순 정렬 후 maxPrefetch만큼 자르기
+      // Sort by probability descending and truncate to maxPrefetch
       priorities.sort((a, b) => b.probability - a.probability);
       return priorities.slice(0, maxPrefetch);
     },
@@ -196,7 +196,7 @@ export function createIntelligentPrefetch(
         try {
           localStorage.removeItem(persistKey);
         } catch {
-          /* localStorage 접근 불가 시 무시 */
+          /* Ignore when localStorage is inaccessible */
         }
       }
     },
@@ -207,18 +207,18 @@ export function createIntelligentPrefetch(
       try {
         localStorage.setItem(persistKey, JSON.stringify(history));
       } catch {
-        /* localStorage 접근 불가 시 무시 */
+        /* Ignore when localStorage is inaccessible */
       }
     },
   };
 }
 
 /**
- * 제거된 기록의 전환 카운트를 차감한다. 0 이하가 되면 맵에서 삭제한다.
- * @param counts - 전환 빈도 맵
- * @param totals - 출발별 전체 전환 횟수 맵
- * @param from - 출발 앱
- * @param to - 도착 앱
+ * Decrements transition counts for evicted records. Removes from map when count reaches 0 or below.
+ * @param counts - transition frequency map
+ * @param totals - per-source total transitions map
+ * @param from - source app
+ * @param to - destination app
  */
 function decrementTransition(
   counts: Map<string, number>,
@@ -241,7 +241,7 @@ function decrementTransition(
   }
 }
 
-/** localStorage에서 저장된 네비게이션 기록을 불러온다 */
+/** Loads persisted navigation history from localStorage */
 function loadPersistedHistory(persistKey: string | undefined): NavigationRecord[] {
   if (!persistKey) return [];
 
@@ -256,7 +256,7 @@ function loadPersistedHistory(persistKey: string | undefined): NavigationRecord[
   }
 }
 
-/** 값이 유효한 NavigationRecord인지 확인한다 */
+/** Checks whether a value is a valid NavigationRecord */
 function isNavigationRecord(value: unknown): value is NavigationRecord {
   if (!isRecord(value)) return false;
   return typeof value.to === 'string' && typeof value.timestamp === 'number';

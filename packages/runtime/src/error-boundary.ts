@@ -1,12 +1,12 @@
-/** 에러 바운더리에서 사용하는 CSS 클래스 접두사 */
+/** CSS class prefix used by the error boundary */
 const CLASS_PREFIX = 'esmap-error-boundary';
 
 /**
- * 기본 폴백 DOM 요소를 생성한다.
- * 에러 메시지와 다시 시도 버튼을 포함한다.
- * @param _appName - 에러가 발생한 앱 이름
- * @param _error - 발생한 에러
- * @param onRetry - 다시 시도 버튼 클릭 시 호출되는 콜백
+ * Creates a default fallback DOM element.
+ * Includes an error message and a retry button.
+ * @param _appName - name of the app that encountered the error
+ * @param _error - the error that occurred
+ * @param onRetry - callback invoked when the retry button is clicked
  */
 export function createDefaultFallback(
   _appName: string,
@@ -17,10 +17,10 @@ export function createDefaultFallback(
   wrapper.className = CLASS_PREFIX;
 
   const message = document.createElement('p');
-  message.textContent = '앱을 불러올 수 없습니다';
+  message.textContent = 'Unable to load the app';
 
   const retryButton = document.createElement('button');
-  retryButton.textContent = '다시 시도';
+  retryButton.textContent = 'Retry';
   retryButton.addEventListener('click', onRetry);
 
   wrapper.appendChild(message);
@@ -30,9 +30,9 @@ export function createDefaultFallback(
 }
 
 /**
- * 컨테이너 내용을 지우고 폴백 콘텐츠를 렌더링한다.
- * @param container - 폴백을 렌더링할 대상 DOM 요소
- * @param content - 렌더링할 HTMLElement 또는 HTML 문자열
+ * Clears the container and renders fallback content.
+ * @param container - target DOM element to render the fallback into
+ * @param content - HTMLElement or HTML string to render
  */
 export function renderFallback(container: HTMLElement, content: HTMLElement | string): void {
   container.innerHTML = '';

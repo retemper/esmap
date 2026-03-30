@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { ProxySandbox, DEFAULT_ALLOW_LIST } from './proxy-sandbox';
 
 describe('ProxySandbox', () => {
-  describe('속성 격리', () => {
-    it('샌드박스 내 속성 설정이 실제 window에 영향을 주지 않는다', () => {
+  describe('property isolation', () => {
+    it('setting properties in the sandbox does not affect the real window', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -18,7 +18,7 @@ describe('ProxySandbox', () => {
       sandbox.deactivate();
     });
 
-    it('비활성 상태에서 속성 설정은 무시한다', () => {
+    it('ignores property assignments when inactive', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       const proxy = sandbox.proxy as unknown as Record<string, unknown>;
 
@@ -28,7 +28,7 @@ describe('ProxySandbox', () => {
       expect(sandbox.getModifiedProps()).toStrictEqual([]);
     });
 
-    it('여러 샌드박스가 독립적으로 동작한다', () => {
+    it('multiple sandboxes operate independently', () => {
       const sandbox1 = new ProxySandbox({ name: 'sb1' });
       const sandbox2 = new ProxySandbox({ name: 'sb2' });
 
@@ -53,7 +53,7 @@ describe('ProxySandbox', () => {
   });
 
   describe('allowList', () => {
-    it('allowList 속성은 실제 window에서 직접 읽는다', () => {
+    it('reads allowList properties directly from the real window', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -63,7 +63,7 @@ describe('ProxySandbox', () => {
       sandbox.deactivate();
     });
 
-    it('기본 allowList가 적용된다', () => {
+    it('applies the default allowList', () => {
       const expected = [
         'document',
         'location',
@@ -83,7 +83,7 @@ describe('ProxySandbox', () => {
       expect([...DEFAULT_ALLOW_LIST]).toStrictEqual(expected);
     });
 
-    it('커스텀 allowList를 설정할 수 있다', () => {
+    it('allows setting a custom allowList', () => {
       const sandbox = new ProxySandbox({
         name: 'custom',
         allowList: ['document'],
@@ -96,8 +96,8 @@ describe('ProxySandbox', () => {
     });
   });
 
-  describe('수정 추적', () => {
-    it('비활성화 후 수정된 속성 목록을 반환한다', () => {
+  describe('modification tracking', () => {
+    it('returns the list of modified properties after deactivation', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -110,7 +110,7 @@ describe('ProxySandbox', () => {
       expect(sandbox.getModifiedProps()).toStrictEqual(['__prop_a__', '__prop_b__']);
     });
 
-    it('재활성화 시 이전 수정사항을 복원한다', () => {
+    it('restores previous modifications on reactivation', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -132,8 +132,8 @@ describe('ProxySandbox', () => {
     });
   });
 
-  describe('delete 연산', () => {
-    it('delete 연산이 내부 맵에서만 동작한다', () => {
+  describe('delete operation', () => {
+    it('delete operates only on the internal map', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -149,8 +149,8 @@ describe('ProxySandbox', () => {
     });
   });
 
-  describe('has 연산', () => {
-    it('has 연산이 내부 맵과 window 모두 확인한다', () => {
+  describe('has operation', () => {
+    it('has checks both the internal map and window', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -164,7 +164,7 @@ describe('ProxySandbox', () => {
       sandbox.deactivate();
     });
 
-    it('삭제된 속성은 has에서 false를 반환한다', () => {
+    it('returns false for deleted properties in has', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -180,7 +180,7 @@ describe('ProxySandbox', () => {
   });
 
   describe('ownKeys trap', () => {
-    it('수정된 속성이 ownKeys에 포함된다', () => {
+    it('includes modified properties in ownKeys', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -193,7 +193,7 @@ describe('ProxySandbox', () => {
       sandbox.deactivate();
     });
 
-    it('삭제된 속성이 ownKeys에서 제외된다', () => {
+    it('excludes deleted properties from ownKeys', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -209,7 +209,7 @@ describe('ProxySandbox', () => {
   });
 
   describe('getOwnPropertyDescriptor trap', () => {
-    it('수정된 속성의 descriptor를 반환한다', () => {
+    it('returns the descriptor of modified properties', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -227,7 +227,7 @@ describe('ProxySandbox', () => {
       sandbox.deactivate();
     });
 
-    it('삭제된 속성의 descriptor는 undefined를 반환한다', () => {
+    it('returns undefined for the descriptor of deleted properties', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -241,7 +241,7 @@ describe('ProxySandbox', () => {
       sandbox.deactivate();
     });
 
-    it('window의 기존 속성 descriptor를 configurable로 반환한다', () => {
+    it('returns existing window property descriptors as configurable', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -254,7 +254,7 @@ describe('ProxySandbox', () => {
   });
 
   describe('defineProperty trap', () => {
-    it('활성 상태에서 defineProperty로 속성을 정의할 수 있다', () => {
+    it('can define properties via defineProperty when active', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
       sandbox.activate();
 
@@ -272,7 +272,7 @@ describe('ProxySandbox', () => {
       sandbox.deactivate();
     });
 
-    it('비활성 상태에서 defineProperty는 무시된다', () => {
+    it('ignores defineProperty when inactive', () => {
       const sandbox = new ProxySandbox({ name: 'test' });
 
       Object.defineProperty(sandbox.proxy, '__define_inactive__', {

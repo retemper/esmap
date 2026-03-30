@@ -1,19 +1,19 @@
 import type { ImportMap } from '@esmap/shared';
 
-/** localStorage에 저장되는 override 맵의 키 */
+/** Key for the override map stored in localStorage */
 const STORAGE_KEY = 'esmap:overrides';
 
-/** 개별 override 엔트리 */
+/** Individual override entry */
 export interface OverrideEntry {
-  /** 원래 specifier (예: "@flex/checkout") */
+  /** Original specifier (e.g., "@flex/checkout") */
   readonly specifier: string;
-  /** 대체할 URL (예: "http://localhost:5173/checkout.js") */
+  /** Replacement URL (e.g., "http://localhost:5173/checkout.js") */
   readonly url: string;
 }
 
 /**
- * localStorage에서 현재 override 목록을 읽는다.
- * 파싱 실패 시 빈 배열을 반환한다.
+ * Reads the current override list from localStorage.
+ * Returns an empty array on parse failure.
  */
 export function getOverrides(): readonly OverrideEntry[] {
   try {
@@ -30,9 +30,9 @@ export function getOverrides(): readonly OverrideEntry[] {
 }
 
 /**
- * override를 추가하거나 갱신한다. 동일 specifier가 있으면 URL을 덮어쓴다.
- * @param specifier - override할 모듈 specifier
- * @param url - 대체할 URL
+ * Adds or updates an override. Overwrites the URL if the same specifier exists.
+ * @param specifier - module specifier to override
+ * @param url - replacement URL
  */
 export function setOverride(specifier: string, url: string): void {
   try {
@@ -47,36 +47,36 @@ export function setOverride(specifier: string, url: string): void {
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
   } catch {
-    /* private browsing 또는 quota 초과 시 무시 */
+    /* Ignore in private browsing or quota exceeded */
   }
 }
 
 /**
- * 특정 specifier의 override를 제거한다.
- * @param specifier - 제거할 모듈 specifier
+ * Removes the override for a specific specifier.
+ * @param specifier - module specifier to remove
  */
 export function removeOverride(specifier: string): void {
   try {
     const overrides = getOverrides().filter((o) => o.specifier !== specifier);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
   } catch {
-    /* private browsing 시 무시 */
+    /* Ignore in private browsing */
   }
 }
 
-/** 모든 override를 제거한다. */
+/** Removes all overrides. */
 export function clearOverrides(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch {
-    /* private browsing 시 무시 */
+    /* Ignore in private browsing */
   }
 }
 
 /**
- * import map에 override를 적용한다. override가 있는 specifier는 URL이 대체된다.
- * @param importMap - 원본 import map
- * @returns override가 적용된 새 import map
+ * Applies overrides to an import map. Specifiers with overrides have their URLs replaced.
+ * @param importMap - original import map
+ * @returns new import map with overrides applied
  */
 export function applyOverrides(importMap: ImportMap): ImportMap {
   const overrides = getOverrides();
@@ -94,14 +94,14 @@ export function applyOverrides(importMap: ImportMap): ImportMap {
 }
 
 /**
- * 현재 override가 활성화되어 있는지 확인한다.
- * @returns override가 하나라도 있으면 true
+ * Checks whether any overrides are currently active.
+ * @returns true if at least one override exists
  */
 export function hasActiveOverrides(): boolean {
   return getOverrides().length > 0;
 }
 
-/** OverrideEntry 타입 가드 */
+/** OverrideEntry type guard */
 function isValidOverrideEntry(value: unknown): value is OverrideEntry {
   if (typeof value !== 'object' || value === null) return false;
   return (

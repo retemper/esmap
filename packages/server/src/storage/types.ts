@@ -1,21 +1,21 @@
 import type { ImportMap } from '@esmap/shared';
 
 /**
- * import map 저장소 인터페이스.
- * 구현체는 동시성 안전한 read-write를 보장해야 한다.
+ * Import map storage interface.
+ * Implementations must guarantee concurrency-safe read-write operations.
  */
 export interface ImportMapStorage {
-  /** 현재 import map을 읽는다. 없으면 null. */
+  /** Reads the current import map. Returns null if none exists. */
   read(): Promise<ImportMap | null>;
-  /** import map을 원자적으로 갱신한다. updater는 lock 내에서 실행된다. */
+  /** Atomically updates the import map. The updater runs within a lock. */
   update(updater: (current: ImportMap) => ImportMap): Promise<ImportMap>;
-  /** 배포 이력을 저장한다. */
+  /** Stores a deployment history entry. */
   appendHistory(entry: DeploymentHistoryEntry): Promise<void>;
-  /** 최근 배포 이력을 조회한다. */
+  /** Retrieves recent deployment history. */
   getHistory(limit?: number): Promise<readonly DeploymentHistoryEntry[]>;
 }
 
-/** 배포 이력 항목 */
+/** Deployment history entry */
 export interface DeploymentHistoryEntry {
   readonly timestamp: string;
   readonly service: string;

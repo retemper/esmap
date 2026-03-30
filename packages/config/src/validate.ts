@@ -1,32 +1,32 @@
 import type { EsmapConfig } from '@esmap/shared';
 import { ConfigValidationError, isRecord } from '@esmap/shared';
 
-/** 설정 필드별 검증 에러 */
+/** Validation error per config field */
 export interface ConfigFieldError {
   readonly path: string;
   readonly message: string;
 }
 
 /**
- * 설정 객체의 유효성을 검증한다. 에러 목록을 반환한다.
- * @param config - 검증할 설정 객체
+ * Validates a config object. Returns a list of errors.
+ * @param config - the config object to validate
  */
 export function validateConfig(config: unknown): readonly ConfigFieldError[] {
   const errors: ConfigFieldError[] = [];
 
   if (!isRecord(config)) {
-    errors.push({ path: '', message: '설정은 객체여야 합니다' });
+    errors.push({ path: '', message: 'Config must be an object' });
     return errors;
   }
 
   if (!isRecord(config.apps)) {
-    errors.push({ path: 'apps', message: '"apps" 필드는 필수이며 객체여야 합니다' });
+    errors.push({ path: 'apps', message: '"apps" field is required and must be an object' });
   } else {
     validateApps(config.apps, errors);
   }
 
   if (!config.shared || typeof config.shared !== 'object') {
-    errors.push({ path: 'shared', message: '"shared" 필드는 필수이며 객체여야 합니다' });
+    errors.push({ path: 'shared', message: '"shared" field is required and must be an object' });
   }
 
   if (config.server !== undefined) {
@@ -37,16 +37,16 @@ export function validateConfig(config: unknown): readonly ConfigFieldError[] {
 }
 
 /**
- * EsmapConfig 타입 가드. validateConfig가 에러 없이 통과한 값에 대해 사용한다.
- * @param config - 검증할 설정 객체
+ * EsmapConfig type guard. Used for values that pass validateConfig without errors.
+ * @param config - the config object to validate
  */
 function isEsmapConfig(config: unknown): config is EsmapConfig {
   return validateConfig(config).length === 0;
 }
 
 /**
- * 검증 에러가 없으면 설정을 타입 안전하게 반환한다. 에러가 있으면 ConfigValidationError를 던진다.
- * @param config - 검증할 설정 객체
+ * Returns the config in a type-safe manner if no validation errors exist. Throws ConfigValidationError otherwise.
+ * @param config - the config object to validate
  */
 export function assertValidConfig(config: unknown): EsmapConfig {
   const errors = validateConfig(config);
@@ -60,31 +60,31 @@ export function assertValidConfig(config: unknown): EsmapConfig {
 }
 
 /**
- * apps 필드를 검증한다.
- * @param apps - 앱 설정 맵
- * @param errors - 에러 누적 배열
+ * Validates the apps field.
+ * @param apps - app configuration map
+ * @param errors - accumulated error array
  */
 function validateApps(apps: Record<string, unknown>, errors: ConfigFieldError[]): void {
   for (const [name, appConfig] of Object.entries(apps)) {
     if (!isRecord(appConfig)) {
-      errors.push({ path: `apps.${name}`, message: '앱 설정은 객체여야 합니다' });
+      errors.push({ path: `apps.${name}`, message: 'App config must be an object' });
       continue;
     }
 
     if (typeof appConfig.path !== 'string' || appConfig.path.length === 0) {
-      errors.push({ path: `apps.${name}.path`, message: '"path"는 필수 문자열입니다' });
+      errors.push({ path: `apps.${name}.path`, message: '"path" is a required string' });
     }
   }
 }
 
 /**
- * server 필드를 검증한다.
- * @param server - 서버 설정 객체
- * @param errors - 에러 누적 배열
+ * Validates the server field.
+ * @param server - server configuration object
+ * @param errors - accumulated error array
  */
 function validateServer(server: unknown, errors: ConfigFieldError[]): void {
   if (!isRecord(server)) {
-    errors.push({ path: 'server', message: '"server"는 객체여야 합니다' });
+    errors.push({ path: 'server', message: '"server" must be an object' });
     return;
   }
 
@@ -92,7 +92,7 @@ function validateServer(server: unknown, errors: ConfigFieldError[]): void {
     server.port !== undefined &&
     (typeof server.port !== 'number' || server.port < 0 || server.port > 65535)
   ) {
-    errors.push({ path: 'server.port', message: '포트는 0~65535 사이의 숫자여야 합니다' });
+    errors.push({ path: 'server.port', message: 'Port must be a number between 0 and 65535' });
   }
 
   if (server.storage !== undefined) {
@@ -100,7 +100,7 @@ function validateServer(server: unknown, errors: ConfigFieldError[]): void {
     if (typeof server.storage !== 'string' || !validStorages.includes(server.storage)) {
       errors.push({
         path: 'server.storage',
-        message: `storage는 ${validStorages.join(', ')} 중 하나여야 합니다`,
+        message: `storage must be one of ${validStorages.join(', ')}`,
       });
     }
   }

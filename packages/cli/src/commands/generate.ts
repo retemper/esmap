@@ -5,23 +5,23 @@ import type { GenerateInput } from '../generate/generate-import-map.js';
 import type { EsmapConfig, MfeManifest, SharedDependencyManifest } from '@esmap/shared';
 import { assertValidConfig } from '@esmap/config';
 
-/** 파일 읽기 함수의 타입 (테스트 주입용) */
+/** File read function type (for test injection) */
 type ReadFileFn = (path: string, encoding: BufferEncoding) => Promise<string | Buffer>;
 
-/** 파일 쓰기 함수의 타입 (테스트 주입용) */
+/** File write function type (for test injection) */
 type WriteFileFn = (path: string, data: string, encoding: BufferEncoding) => Promise<void>;
 
-/** generate 커맨드의 옵션 */
+/** Options for the generate command */
 export interface GenerateOptions {
-  /** 설정 파일 경로 */
+  /** Config file path */
   readonly config: string;
-  /** 출력 파일 경로 (미지정 시 stdout) */
+  /** Output file path (defaults to stdout if not specified) */
   readonly out?: string;
 }
 
 /**
- * 플래그 맵에서 GenerateOptions를 추출한다.
- * @param flags - 파싱된 CLI 플래그
+ * Extracts GenerateOptions from the flag map.
+ * @param flags - parsed CLI flags
  */
 export function parseGenerateFlags(flags: Readonly<Record<string, string>>): GenerateOptions {
   return {
@@ -31,10 +31,10 @@ export function parseGenerateFlags(flags: Readonly<Record<string, string>>): Gen
 }
 
 /**
- * 앱 설정에서 매니페스트 파일을 탐색하여 로드한다.
- * @param config - esmap 설정
- * @param basePath - 설정 파일 기준 디렉토리
- * @param readFn - 파일 읽기 함수
+ * Discovers and loads manifest files from the app configuration.
+ * @param config - esmap config
+ * @param basePath - base directory relative to the config file
+ * @param readFn - file read function
  */
 export async function discoverManifests(
   config: EsmapConfig,
@@ -55,7 +55,7 @@ export async function discoverManifests(
         manifests[appName] = parsed;
       }
     } catch {
-      // 매니페스트 파일이 없으면 건너뛴다
+      // Skip if the manifest file does not exist
     }
   }
 
@@ -63,10 +63,10 @@ export async function discoverManifests(
 }
 
 /**
- * 공유 의존성 매니페스트를 탐색하여 로드한다.
- * @param config - esmap 설정
- * @param basePath - 설정 파일 기준 디렉토리
- * @param readFn - 파일 읽기 함수
+ * Discovers and loads shared dependency manifests.
+ * @param config - esmap config
+ * @param basePath - base directory relative to the config file
+ * @param readFn - file read function
  */
 export async function discoverSharedManifests(
   config: EsmapConfig,
@@ -87,7 +87,7 @@ export async function discoverSharedManifests(
         manifests[name] = parsed;
       }
     } catch {
-      // 매니페스트 파일이 없으면 건너뛴다
+      // Skip if the manifest file does not exist
     }
   }
 
@@ -95,10 +95,10 @@ export async function discoverSharedManifests(
 }
 
 /**
- * 설정과 매니페스트로부터 import map을 생성하고 출력한다.
- * @param options - generate 옵션
- * @param readFileFn - 파일 읽기 함수 (테스트 주입용)
- * @param writeFileFn - 파일 쓰기 함수 (테스트 주입용)
+ * Generates an import map from config and manifests, then outputs the result.
+ * @param options - generate options
+ * @param readFileFn - file read function (for test injection)
+ * @param writeFileFn - file write function (for test injection)
  */
 export async function generate(
   options: GenerateOptions,
@@ -138,8 +138,8 @@ export async function generate(
 }
 
 /**
- * generate 커맨드를 실행한다.
- * @param flags - 파싱된 CLI 플래그
+ * Runs the generate command.
+ * @param flags - parsed CLI flags
  */
 export async function runGenerate(flags: Readonly<Record<string, string>>): Promise<void> {
   const options = parseGenerateFlags(flags);
@@ -147,8 +147,8 @@ export async function runGenerate(flags: Readonly<Record<string, string>>): Prom
 }
 
 /**
- * 값이 MfeManifest 구조를 만족하는지 확인한다.
- * @param value - 검증할 값
+ * Checks whether a value satisfies the MfeManifest structure.
+ * @param value - value to validate
  */
 function isMfeManifest(value: unknown): value is MfeManifest {
   if (typeof value !== 'object' || value === null) return false;
@@ -165,8 +165,8 @@ function isMfeManifest(value: unknown): value is MfeManifest {
 }
 
 /**
- * 값이 SharedDependencyManifest 구조를 만족하는지 확인한다.
- * @param value - 검증할 값
+ * Checks whether a value satisfies the SharedDependencyManifest structure.
+ * @param value - value to validate
  */
 function isSharedDependencyManifest(value: unknown): value is SharedDependencyManifest {
   if (typeof value !== 'object' || value === null) return false;
@@ -180,7 +180,7 @@ function isSharedDependencyManifest(value: unknown): value is SharedDependencyMa
   );
 }
 
-/** generate 커맨드의 도움말 텍스트 */
+/** Help text for the generate command */
 export const GENERATE_HELP = `Usage: esmap generate [options]
 
 Options:

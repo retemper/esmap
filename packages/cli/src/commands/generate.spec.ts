@@ -3,9 +3,9 @@ import { parseGenerateFlags, generate } from './generate.js';
 import type { GenerateOptions } from './generate.js';
 import { resolve, dirname } from 'node:path';
 
-describe('generate 커맨드', () => {
+describe('generate command', () => {
   describe('parseGenerateFlags', () => {
-    it('config 플래그가 없으면 기본값을 사용한다', () => {
+    it('uses default value when config flag is missing', () => {
       const result = parseGenerateFlags({});
 
       expect(result).toStrictEqual({
@@ -14,7 +14,7 @@ describe('generate 커맨드', () => {
       });
     });
 
-    it('config과 out 플래그를 파싱한다', () => {
+    it('parses config and out flags', () => {
       const result = parseGenerateFlags({
         config: './my-config.json',
         out: './dist/importmap.json',
@@ -28,7 +28,7 @@ describe('generate 커맨드', () => {
   });
 
   describe('generate', () => {
-    /** 테스트용 설정 파일 내용 */
+    /** Test config file content */
     const testConfig = JSON.stringify({
       apps: {
         '@flex/checkout': { path: 'apps/checkout' },
@@ -39,7 +39,7 @@ describe('generate 커맨드', () => {
       cdnBase: 'https://cdn.flex.team',
     });
 
-    /** 테스트용 매니페스트 파일 내용 */
+    /** Test manifest file content */
     const testManifest = JSON.stringify({
       name: '@flex/checkout',
       version: '1.0.0',
@@ -49,7 +49,7 @@ describe('generate 커맨드', () => {
       modulepreload: ['checkout-abc123.js'],
     });
 
-    it('설정과 매니페스트를 읽어 import map JSON을 생성한다', async () => {
+    it('reads config and manifests to generate import map JSON', async () => {
       const configPath = resolve('/tmp/esmap.config.json');
       const basePath = dirname(configPath);
       const manifestPath = resolve(basePath, 'apps/checkout/manifest.json');
@@ -78,7 +78,7 @@ describe('generate 커맨드', () => {
       consoleSpy.mockRestore();
     });
 
-    it('--out 옵션이 있으면 파일에 기록한다', async () => {
+    it('writes to a file when --out option is provided', async () => {
       const configPath = resolve('/tmp/esmap.config.json');
 
       const mockReadFile = vi.fn().mockImplementation((path: string) => {
@@ -111,7 +111,7 @@ describe('generate 커맨드', () => {
       consoleSpy.mockRestore();
     });
 
-    it('설정 파일이 유효하지 않으면 에러를 던진다', async () => {
+    it('throws an error when the config file is invalid', async () => {
       const configPath = resolve('/tmp/invalid.json');
 
       const mockReadFile = vi.fn().mockResolvedValue('null');
@@ -122,7 +122,7 @@ describe('generate 커맨드', () => {
       ).rejects.toThrow('Invalid config file');
     });
 
-    it('매니페스트가 없는 앱은 건너뛰고 나머지를 생성한다', async () => {
+    it('skips apps without manifests and generates the rest', async () => {
       const configPath = resolve('/tmp/esmap.config.json');
 
       const mockReadFile = vi.fn().mockImplementation((path: string) => {

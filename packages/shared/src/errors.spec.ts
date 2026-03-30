@@ -13,12 +13,12 @@ import {
 } from './errors.js';
 
 describe('EsmapError', () => {
-  it('코드, 메시지, cause를 가진다', () => {
-    const cause = new Error('원인');
-    const error = new EsmapError('TEST_CODE', '테스트 메시지', cause);
+  it('has code, message, and cause', () => {
+    const cause = new Error('cause');
+    const error = new EsmapError('TEST_CODE', 'test message', cause);
 
     expect(error.code).toBe('TEST_CODE');
-    expect(error.message).toBe('테스트 메시지');
+    expect(error.message).toBe('test message');
     expect(error.cause).toBe(cause);
     expect(error.name).toBe('EsmapError');
     expect(error).toBeInstanceOf(Error);
@@ -26,8 +26,8 @@ describe('EsmapError', () => {
 });
 
 describe('ImportMapError', () => {
-  it('IMPORT_MAP_ERROR 코드를 가진다', () => {
-    const error = new ImportMapError('파싱 실패');
+  it('has IMPORT_MAP_ERROR code', () => {
+    const error = new ImportMapError('parsing failed');
     expect(error.code).toBe('IMPORT_MAP_ERROR');
     expect(error.name).toBe('ImportMapError');
     expect(error).toBeInstanceOf(EsmapError);
@@ -35,7 +35,7 @@ describe('ImportMapError', () => {
 });
 
 describe('ImportMapConflictError', () => {
-  it('충돌한 specifier를 포함한다', () => {
+  it('includes the conflicting specifier', () => {
     const error = new ImportMapConflictError('react');
     expect(error.specifier).toBe('react');
     expect(error.code).toBe('IMPORT_MAP_CONFLICT');
@@ -44,7 +44,7 @@ describe('ImportMapConflictError', () => {
 });
 
 describe('ManifestValidationError', () => {
-  it('검증 에러 목록을 포함한다', () => {
+  it('includes the list of validation errors', () => {
     const errors = ['"name" is required', '"version" is required'];
     const error = new ManifestValidationError(errors);
     expect(error.validationErrors).toStrictEqual(errors);
@@ -53,8 +53,8 @@ describe('ManifestValidationError', () => {
 });
 
 describe('ConfigValidationError', () => {
-  it('경로별 에러 목록을 포함한다', () => {
-    const errors = [{ path: 'apps', message: '필수' }];
+  it('includes error list by path', () => {
+    const errors = [{ path: 'apps', message: 'required' }];
     const error = new ConfigValidationError(errors);
     expect(error.validationErrors).toStrictEqual(errors);
     expect(error.message).toContain('apps');
@@ -62,8 +62,8 @@ describe('ConfigValidationError', () => {
 });
 
 describe('AppLifecycleError', () => {
-  it('앱 이름과 페이즈를 포함한다', () => {
-    const cause = new Error('네트워크 에러');
+  it('includes the app name and phase', () => {
+    const cause = new Error('network error');
     const error = new AppLifecycleError('@flex/checkout', 'load', cause);
     expect(error.appName).toBe('@flex/checkout');
     expect(error.phase).toBe('load');
@@ -72,14 +72,14 @@ describe('AppLifecycleError', () => {
     expect(error.message).toContain('load');
   });
 
-  it('cause 없이도 생성 가능하다', () => {
+  it('can be created without a cause', () => {
     const error = new AppLifecycleError('@flex/checkout', 'mount');
     expect(error.cause).toBeUndefined();
   });
 });
 
 describe('AppNotFoundError', () => {
-  it('앱 이름을 포함한다', () => {
+  it('includes the app name', () => {
     const error = new AppNotFoundError('@flex/checkout');
     expect(error.appName).toBe('@flex/checkout');
     expect(error.code).toBe('APP_NOT_FOUND');
@@ -87,7 +87,7 @@ describe('AppNotFoundError', () => {
 });
 
 describe('AppAlreadyRegisteredError', () => {
-  it('앱 이름을 포함한다', () => {
+  it('includes the app name', () => {
     const error = new AppAlreadyRegisteredError('@flex/checkout');
     expect(error.appName).toBe('@flex/checkout');
     expect(error.code).toBe('APP_ALREADY_REGISTERED');
@@ -95,7 +95,7 @@ describe('AppAlreadyRegisteredError', () => {
 });
 
 describe('ContainerNotFoundError', () => {
-  it('셀렉터를 포함한다', () => {
+  it('includes the selector', () => {
     const error = new ContainerNotFoundError('#app');
     expect(error.selector).toBe('#app');
     expect(error.code).toBe('CONTAINER_NOT_FOUND');
@@ -103,8 +103,8 @@ describe('ContainerNotFoundError', () => {
 });
 
 describe('ImportMapLoadError', () => {
-  it('URL과 상태 코드를 포함한다', () => {
-    const error = new ImportMapLoadError('로드 실패', {
+  it('includes the URL and status code', () => {
+    const error = new ImportMapLoadError('load failed', {
       url: 'https://api.example.com/importmap',
       status: 500,
     });
@@ -113,8 +113,8 @@ describe('ImportMapLoadError', () => {
     expect(error.code).toBe('IMPORT_MAP_LOAD_ERROR');
   });
 
-  it('옵션 없이도 생성 가능하다', () => {
-    const error = new ImportMapLoadError('필수 옵션 누락');
+  it('can be created without options', () => {
+    const error = new ImportMapLoadError('missing required options');
     expect(error.url).toBeUndefined();
     expect(error.status).toBeUndefined();
   });

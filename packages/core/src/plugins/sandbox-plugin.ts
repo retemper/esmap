@@ -1,29 +1,29 @@
 /**
- * JavaScript 샌드박스 플러그인.
- * 앱 mount 시 ProxySandbox를 자동으로 활성화하고, unmount 시 비활성화한다.
- * window 속성 변경을 앱별로 격리하여 전역 오염을 방지한다.
+ * JavaScript sandbox plugin.
+ * Automatically activates ProxySandbox on app mount and deactivates on unmount.
+ * Isolates window property modifications per app to prevent global pollution.
  */
 
 import { ProxySandbox } from '@esmap/sandbox';
 import type { EsmapPlugin, PluginContext, PluginCleanup } from '../plugin.js';
 
-/** sandbox 플러그인 옵션 */
+/** Sandbox plugin options */
 export interface SandboxPluginOptions {
-  /** Proxy sandbox의 allowList. 기본값은 ProxySandbox 기본값을 사용한다. */
+  /** Proxy sandbox allowList. Uses ProxySandbox defaults if not specified. */
   readonly allowList?: readonly PropertyKey[];
   /**
-   * 샌드박싱을 적용하지 않을 앱 이름 목록.
-   * 호스트 앱이나 신뢰된 앱은 제외할 수 있다.
+   * List of app names to exclude from sandboxing.
+   * Host apps or trusted apps can be excluded.
    */
   readonly exclude?: readonly string[];
 }
 
 /**
- * JavaScript 샌드박스 플러그인을 생성한다.
- * 앱 mount 시 ProxySandbox를 활성화하고, unmount 시 비활성화한다.
+ * Creates a JavaScript sandbox plugin.
+ * Activates ProxySandbox on app mount and deactivates on unmount.
  *
- * @param options - sandbox 플러그인 옵션
- * @returns EsmapPlugin 인스턴스
+ * @param options - sandbox plugin options
+ * @returns EsmapPlugin instance
  */
 export function sandboxPlugin(options: SandboxPluginOptions = {}): EsmapPlugin {
   const { allowList, exclude = [] } = options;

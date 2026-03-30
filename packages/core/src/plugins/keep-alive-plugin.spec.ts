@@ -5,7 +5,7 @@ import type { PluginContext } from '../plugin.js';
 import { AppRegistry, Router, createLifecycleHooks, createPrefetch } from '@esmap/runtime';
 import { PerfTracker } from '@esmap/monitor';
 
-/** 테스트용 PluginContext를 생성한다 */
+/** Creates a PluginContext for testing */
 function createTestContext(): PluginContext & { registry: AppRegistry } {
   const registry = new AppRegistry();
   const router = new Router(registry);
@@ -21,12 +21,12 @@ describe('keepAlivePlugin', () => {
     document.body.innerHTML = '<div id="app-a"></div><div id="app-b"></div><div id="app-c"></div>';
   });
 
-  it('플러그인 이름이 esmap:keep-alive이다', () => {
+  it('has plugin name esmap:keep-alive', () => {
     const plugin = keepAlivePlugin({ apps: [] });
     expect(plugin.name).toBe('esmap:keep-alive');
   });
 
-  it('지정된 앱에 keep-alive를 설정한다', () => {
+  it('sets keep-alive on specified apps', () => {
     const ctx = createTestContext();
     ctx.registry.registerApp({ name: 'app-a', activeWhen: '/', container: '#app-a' });
 
@@ -36,7 +36,7 @@ describe('keepAlivePlugin', () => {
     expect(ctx.registry.isKeepAlive('app-a')).toBe(true);
   });
 
-  it('cleanup 시 keep-alive 설정이 해제된다', () => {
+  it('removes keep-alive settings during cleanup', () => {
     const ctx = createTestContext();
     ctx.registry.registerApp({ name: 'app-a', activeWhen: '/', container: '#app-a' });
 

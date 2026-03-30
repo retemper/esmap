@@ -4,8 +4,8 @@ import { esmapManifest, esmapCssScope } from '@esmap/vite-plugin';
 import { mfeDevExternals } from '../_shared/dev-externals-plugin.js';
 
 /**
- * Team Directory MFE 빌드 설정.
- * keepAlive 상태 보존 + MFE 내부 레이지 서브모듈 시연.
+ * Team Directory MFE build configuration.
+ * keepAlive state preservation + lazy sub-module within MFE demonstration.
  */
 export default defineConfig(({ command }) => ({
   root: __dirname,

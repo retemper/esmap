@@ -3,8 +3,8 @@ import { ManifestValidationError } from '../errors.js';
 import { isRecord } from './type-guards.js';
 
 /**
- * MFE 매니페스트 JSON을 파싱하고 유효성을 검증한다.
- * @param json - 매니페스트 JSON 문자열
+ * Parses and validates an MFE manifest JSON.
+ * @param json - manifest JSON string
  */
 export function parseManifest(json: string): MfeManifest {
   const parsed: unknown = JSON.parse(json);
@@ -12,8 +12,8 @@ export function parseManifest(json: string): MfeManifest {
 }
 
 /**
- * 매니페스트 객체의 유효성을 검증한다.
- * @param value - 검증할 값
+ * Validates a manifest object.
+ * @param value - value to validate
  */
 export function validateManifest(value: unknown): MfeManifest {
   if (!isRecord(value)) {
@@ -68,17 +68,17 @@ export function validateManifest(value: unknown): MfeManifest {
 }
 
 /**
- * unknown 값을 string 배열로 변환한다. 사전에 Array.isArray 검증이 완료된 값에만 사용한다.
- * @param value - 배열로 검증된 unknown 값
+ * Converts an unknown value to a string array. Only use on values already validated by Array.isArray.
+ * @param value - unknown value verified to be an array
  */
 function toStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.map(String) : [];
 }
 
 /**
- * 검증을 통과한 값으로부터 MfeManifest를 안전하게 구성한다.
- * @param value - 검증 완료된 Record
- * @param deps - 검증 완료된 dependencies Record
+ * Safely constructs an MfeManifest from validated values.
+ * @param value - validated Record
+ * @param deps - validated dependencies Record
  */
 function buildValidatedManifest(
   value: Record<string, unknown>,
@@ -99,10 +99,10 @@ function buildValidatedManifest(
 }
 
 /**
- * 매니페스트에서 CDN URL을 생성한다.
- * @param manifest - MFE 매니페스트
- * @param cdnBase - CDN 기본 URL (예: "https://cdn.flex.team")
- * @param appPath - 앱 경로 prefix (예: "apps/checkout")
+ * Generates CDN URLs from a manifest.
+ * @param manifest - MFE manifest
+ * @param cdnBase - CDN base URL (e.g., "https://cdn.flex.team")
+ * @param appPath - app path prefix (e.g., "apps/checkout")
  */
 export function resolveManifestUrls(
   manifest: MfeManifest,

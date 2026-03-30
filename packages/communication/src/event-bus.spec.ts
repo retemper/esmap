@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createEventBus } from './event-bus.js';
 
 describe('createEventBus', () => {
-  it('emit/on 기본 동작으로 이벤트를 발행하고 수신한다', () => {
+  it('emits and receives events with basic emit/on behavior', () => {
     const bus = createEventBus();
     const handler = vi.fn();
 
@@ -13,7 +13,7 @@ describe('createEventBus', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
-  it('once는 한 번만 호출된다', () => {
+  it('once is called only once', () => {
     const bus = createEventBus();
     const handler = vi.fn();
 
@@ -25,7 +25,7 @@ describe('createEventBus', () => {
     expect(handler).toHaveBeenCalledWith('first');
   });
 
-  it('unsubscribe 함수로 구독을 해제한다', () => {
+  it('unsubscribes using the unsubscribe function', () => {
     const bus = createEventBus();
     const handler = vi.fn();
 
@@ -38,7 +38,7 @@ describe('createEventBus', () => {
     expect(handler).toHaveBeenCalledWith('before');
   });
 
-  it('off로 특정 이벤트의 모든 리스너를 제거한다', () => {
+  it('removes all listeners for a specific event with off', () => {
     const bus = createEventBus();
     const handler1 = vi.fn();
     const handler2 = vi.fn();
@@ -52,7 +52,7 @@ describe('createEventBus', () => {
     expect(handler2).not.toHaveBeenCalled();
   });
 
-  it('clear로 모든 리스너를 제거한다', () => {
+  it('removes all listeners with clear', () => {
     const bus = createEventBus();
     const handler1 = vi.fn();
     const handler2 = vi.fn();
@@ -67,7 +67,7 @@ describe('createEventBus', () => {
     expect(handler2).not.toHaveBeenCalled();
   });
 
-  it('getHistory로 이벤트 이력을 조회한다', () => {
+  it('retrieves event history with getHistory', () => {
     const bus = createEventBus();
 
     bus.emit('a', 1);
@@ -79,7 +79,7 @@ describe('createEventBus', () => {
     expect(history[1]).toStrictEqual(expect.objectContaining({ event: 'b', payload: 2 }));
   });
 
-  it('maxHistory를 초과하면 오래된 이력이 삭제된다', () => {
+  it('deletes old history entries when maxHistory is exceeded', () => {
     const bus = createEventBus({ maxHistory: 3 });
 
     bus.emit('e', 1);
@@ -93,7 +93,7 @@ describe('createEventBus', () => {
     expect(history[2]).toStrictEqual(expect.objectContaining({ payload: 4 }));
   });
 
-  it('listenerCount가 정확한 수를 반환한다', () => {
+  it('returns the correct count from listenerCount', () => {
     const bus = createEventBus();
 
     expect(bus.listenerCount('test')).toBe(0);
@@ -106,13 +106,13 @@ describe('createEventBus', () => {
     expect(bus.listenerCount('test')).toBe(1);
   });
 
-  it('이벤트 없이 emit해도 에러가 없다', () => {
+  it('does not throw when emitting with no listeners', () => {
     const bus = createEventBus();
 
     expect(() => bus.emit('nonexistent', 'data')).not.toThrow();
   });
 
-  it('payload 없이 emit할 수 있다', () => {
+  it('can emit without a payload', () => {
     const bus = createEventBus();
     const handler = vi.fn();
 
@@ -122,7 +122,7 @@ describe('createEventBus', () => {
     expect(handler).toHaveBeenCalledWith(undefined);
   });
 
-  it('여러 리스너가 등록 순서대로 호출된다', () => {
+  it('calls multiple listeners in registration order', () => {
     const bus = createEventBus();
     const callOrder: Array<number> = [];
 
@@ -134,7 +134,7 @@ describe('createEventBus', () => {
     expect(callOrder).toStrictEqual([1, 2, 3]);
   });
 
-  it('getHistory에 event 인자를 전달하면 해당 이벤트만 필터한다', () => {
+  it('filters by event when passing an event argument to getHistory', () => {
     const bus = createEventBus();
 
     bus.emit('a', 1);
@@ -147,7 +147,7 @@ describe('createEventBus', () => {
     expect(filtered[1]).toStrictEqual(expect.objectContaining({ event: 'a', payload: 3 }));
   });
 
-  it('once의 unsubscribe를 emit 전에 호출하면 핸들러가 호출되지 않는다', () => {
+  it('does not call handler if once unsubscribe is called before emit', () => {
     const bus = createEventBus();
     const handler = vi.fn();
 
@@ -158,11 +158,11 @@ describe('createEventBus', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  describe('핸들러 에러 격리', () => {
-    it('핸들러가 에러를 던져도 다른 핸들러는 실행된다', () => {
+  describe('handler error isolation', () => {
+    it('other handlers still execute even when a handler throws', () => {
       const bus = createEventBus();
       const handler1 = vi.fn(() => {
-        throw new Error('핸들러 에러');
+        throw new Error('handler error');
       });
       const handler2 = vi.fn();
 
@@ -174,10 +174,10 @@ describe('createEventBus', () => {
       expect(handler2).toHaveBeenCalled();
     });
 
-    it('onHandlerError 콜백에 에러 정보가 전달된다', () => {
+    it('passes error information to onHandlerError callback', () => {
       const onHandlerError = vi.fn();
       const bus = createEventBus({ onHandlerError });
-      const error = new Error('핸들러 에러');
+      const error = new Error('handler error');
 
       bus.on('test', () => {
         throw error;
@@ -187,15 +187,15 @@ describe('createEventBus', () => {
       expect(onHandlerError).toHaveBeenCalledWith('test', error);
     });
 
-    it('여러 핸들러에서 에러가 발생해도 모든 에러가 보고된다', () => {
+    it('reports all errors even when multiple handlers throw', () => {
       const onHandlerError = vi.fn();
       const bus = createEventBus({ onHandlerError });
 
       bus.on('test', () => {
-        throw new Error('에러1');
+        throw new Error('error1');
       });
       bus.on('test', () => {
-        throw new Error('에러2');
+        throw new Error('error2');
       });
       bus.emit('test', 'data');
 
@@ -203,8 +203,8 @@ describe('createEventBus', () => {
     });
   });
 
-  describe('와일드카드 구독 (onAny)', () => {
-    it('패턴에 매칭되는 모든 이벤트를 수신한다', () => {
+  describe('wildcard subscription (onAny)', () => {
+    it('receives all events matching the pattern', () => {
       const bus = createEventBus();
       const handler = vi.fn();
 
@@ -218,7 +218,7 @@ describe('createEventBus', () => {
       expect(handler).toHaveBeenNthCalledWith(2, { name: 'nav' });
     });
 
-    it('구독 해제 함수로 와일드카드 리스너를 제거한다', () => {
+    it('removes wildcard listeners with the unsubscribe function', () => {
       const bus = createEventBus();
       const handler = vi.fn();
 
@@ -230,7 +230,7 @@ describe('createEventBus', () => {
       expect(handler).toHaveBeenCalledTimes(1);
     });
 
-    it('clear()가 와일드카드 리스너도 제거한다', () => {
+    it('clear() also removes wildcard listeners', () => {
       const bus = createEventBus();
       const handler = vi.fn();
 
@@ -242,8 +242,8 @@ describe('createEventBus', () => {
     });
   });
 
-  describe('이벤트 이력 재생 (replay)', () => {
-    it('replay 옵션으로 구독하면 이전 이력이 재생된다', () => {
+  describe('event history replay', () => {
+    it('replays previous history when subscribing with replay option', () => {
       const bus = createEventBus();
 
       bus.emit('data', { id: 1 });
@@ -257,7 +257,7 @@ describe('createEventBus', () => {
       expect(handler).toHaveBeenNthCalledWith(2, { id: 2 });
     });
 
-    it('replay 없이 구독하면 이전 이력을 받지 않는다', () => {
+    it('does not receive previous history when subscribing without replay', () => {
       const bus = createEventBus();
 
       bus.emit('data', { id: 1 });
@@ -268,7 +268,7 @@ describe('createEventBus', () => {
       expect(handler).not.toHaveBeenCalled();
     });
 
-    it('다른 이벤트의 이력은 재생하지 않는다', () => {
+    it('does not replay history from other events', () => {
       const bus = createEventBus();
 
       bus.emit('event-a', 1);
@@ -282,11 +282,11 @@ describe('createEventBus', () => {
     });
   });
 
-  describe('Request-Response 패턴', () => {
-    it('request로 이벤트를 발행하고 응답을 받는다', async () => {
+  describe('Request-Response pattern', () => {
+    it('emits an event and receives a response with request', async () => {
       const bus = createEventBus();
 
-      // 응답자 등록
+      // Register responder
       bus.on('getData', (payload) => {
         bus.emit('getData:response', { result: `data for ${payload}` });
       });
@@ -296,20 +296,20 @@ describe('createEventBus', () => {
       expect(response).toStrictEqual({ result: 'data for user-123' });
     });
 
-    it('타임아웃 내에 응답이 없으면 에러가 발생한다', async () => {
+    it('throws an error if no response within timeout', async () => {
       const bus = createEventBus({ defaultRequestTimeout: 50 });
 
-      // 응답자 없음
-      await expect(bus.request('noResponder', 'data')).rejects.toThrow('타임아웃');
+      // No responder
+      await expect(bus.request('noResponder', 'data')).rejects.toThrow('timed out');
     });
 
-    it('커스텀 타임아웃을 지정할 수 있다', async () => {
+    it('can specify a custom timeout', async () => {
       const bus = createEventBus();
 
-      await expect(bus.request('noResponder', 'data', 50)).rejects.toThrow('타임아웃');
+      await expect(bus.request('noResponder', 'data', 50)).rejects.toThrow('timed out');
     });
 
-    it('응답 후 response 리스너가 자동으로 해제된다', async () => {
+    it('automatically removes response listener after response', async () => {
       const bus = createEventBus();
 
       bus.on('ping', () => {
@@ -318,13 +318,13 @@ describe('createEventBus', () => {
 
       await bus.request('ping');
 
-      // 응답 후에는 response 리스너가 없어야 함
+      // After response, there should be no response listeners
       expect(bus.listenerCount('ping:response')).toBe(0);
     });
   });
 
-  describe('타입 안전한 이벤트 맵', () => {
-    it('타입이 지정된 이벤트 버스에서 emit/on이 정상 동작한다', () => {
+  describe('type-safe event map', () => {
+    it('emit/on works correctly with a typed event bus', () => {
       type AppEvents = {
         'user:login': { userId: string };
         'cart:update': { items: number };
@@ -339,7 +339,7 @@ describe('createEventBus', () => {
       expect(handler).toHaveBeenCalledWith({ userId: '123' });
     });
 
-    it('타입이 지정된 이벤트 버스의 이력에서 타입이 보존된다', () => {
+    it('preserves types in the history of a typed event bus', () => {
       type Events = {
         ping: { ts: number };
       };

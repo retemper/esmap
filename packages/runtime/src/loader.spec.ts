@@ -10,7 +10,7 @@ describe('loadImportMap', () => {
     vi.restoreAllMocks();
   });
 
-  it('인라인 import map을 DOM에 주입한다', async () => {
+  it('injects inline import map into the DOM', async () => {
     const importMap: ImportMap = {
       imports: { react: 'https://cdn.example.com/react.js' },
     };
@@ -24,7 +24,7 @@ describe('loadImportMap', () => {
     expect(JSON.parse(script!.textContent!)).toStrictEqual(importMap);
   });
 
-  it('이미 import map이 있으면 새로 주입하지 않는다', async () => {
+  it('does not inject a new import map when one already exists', async () => {
     const existing = document.createElement('script');
     existing.type = 'importmap';
     existing.textContent = '{"imports":{}}';
@@ -40,7 +40,7 @@ describe('loadImportMap', () => {
     expect(scripts).toHaveLength(1);
   });
 
-  it('modulepreload 링크를 자동 주입한다', async () => {
+  it('automatically injects modulepreload links', async () => {
     const importMap: ImportMap = {
       imports: {
         react: 'https://cdn.example.com/react.js',
@@ -54,7 +54,7 @@ describe('loadImportMap', () => {
     expect(preloads).toHaveLength(2);
   });
 
-  it('injectPreload: false이면 preload 링크를 주입하지 않는다', async () => {
+  it('does not inject preload links when injectPreload is false', async () => {
     const importMap: ImportMap = {
       imports: { react: 'https://cdn.example.com/react.js' },
     };
@@ -65,7 +65,7 @@ describe('loadImportMap', () => {
     expect(preloads).toHaveLength(0);
   });
 
-  it('이미 존재하는 preload 링크는 중복 생성하지 않는다', async () => {
+  it('does not create duplicate preload links that already exist', async () => {
     const existing = document.createElement('link');
     existing.rel = 'modulepreload';
     existing.href = 'https://cdn.example.com/react.js';
@@ -81,7 +81,7 @@ describe('loadImportMap', () => {
     expect(preloads).toHaveLength(1);
   });
 
-  it('URL에서 import map을 fetch한다', async () => {
+  it('fetches import map from URL', async () => {
     const importMap: ImportMap = {
       imports: { react: 'https://cdn.example.com/react.js' },
     };
@@ -97,7 +97,7 @@ describe('loadImportMap', () => {
     expect(globalThis.fetch).toHaveBeenCalledWith('https://api.example.com/importmap');
   });
 
-  it('fetch 실패 시 ImportMapLoadError를 던진다', async () => {
+  it('throws ImportMapLoadError on fetch failure', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue({
       ok: false,
       status: 500,
@@ -119,9 +119,9 @@ describe('loadImportMap', () => {
     }
   });
 
-  // importMapUrl/inlineImportMap 누락은 discriminated union으로 컴파일 시점에 방지됨
+  // Missing importMapUrl/inlineImportMap is prevented at compile time by discriminated union
 
-  it('module 스크립트 앞에 import map을 삽입한다', async () => {
+  it('inserts import map before module scripts', async () => {
     const moduleScript = document.createElement('script');
     moduleScript.type = 'module';
     moduleScript.src = 'https://example.com/app.js';
@@ -142,7 +142,7 @@ describe('loadImportMap', () => {
     expect(importMapIdx).toBeLessThan(moduleIdx);
   });
 
-  it('.js 확장자가 아닌 URL은 preload하지 않는다', async () => {
+  it('does not preload URLs without .js extension', async () => {
     const importMap: ImportMap = {
       imports: {
         react: 'https://cdn.example.com/react.js',

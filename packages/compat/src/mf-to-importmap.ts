@@ -1,46 +1,46 @@
 import type { ImportMap } from '@esmap/shared';
 
 /**
- * Webpack Module Federation의 exposed 모듈 선언.
- * mf.config.ts의 exposes 필드에 해당한다.
+ * Webpack Module Federation exposed module declaration.
+ * Corresponds to the exposes field in mf.config.ts.
  */
 export interface MfExposedModule {
-  /** expose 키 (예: "./Button") */
+  /** Expose key (e.g., "./Button") */
   readonly key: string;
-  /** 파일 경로 (예: "./src/components/Button.tsx") */
+  /** File path (e.g., "./src/components/Button.tsx") */
   readonly path: string;
 }
 
 /**
- * Module Federation remote 앱 설정.
- * 마이그레이션 대상이 되는 기존 MF 설정을 표현한다.
+ * Module Federation remote app configuration.
+ * Represents the existing MF configuration that is the migration target.
  */
 export interface MfRemoteConfig {
-  /** 앱 이름 (예: "flexCheckout") */
+  /** App name (e.g., "flexCheckout") */
   readonly name: string;
-  /** scope 이름 (예: "@flex/checkout") */
+  /** Scope name (e.g., "@flex/checkout") */
   readonly scope: string;
-  /** 앱 진입점 URL (remoteEntry.js) */
+  /** App entry point URL (remoteEntry.js) */
   readonly remoteEntryUrl?: string;
-  /** expose된 모듈 목록 */
+  /** List of exposed modules */
   readonly exposes?: readonly MfExposedModule[];
 }
 
-/** Module Federation → import map 변환 옵션 */
+/** Module Federation to import map conversion options */
 export interface MfToImportMapOptions {
   /** CDN base URL */
   readonly cdnBase: string;
-  /** 앱별 빌드 결과물 경로 패턴 (기본: "{scope}/{entry}") */
+  /** Per-app build artifact path pattern (default: "{scope}/{entry}") */
   readonly pathPattern?: string;
 }
 
 /**
- * Module Federation remote 설정을 import map 형식으로 변환한다.
- * 각 remote 앱의 scope를 bare specifier로, 빌드 결과물 URL을 값으로 매핑한다.
+ * Converts Module Federation remote configurations into import map format.
+ * Maps each remote app's scope as a bare specifier to its build artifact URL.
  *
- * @param remotes - MF remote 앱 설정 목록
- * @param options - 변환 옵션
- * @returns import map 객체
+ * @param remotes - list of MF remote app configurations
+ * @param options - conversion options
+ * @returns import map object
  */
 export function convertMfToImportMap(
   remotes: readonly MfRemoteConfig[],
@@ -53,10 +53,10 @@ export function convertMfToImportMap(
     const scope = remote.scope;
     const appPath = scope.replace('@', '').replace('/', '-');
 
-    // 메인 엔트리
+    // Main entry
     imports[scope] = `${cdnBase}/${appPath}/index.js`;
 
-    // expose된 서브모듈
+    // Exposed submodules
     if (remote.exposes) {
       for (const exposed of remote.exposes) {
         const subPath = exposed.key.replace('./', '');
@@ -69,11 +69,11 @@ export function convertMfToImportMap(
 }
 
 /**
- * MF shared 의존성 설정에서 공유 라이브러리의 import map 엔트리를 생성한다.
+ * Generates import map entries for shared libraries from MF shared dependency configuration.
  *
- * @param shared - 공유 라이브러리 이름 → 버전 매핑
+ * @param shared - shared library name to version mapping
  * @param cdnBase - CDN base URL
- * @returns import map의 imports 부분
+ * @returns the imports section of an import map
  */
 export function convertMfSharedToImports(
   shared: Readonly<Record<string, string>>,

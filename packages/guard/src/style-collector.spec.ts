@@ -3,9 +3,9 @@ import { createStyleCollector } from './style-collector.js';
 import type { StyleCollector } from './style-collector.js';
 
 describe('createStyleCollector', () => {
-  /** 테스트 중 head에 추가된 요소를 추적하여 정리한다 */
+  /** Tracks elements added to head during testing for cleanup */
   const addedToHead: HTMLElement[] = [];
-  /** 공유 수집기 인스턴스 */
+  /** Shared collector instance */
   const NULL_COLLECTOR: StyleCollector = {
     startCapture: () => {},
     stopCapture: () => [],
@@ -15,7 +15,7 @@ describe('createStyleCollector', () => {
   };
   const collectorRef = { current: NULL_COLLECTOR };
 
-  /** head에 style 요소를 추가하고 추적 목록에 등록한다 */
+  /** Adds a style element to head and registers it in the tracking list */
   function appendStyleToHead(cssText: string): HTMLStyleElement {
     const style = document.createElement('style');
     style.textContent = cssText;
@@ -24,7 +24,7 @@ describe('createStyleCollector', () => {
     return style;
   }
 
-  /** head에 link[rel="stylesheet"] 요소를 추가하고 추적 목록에 등록한다 */
+  /** Adds a link[rel="stylesheet"] element to head and registers it in the tracking list */
   function appendLinkToHead(href: string): HTMLLinkElement {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -47,7 +47,7 @@ describe('createStyleCollector', () => {
   });
 
   describe('startCapture / stopCapture', () => {
-    it('캡처 중 추가된 style 요소를 수집한다', async () => {
+    it('collects style elements added during capture', async () => {
       collectorRef.current.startCapture('app-a');
 
       appendStyleToHead('.a { color: red; }');
@@ -60,7 +60,7 @@ describe('createStyleCollector', () => {
       expect(captured[0].textContent).toBe('.a { color: red; }');
     });
 
-    it('캡처 중 추가된 link[rel="stylesheet"] 요소를 수집한다', async () => {
+    it('collects link[rel="stylesheet"] elements added during capture', async () => {
       collectorRef.current.startCapture('app-a');
 
       appendLinkToHead('https://example.com/style.css');
@@ -72,7 +72,7 @@ describe('createStyleCollector', () => {
       expect(captured).toHaveLength(1);
     });
 
-    it('수집된 요소에 data-esmap-app 속성을 추가한다', async () => {
+    it('adds data-esmap-app attribute to collected elements', async () => {
       collectorRef.current.startCapture('app-a');
 
       appendStyleToHead('.tagged { color: blue; }');
@@ -84,7 +84,7 @@ describe('createStyleCollector', () => {
       expect(captured[0].getAttribute('data-esmap-app')).toBe('app-a');
     });
 
-    it('캡처 중이 아닌 앱에는 요소를 수집하지 않는다', async () => {
+    it('does not collect elements for apps not currently capturing', async () => {
       collectorRef.current.startCapture('app-a');
 
       appendStyleToHead('.x { color: red; }');
@@ -98,7 +98,7 @@ describe('createStyleCollector', () => {
       expect(capturedA).toHaveLength(1);
     });
 
-    it('stopCapture 후 추가된 요소는 수집하지 않는다', async () => {
+    it('does not collect elements added after stopCapture', async () => {
       collectorRef.current.startCapture('app-a');
       collectorRef.current.stopCapture('app-a');
 
@@ -110,12 +110,12 @@ describe('createStyleCollector', () => {
       expect(styles).toHaveLength(0);
     });
 
-    it('존재하지 않는 앱을 stopCapture하면 빈 배열을 반환한다', () => {
+    it('returns an empty array when stopping capture for a nonexistent app', () => {
       const result = collectorRef.current.stopCapture('nonexistent');
       expect(result).toStrictEqual([]);
     });
 
-    it('여러 앱을 동시에 캡처할 수 있다', async () => {
+    it('can capture multiple apps simultaneously', async () => {
       collectorRef.current.startCapture('app-a');
       collectorRef.current.startCapture('app-b');
 
@@ -126,14 +126,14 @@ describe('createStyleCollector', () => {
       const capturedA = collectorRef.current.stopCapture('app-a');
       const capturedB = collectorRef.current.stopCapture('app-b');
 
-      // 두 앱 모두 활성 상태였으므로 둘 다 수집
+      // Both apps were active, so both collected
       expect(capturedA).toHaveLength(1);
       expect(capturedB).toHaveLength(1);
     });
   });
 
   describe('getStyles', () => {
-    it('수집된 스타일 요소를 반환한다', async () => {
+    it('returns collected style elements', async () => {
       collectorRef.current.startCapture('app-a');
 
       appendStyleToHead('.get-test { color: red; }');
@@ -144,12 +144,12 @@ describe('createStyleCollector', () => {
       expect(styles).toHaveLength(1);
     });
 
-    it('존재하지 않는 앱에 대해 빈 배열을 반환한다', () => {
+    it('returns an empty array for a nonexistent app', () => {
       const styles = collectorRef.current.getStyles('nonexistent');
       expect(styles).toStrictEqual([]);
     });
 
-    it('stopCapture 후에도 getStyles로 조회 가능하다', async () => {
+    it('allows querying via getStyles even after stopCapture', async () => {
       collectorRef.current.startCapture('app-a');
 
       appendStyleToHead('.persisted { color: red; }');
@@ -164,7 +164,7 @@ describe('createStyleCollector', () => {
   });
 
   describe('removeStyles', () => {
-    it('앱에 속한 스타일 요소를 DOM에서 제거한다', async () => {
+    it('removes style elements belonging to the app from the DOM', async () => {
       collectorRef.current.startCapture('app-a');
 
       const style = appendStyleToHead('.remove-me { color: red; }');
@@ -178,11 +178,11 @@ describe('createStyleCollector', () => {
       expect(collectorRef.current.getStyles('app-a')).toHaveLength(0);
     });
 
-    it('존재하지 않는 앱에 대해 에러 없이 실행된다', () => {
+    it('runs without error for a nonexistent app', () => {
       expect(() => collectorRef.current.removeStyles('nonexistent')).not.toThrow();
     });
 
-    it('여러 요소를 한 번에 제거한다', async () => {
+    it('removes multiple elements at once', async () => {
       collectorRef.current.startCapture('app-a');
 
       const style1 = appendStyleToHead('.r1 { color: red; }');
@@ -200,7 +200,7 @@ describe('createStyleCollector', () => {
   });
 
   describe('destroy', () => {
-    it('destroy 후 새로운 스타일을 수집하지 않는다', async () => {
+    it('does not collect new styles after destroy', async () => {
       collectorRef.current.startCapture('app-a');
       collectorRef.current.destroy();
 
@@ -213,8 +213,8 @@ describe('createStyleCollector', () => {
     });
   });
 
-  describe('스타일과 무관한 요소', () => {
-    it('script 요소는 수집하지 않는다', async () => {
+  describe('non-style elements', () => {
+    it('does not collect script elements', async () => {
       collectorRef.current.startCapture('app-a');
 
       const script = document.createElement('script');
@@ -228,7 +228,7 @@ describe('createStyleCollector', () => {
       expect(captured).toHaveLength(0);
     });
 
-    it('rel이 stylesheet가 아닌 link 요소는 수집하지 않는다', async () => {
+    it('does not collect link elements whose rel is not stylesheet', async () => {
       collectorRef.current.startCapture('app-a');
 
       const link = document.createElement('link');

@@ -1,19 +1,19 @@
 import { parseSemver, satisfiesRange } from '@esmap/runtime';
 import type { SemverParts } from '@esmap/runtime';
 
-/** 앱별 의존성 선언 */
+/** Per-app dependency declaration */
 export interface AppDependencyDeclaration {
   readonly appName: string;
   readonly dependencies: ReadonlyMap<string, string>;
 }
 
-/** 의존성 충돌에 관여하는 앱 정보 */
+/** App information involved in a dependency conflict */
 interface ConflictApp {
   readonly appName: string;
   readonly versionRange: string;
 }
 
-/** 의존성 충돌 정보 */
+/** Dependency conflict information */
 export interface DependencyConflict {
   readonly dependencyName: string;
   readonly apps: readonly ConflictApp[];
@@ -21,14 +21,14 @@ export interface DependencyConflict {
   readonly message: string;
 }
 
-/** 분석 결과 */
+/** Analysis result */
 export interface DependencyAnalysisResult {
   readonly conflicts: readonly DependencyConflict[];
   readonly warnings: readonly DependencyConflict[];
   readonly summary: string;
 }
 
-/** 범위 문자열에서 연산자와 버전 부분을 분리한다 */
+/** Separates the operator and version parts from a range string */
 interface ParsedRangeInfo {
   readonly operator: string;
   readonly version: SemverParts;
@@ -36,8 +36,8 @@ interface ParsedRangeInfo {
 }
 
 /**
- * 범위 문자열에서 연산자와 SemverParts를 추출한다.
- * @param range - semver 범위 문자열
+ * Extracts the operator and SemverParts from a range string.
+ * @param range - semver range string
  */
 function parseRangeInfo(range: string): ParsedRangeInfo {
   const trimmed = range.trim();
@@ -56,29 +56,29 @@ function parseRangeInfo(range: string): ParsedRangeInfo {
 }
 
 /**
- * SemverParts를 "major.minor.patch" 문자열로 변환한다.
- * @param parts - semver 구성 요소
+ * Converts SemverParts to a "major.minor.patch" string.
+ * @param parts - semver components
  */
 function versionToString(parts: SemverParts): string {
   return `${parts.major}.${parts.minor}.${parts.patch}`;
 }
 
 /**
- * 두 범위가 서로 호환되는지 판정한다.
- * @param a - 첫 번째 범위 정보
- * @param b - 두 번째 범위 정보
+ * Determines whether two ranges are compatible with each other.
+ * @param a - first range info
+ * @param b - second range info
  * @returns 'compatible' | 'warning' | 'error'
  */
 function checkPairCompatibility(
   a: ParsedRangeInfo,
   b: ParsedRangeInfo,
 ): 'compatible' | 'warning' | 'error' {
-  /* 정확 일치 범위끼리 버전이 다르면 에러 */
+  /* Error if exact-match ranges have different versions */
   if (a.operator === '=' && b.operator === '=') {
     return versionToString(a.version) === versionToString(b.version) ? 'compatible' : 'error';
   }
 
-  /* 정확 일치가 다른 범위를 만족하는지 확인 */
+  /* Check if an exact version satisfies the other range */
   if (a.operator === '=') {
     return satisfiesRange(versionToString(a.version), b.raw) ? 'compatible' : 'error';
   }
@@ -86,22 +86,22 @@ function checkPairCompatibility(
     return satisfiesRange(versionToString(b.version), a.raw) ? 'compatible' : 'error';
   }
 
-  /* 서로 다른 major → 에러 */
+  /* Different major versions -> error */
   if (a.version.major !== b.version.major) {
     return 'error';
   }
 
-  /* 같은 major, ^ 범위끼리 → 호환 */
+  /* Same major, both ^ ranges -> compatible */
   if (a.operator === '^' && b.operator === '^') {
     return 'compatible';
   }
 
-  /* ~ 범위끼리: minor가 같아야 호환 */
+  /* Both ~ ranges: compatible only if minor versions match */
   if (a.operator === '~' && b.operator === '~') {
     return a.version.minor === b.version.minor ? 'compatible' : 'error';
   }
 
-  /* ^ + ~ 혼합: ~의 min 버전이 ^의 범위를 만족하면 호환, 아니면 경고 */
+  /* ^ + ~ mixed: compatible if ~'s min version satisfies ^'s range, otherwise error */
   const tildeRange = a.operator === '~' ? a : b;
   const caretRange = a.operator === '^' ? a : b;
   const tildeMin = versionToString(tildeRange.version);
@@ -114,9 +114,9 @@ function checkPairCompatibility(
 }
 
 /**
- * 여러 앱의 범위 목록 전체에서 가장 심각한 충돌 수준을 판정한다.
- * @param ranges - 파싱된 범위 목록
- * @returns 가장 심각한 충돌 수준
+ * Determines the worst compatibility level across all range pairs from multiple apps.
+ * @param ranges - parsed range list
+ * @returns the most severe conflict level
  */
 function determineWorstCompatibility(
   ranges: readonly ParsedRangeInfo[],
@@ -139,13 +139,13 @@ function determineWorstCompatibility(
 }
 
 /**
- * 여러 MFE 매니페스트에서 의존성 충돌을 분석한다.
- * @param declarations - 앱별 의존성 선언 목록
+ * Analyzes dependency conflicts across multiple MFE manifests.
+ * @param declarations - per-app dependency declaration list
  */
 export function analyzeDependencyConflicts(
   declarations: readonly AppDependencyDeclaration[],
 ): DependencyAnalysisResult {
-  /* 의존성 이름별로 앱+범위 그룹핑 */
+  /* Group apps + ranges by dependency name */
   const depMap = new Map<string, ConflictApp[]>();
 
   for (const decl of declarations) {
@@ -160,7 +160,7 @@ export function analyzeDependencyConflicts(
   const warnings: DependencyConflict[] = [];
 
   for (const [depName, apps] of depMap) {
-    /* 단일 앱만 사용하면 충돌 불가 */
+    /* No conflict possible if only one app uses it */
     if (apps.length < 2) {
       continue;
     }

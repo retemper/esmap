@@ -19,10 +19,10 @@ export default defineConfig({
         const distDir = resolve(__dirname, '../../dist');
 
         /**
-         * /apps/* 요청을 dist/ 하위 디렉토리로 라우팅한다.
-         * 구조: /apps/{appName}/{fileName} → dist/apps/{appName}/{fileName}
-         *       /apps/shared/{fileName}    → dist/shared/{fileName}
-         *       /apps/design-system/{file} → dist/design-system/{file}
+         * Routes /apps/* requests to subdirectories under dist/.
+         * Structure: /apps/{appName}/{fileName} -> dist/apps/{appName}/{fileName}
+         *            /apps/shared/{fileName}    -> dist/shared/{fileName}
+         *            /apps/design-system/{file} -> dist/design-system/{file}
          */
         server.middlewares.use(async (req, res, next) => {
           if (!req.url?.startsWith('/apps/')) {
@@ -31,15 +31,15 @@ export default defineConfig({
           }
 
           const urlPath = req.url.split('?')[0];
-          const relativePath = urlPath.slice(6); // '/apps/' 제거
+          const relativePath = urlPath.slice(6); // Remove '/apps/'
 
-          // shared/, design-system/ 은 dist 루트에, 나머지는 dist/apps/ 하위
+          // shared/, design-system/ are at dist root, others under dist/apps/
           const isInfra = relativePath.startsWith('shared/') || relativePath.startsWith('design-system/');
           const filePath = isInfra
             ? resolve(distDir, relativePath)
             : resolve(distDir, 'apps', relativePath);
 
-          // 디렉토리 트래버설 방지
+          // Prevent directory traversal
           if (!filePath.startsWith(distDir)) {
             next();
             return;

@@ -1,19 +1,19 @@
 /**
  * Enterprise Platform DevTools Panel.
  *
- * SVG 토폴로지, 이벤트 스트림, 상태 인스펙터, 통신 플로우를 포함하는
- * 자립형(self-contained) 바닐라 TypeScript DevTools 위젯.
+ * Self-contained vanilla TypeScript DevTools widget including
+ * SVG topology, event stream, state inspector, and communication flow.
  *
- * v2: 이벤트 플로우 애니메이션, 노드 글로우, 방향 화살표,
- *     전환 확률 엣지, 프리페치 표시기, Flow 탭 추가.
+ * v2: Event flow animation, node glow, directional arrows,
+ *     transition probability edges, prefetch indicators, Flow tab added.
  */
 
 // ─── Types ───
 
-/** 앱 상태 문자열 */
+/** App status string */
 type AppStatus = 'MOUNTED' | 'FROZEN' | 'NOT_LOADED' | 'LOADING' | 'LOAD_ERROR' | 'BOOTSTRAPPING' | 'NOT_MOUNTED' | 'UNMOUNTING';
 
-/** 앱 정보 */
+/** App information */
 interface AppInfo {
   readonly name: string;
   readonly status: string;
@@ -21,8 +21,8 @@ interface AppInfo {
 }
 
 /**
- * 이벤트 버스 핸들.
- * 제네릭 EventBus<T>와 호환되기 위해 넓은 시그니처를 사용한다.
+ * Event bus handle.
+ * Uses a wide signature for compatibility with the generic EventBus<T>.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface EventBusHandle {
@@ -30,49 +30,49 @@ interface EventBusHandle {
   readonly on: (event: string, handler: (...args: any[]) => void, options?: unknown) => unknown;
 }
 
-/** 글로벌 상태 핸들 */
+/** Global state handle */
 interface GlobalStateHandle {
   readonly getState: () => Record<string, unknown>;
   readonly subscribe: (cb: (newState: Record<string, unknown>, prevState: Record<string, unknown>) => void) => void;
 }
 
-/** 앱 레지스트리 핸들 */
+/** App registry handle */
 interface RegistryHandle {
   readonly getApps: () => ReadonlyArray<AppInfo>;
   readonly onStatusChange: (cb: (event: { appName: string; from: string; to: string }) => void) => void;
 }
 
-/** 라우터 핸들 */
+/** Router handle */
 interface RouterHandle {
   readonly afterRouteChange: (cb: (from: { pathname: string }, to: { pathname: string }) => void) => void;
 }
 
-/** 성능 핸들 */
+/** Performance handle */
 interface PerfHandle {
   readonly summarize: () => ReadonlyMap<string, { readonly total: number; readonly phases: Record<string, number> }>;
   readonly onMeasurement?: (listener: (m: { appName: string; phase: string; duration: number; startTime: number }) => void) => () => void;
 }
 
-/** 프리페치 컨트롤러 핸들 */
+/** Prefetch controller handle */
 interface PrefetchHandle {
   readonly getStats: () => ReadonlyArray<{ from: string; to: string; count: number; ratio: number }>;
   readonly getPriorities: (currentApp: string) => ReadonlyArray<{ appName: string; probability: number }>;
   readonly historySize: number;
 }
 
-/** 공유 모듈 레지스트리 핸들 */
+/** Shared module registry handle */
 interface SharedModulesHandle {
   readonly getRegistered: () => ReadonlyMap<string, ReadonlyArray<{ name: string; version: string; requiredVersion?: string; singleton?: boolean; eager?: boolean; from?: string }>>;
   readonly getLoaded: () => ReadonlyMap<string, { version: string; from?: string }>;
 }
 
-/** Import Map 데이터 핸들 */
+/** Import Map data handle */
 interface ImportMapHandle {
   readonly imports: Readonly<Record<string, string>>;
   readonly scopes?: Readonly<Record<string, Readonly<Record<string, string>>>>;
 }
 
-/** DevTools 패널 설정 */
+/** DevTools panel configuration */
 interface DevtoolsPanelConfig {
   readonly registry: RegistryHandle;
   readonly eventBus: EventBusHandle;
@@ -85,10 +85,10 @@ interface DevtoolsPanelConfig {
   readonly container?: string;
 }
 
-/** 이벤트 카테고리 */
+/** Event category */
 type EventCategory = 'lifecycle' | 'auth' | 'route' | 'state' | 'error' | 'all';
 
-/** 이벤트 항목 */
+/** Event entry */
 interface EventEntry {
   readonly timestamp: number;
   readonly category: EventCategory;
@@ -97,13 +97,13 @@ interface EventEntry {
   readonly appName?: string;
 }
 
-/** 상태 변경 이력 */
+/** State change history */
 interface StateChangeEntry {
   readonly timestamp: number;
   readonly diff: ReadonlyArray<{ key: string; oldValue: unknown; newValue: unknown }>;
 }
 
-/** 앱 간 통신 플로우 항목 (Flow 탭용) */
+/** Inter-app communication flow entry (for Flow tab) */
 interface FlowEntry {
   readonly timestamp: number;
   readonly from: string;
@@ -112,17 +112,17 @@ interface FlowEntry {
   readonly category: EventCategory;
 }
 
-/** DevTools 패널 퍼블릭 핸들 */
+/** DevTools panel public handle */
 interface DevtoolsPanel {
-  /** 외부에서 로그를 추가한다 */
+  /** Adds a log message from outside */
   readonly log: (message: string) => void;
-  /** 패널을 파괴한다 */
+  /** Destroys the panel */
   readonly destroy: () => void;
 }
 
 // ─── Constants ───
 
-/** 앱 상태별 색상 */
+/** Colors per app status */
 const STATUS_COLORS: Record<string, string> = {
   MOUNTED: '#4ade80',
   FROZEN: '#fbbf24',
@@ -134,7 +134,7 @@ const STATUS_COLORS: Record<string, string> = {
   UNMOUNTING: '#fb923c',
 };
 
-/** 이벤트 카테고리별 색상 */
+/** Colors per event category */
 const CATEGORY_COLORS: Record<EventCategory, string> = {
   lifecycle: '#4ade80',
   auth: '#c084fc',
@@ -144,7 +144,7 @@ const CATEGORY_COLORS: Record<EventCategory, string> = {
   all: '#94a3b8',
 };
 
-/** 이벤트 카테고리별 라벨 */
+/** Labels per event category */
 const CATEGORY_LABELS: Record<EventCategory, string> = {
   lifecycle: 'Lifecycle',
   auth: 'Auth',
@@ -154,7 +154,7 @@ const CATEGORY_LABELS: Record<EventCategory, string> = {
   all: 'All',
 };
 
-/** 토폴로지에서 사용하는 앱별 단축명 및 위치 정보 */
+/** Per-app short names and position info used in the topology */
 const APP_TOPOLOGY: ReadonlyArray<{
   name: string;
   short: string;
@@ -171,13 +171,13 @@ const APP_TOPOLOGY: ReadonlyArray<{
   { name: '@enterprise/legacy-settings', short: 'Settings', container: '#app-main', angle: -170, icon: '⚙' },
 ];
 
-/** dashboard → activity-feed Parcel 관계 */
+/** dashboard -> activity-feed Parcel relationships */
 const PARCEL_EDGES: ReadonlyArray<{ from: string; to: string }> = [
   { from: '@enterprise/dashboard', to: '@enterprise/activity-feed' },
   { from: '@enterprise/task-board', to: '@enterprise/activity-feed' },
 ];
 
-/** 패널 CSS 문자열 */
+/** Panel CSS string */
 const PANEL_CSS = `
   #esmap-devtools {
     position: fixed;
@@ -426,13 +426,13 @@ const PANEL_CSS = `
   .topo-perf-bar {
     transition: width 0.3s ease;
   }
-  /* 노드 글로우 애니메이션 */
+  /* Node glow animation */
   @keyframes node-glow {
     0% { opacity: 0; }
     30% { opacity: 0.8; }
     100% { opacity: 0; }
   }
-  /* 이벤트 플로우 파티클 */
+  /* Event flow particle */
   @keyframes flow-particle {
     from { offset-distance: 0%; opacity: 1; }
     to { offset-distance: 100%; opacity: 0; }
@@ -806,7 +806,7 @@ const PANEL_CSS = `
 
 // ─── Helpers ───
 
-/** 타임스탬프를 HH:MM:SS.mmm 형식으로 변환한다 */
+/** Converts a timestamp to HH:MM:SS.mmm format */
 function formatTime(ts: number): string {
   const d = new Date(ts);
   const h = String(d.getHours()).padStart(2, '0');
@@ -816,22 +816,22 @@ function formatTime(ts: number): string {
   return `${h}:${m}:${s}.${ms}`;
 }
 
-/** 앱 이름에서 @enterprise/ 프리픽스를 제거한다 */
+/** Strips the @enterprise/ prefix from an app name */
 function shortName(name: string): string {
   return name.replace('@enterprise/', '');
 }
 
-/** 로그 메시지에서 이벤트 카테고리를 판별한다 */
+/** Determines the event category from a log message */
 function classifyMessage(message: string): EventCategory {
-  if (message.includes('실패') || message.includes('에러') || message.includes('차단') || message.includes('오염')) return 'error';
-  if (message.includes('라우트') || message.includes('route') || message.includes('404')) return 'route';
-  if (message.includes('인증') || message.includes('로그아웃') || message.includes('auth')) return 'auth';
-  if (message.includes('→') || message.includes('마운트') || message.includes('정리') || message.includes('앱 등록')) return 'lifecycle';
-  if (message.includes('현재 앱') || message.includes('상태') || message.includes('테마')) return 'state';
+  if (message.includes('fail') || message.includes('error') || message.includes('block') || message.includes('violation')) return 'error';
+  if (message.includes('route') || message.includes('Route') || message.includes('404')) return 'route';
+  if (message.includes('auth') || message.includes('logout') || message.includes('Auth')) return 'auth';
+  if (message.includes('→') || message.includes('mount') || message.includes('cleanup') || message.includes('app registered')) return 'lifecycle';
+  if (message.includes('current app') || message.includes('state') || message.includes('theme')) return 'state';
   return 'lifecycle';
 }
 
-/** SVG 네임스페이스로 요소를 생성한다 */
+/** Creates an element using the SVG namespace */
 function svgEl<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}): SVGElementTagNameMap[K] {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
   for (const [key, value] of Object.entries(attrs)) {
@@ -840,7 +840,7 @@ function svgEl<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<strin
   return el;
 }
 
-/** JSON 값을 HTML로 렌더링한다 (트리 뷰) */
+/** Renders a JSON value as HTML (tree view) */
 function renderJsonTree(value: unknown, indent: number = 0, isLast: boolean = true): string {
   const pad = '  '.repeat(indent);
 
@@ -874,12 +874,12 @@ function renderJsonTree(value: unknown, indent: number = 0, isLast: boolean = tr
   return `<span class="state-null">${String(value)}</span>${isLast ? '' : ','}`;
 }
 
-/** HTML 특수문자를 이스케이프한다 */
+/** Escapes HTML special characters */
 function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/** 두 점 사이의 앵글을 구한다 */
+/** Calculates the angle between two points */
 function angleBetween(x1: number, y1: number, x2: number, y2: number): number {
   return Math.atan2(y2 - y1, x2 - x1);
 }
@@ -887,15 +887,15 @@ function angleBetween(x1: number, y1: number, x2: number, y2: number): number {
 // ─── Panel Creation ───
 
 /**
- * DevTools 패널을 생성하고 DOM에 마운트한다.
- * boot.ts에서 esmap 생성 후 호출하여 모든 데이터 소스를 연결한다.
- * @param config - 데이터 소스와 설정
+ * Creates and mounts the DevTools panel in the DOM.
+ * Called after esmap creation in boot.ts to connect all data sources.
+ * @param config - data sources and configuration
  */
 export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel {
   const { registry, eventBus, globalState, router, perf, prefetch, sharedModules, importMap } = config;
   const containerId = config.container ?? '#esmap-devtools';
 
-  // ─── 내부 상태 ───
+  // ─── Internal state ───
   const events: EventEntry[] = [];
   const stateHistory: StateChangeEntry[] = [];
   const flows: FlowEntry[] = [];
@@ -904,9 +904,9 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   const MAX_FLOWS = 100;
   const activeFilter: { value: EventCategory } = { value: 'all' };
   const logCountRef = { value: 0 };
-  /** 토폴로지 노드 글로우 타이머 */
+  /** Topology node glow timers */
   const glowTimers: Record<string, ReturnType<typeof setTimeout>> = {};
-  /** 엣지별 이벤트 카운터 */
+  /** Event counter per edge */
   const edgeTraffic: Record<string, number> = {};
 
   // ─── Inject CSS ───
@@ -957,7 +957,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     root.classList.toggle('collapsed');
   });
 
-  // 탭 전환
+  // Tab switching
   const tabs = header.querySelectorAll<HTMLButtonElement>('.devtools-tab');
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -1009,7 +1009,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   depsPanel.style.display = 'none';
   body.appendChild(depsPanel);
 
-  /** 지정된 탭 패널을 활성화하고 나머지를 숨긴다 */
+  /** Activates the specified tab panel and hides the rest */
   function showPanel(name: string): void {
     body.querySelectorAll<HTMLElement>('.devtools-panel').forEach((p) => {
       const isTarget = p.dataset.panel === name;
@@ -1039,7 +1039,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   topoSvg.classList.add('topo-svg');
   topoContainer.appendChild(topoSvg);
 
-  // 레전드
+  // Legend
   const legend = document.createElement('div');
   legend.className = 'topo-legend';
   const legendItems: ReadonlyArray<{ label: string; color: string }> = [
@@ -1062,20 +1062,20 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   legend.appendChild(parcelLegend);
   topoContainer.appendChild(legend);
 
-  /** 현재 활성 앱을 추적한다 */
+  /** Tracks the currently active app */
   const activeAppRef = { value: '' };
-  /** 앱 상태 캐시 */
+  /** App status cache */
   const statusCache: Record<string, string> = {};
-  /** 앱별 라이프사이클 단계 시작 시각 (성능 데이터 파생용) */
+  /** Per-app lifecycle phase start times (for deriving performance data) */
   const phaseStartTimes: Record<string, Record<string, number>> = {};
-  /** 라이프사이클 이벤트에서 파생된 성능 데이터 */
+  /** Performance data derived from lifecycle events */
   const derivedPerfData: Record<string, { total: number; phases: Record<string, number> }> = {};
-  /** 노드 좌표 캐시 (토폴로지 외부에서도 접근) */
+  /** Node coordinate cache (accessible outside topology) */
   const nodePositionsCache: Record<string, { x: number; y: number }> = {};
-  /** 중심 좌표 캐시 */
+  /** Center coordinate cache */
   const centerCache = { x: 0, y: 0 };
 
-  /** SVG 토폴로지 그래프를 다시 그린다 */
+  /** Redraws the SVG topology graph */
   function refreshTopology(): void {
     topoSvg.innerHTML = '';
 
@@ -1091,10 +1091,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     centerCache.y = cy;
     topoSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
 
-    // ─── SVG Defs: 마커, 필터, 그라디언트 ───
+    // ─── SVG Defs: markers, filters, gradients ───
     const defs = svgEl('defs');
 
-    // 화살표 마커
+    // Arrow marker
     const arrowMarker = svgEl('marker', {
       id: 'arrow-marker',
       markerWidth: 8,
@@ -1109,7 +1109,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     arrowMarker.appendChild(arrowPath);
     defs.appendChild(arrowMarker);
 
-    // Parcel 화살표 마커
+    // Parcel arrow marker
     const parcelArrowMarker = svgEl('marker', {
       id: 'parcel-arrow-marker',
       markerWidth: 8,
@@ -1124,7 +1124,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     parcelArrowMarker.appendChild(parcelArrowPath);
     defs.appendChild(parcelArrowMarker);
 
-    // 글로우 필터
+    // Glow filter
     const glowFilter = svgEl('filter', { id: 'node-glow', x: '-50%', y: '-50%', width: '200%', height: '200%' });
     const feGaussianBlur = svgEl('feGaussianBlur', { stdDeviation: '4', result: 'blur' });
     glowFilter.appendChild(feGaussianBlur);
@@ -1138,7 +1138,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
     topoSvg.appendChild(defs);
 
-    // ─── 플러그인 뱃지 (상단) ───
+    // ─── Plugin badges (top) ───
     const pluginNames = ['guard', 'sandbox', 'keepAlive', 'domIsolation', 'prefetch', 'communication', 'audit'];
     const pluginY = 16;
     const pluginSpacing = 90;
@@ -1161,7 +1161,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       topoSvg.appendChild(pillText);
     }
 
-    // ─── Shared deps 뱃지 (하단) ───
+    // ─── Shared deps badges (bottom) ───
     const sharedDeps = ['react ^19', 'react-dom ^19', '@enterprise/design-system ^1'];
     const sharedY = height - 14;
     const sharedSpacing = 120;
@@ -1184,7 +1184,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       topoSvg.appendChild(pillText);
     }
 
-    // ─── 앱별 좌표 계산 ───
+    // ─── Per-app coordinate calculation ───
     const apps = registry.getApps();
     const appStatusMap: Record<string, string> = {};
     for (const app of apps) {
@@ -1200,7 +1200,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       };
     }
 
-    // ─── 엣지: Host → App (화살표 포함) ───
+    // ─── Edges: Host -> App (with arrows) ───
     const nodeWidth = 108;
     const nodeHeight = 44;
 
@@ -1208,11 +1208,11 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const pos = nodePositionsCache[appDef.name];
       if (!pos) continue;
 
-      // 엣지 끝점을 노드 바운더리에서 멈추도록 조정
+      // Adjust edge endpoints to stop at node boundary
       const angle = angleBetween(cx, cy, pos.x, pos.y);
       const endX = pos.x - Math.cos(angle) * (nodeWidth / 2 + 4);
       const endY = pos.y - Math.sin(angle) * (nodeHeight / 2 + 4);
-      const startX = cx + Math.cos(angle) * 28; // 호스트 원 바깥
+      const startX = cx + Math.cos(angle) * 28; // Outside host circle
       const startY = cy + Math.sin(angle) * 28;
 
       const line = svgEl('line', {
@@ -1224,7 +1224,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       line.setAttribute('data-from', 'host');
       line.setAttribute('data-to', appDef.name);
 
-      // 트래픽 볼륨에 따른 엣지 굵기
+      // Edge thickness based on traffic volume
       const trafficKey = `host→${appDef.name}`;
       const traffic = edgeTraffic[trafficKey] ?? 0;
       if (traffic > 0) {
@@ -1236,7 +1236,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       topoSvg.appendChild(line);
     }
 
-    // ─── 엣지: Parcel 관계 (점선 + 화살표) ───
+    // ─── Edges: Parcel relationships (dashed + arrows) ───
     for (const edge of PARCEL_EDGES) {
       const fromPos = nodePositionsCache[edge.from];
       const toPos = nodePositionsCache[edge.to];
@@ -1256,7 +1256,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       });
       topoSvg.appendChild(line);
 
-      // Parcel 라벨 (곡선 경로 위)
+      // Parcel label (on curved path)
       const midX = (startX + endX) / 2;
       const midY = (startY + endY) / 2 - 10;
       const parcelPill = svgEl('rect', {
@@ -1275,7 +1275,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       topoSvg.appendChild(parcelLabel);
     }
 
-    // ─── 전환 확률 엣지 (IntelligentPrefetch) ───
+    // ─── Transition probability edges (IntelligentPrefetch) ───
     if (prefetch) {
       try {
         const stats = prefetch.getStats();
@@ -1283,11 +1283,11 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
           const fromPos = nodePositionsCache[stat.from];
           const toPos = nodePositionsCache[stat.to];
           if (!fromPos || !toPos) continue;
-          if (stat.ratio < 0.1) continue; // 10% 미만은 표시 안 함
+          if (stat.ratio < 0.1) continue; // Skip ratios below 10%
 
           const angle = angleBetween(fromPos.x, fromPos.y, toPos.x, toPos.y);
           const offsetAngle = angle + Math.PI / 2;
-          const offset = 6; // 일반 엣지와 겹치지 않도록 오프셋
+          const offset = 6; // Offset to avoid overlapping regular edges
 
           const startX = fromPos.x + Math.cos(angle) * (nodeWidth / 2 + 2) + Math.cos(offsetAngle) * offset;
           const startY = fromPos.y + Math.sin(angle) * (nodeHeight / 2 + 2) + Math.sin(offsetAngle) * offset;
@@ -1304,7 +1304,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
           line.style.strokeWidth = String(1 + stat.ratio * 2);
           topoSvg.appendChild(line);
 
-          // 확률 라벨
+          // Probability label
           const midX = (startX + endX) / 2 + Math.cos(offsetAngle) * 10;
           const midY = (startY + endY) / 2 + Math.sin(offsetAngle) * 10;
           const probLabel = svgEl('text', {
@@ -1317,11 +1317,11 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
           topoSvg.appendChild(probLabel);
         }
       } catch {
-        // prefetch data가 아직 없으면 무시
+        // Ignore if prefetch data is not yet available
       }
     }
 
-    // ─── Host 노드 (중앙) ───
+    // ─── Host node (center) ───
     const hostGroup = svgEl('g');
     const hostCircle = svgEl('circle', { cx, cy, r: 26, class: 'topo-host' });
     hostGroup.appendChild(hostCircle);
@@ -1337,7 +1337,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     hostGroup.appendChild(hostSubLabel);
     topoSvg.appendChild(hostGroup);
 
-    // ─── 앱 노드 ───
+    // ─── App nodes ───
     for (const appDef of APP_TOPOLOGY) {
       const pos = nodePositionsCache[appDef.name];
       if (!pos) continue;
@@ -1349,7 +1349,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const group = svgEl('g', { class: 'topo-node' });
       group.setAttribute('data-app', appDef.name);
 
-      // 글로우 배경 (이벤트 시 활성화)
+      // Glow background (activated on events)
       const glowRect = svgEl('rect', {
         x: pos.x - nodeWidth / 2 - 6,
         y: pos.y - nodeHeight / 2 - 6,
@@ -1363,7 +1363,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       glowRect.setAttribute('data-glow', appDef.name);
       group.appendChild(glowRect);
 
-      // 활성 링 (현재 앱)
+      // Active ring (current app)
       const activeRing = svgEl('rect', {
         x: pos.x - nodeWidth / 2 - 4,
         y: pos.y - nodeHeight / 2 - 4,
@@ -1375,7 +1375,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       activeRing.setAttribute('data-active-ring', appDef.name);
       group.appendChild(activeRing);
 
-      // 노드 배경
+      // Node background
       const bgRect = svgEl('rect', {
         x: pos.x - nodeWidth / 2,
         y: pos.y - nodeHeight / 2,
@@ -1387,10 +1387,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       });
       group.appendChild(bgRect);
 
-      // 성능 바 (하단에 얇은 바)
+      // Performance bar (thin bar at bottom)
       const perfData = perf.summarize().get(appDef.name);
       if (perfData && perfData.total > 0) {
-        const maxMs = 500; // 기준값
+        const maxMs = 500; // Reference value
         const barWidth = Math.min((perfData.total / maxMs) * (nodeWidth - 4), nodeWidth - 4);
         const barColor = perfData.total < 100 ? '#3fb950' : perfData.total < 300 ? '#d29922' : '#f85149';
         const perfBar = svgEl('rect', {
@@ -1405,7 +1405,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         });
         group.appendChild(perfBar);
 
-        // 성능 수치 (노드 우측 하단)
+        // Performance metric (bottom-right of node)
         const perfLabel = svgEl('text', {
           x: pos.x + nodeWidth / 2 - 4,
           y: pos.y + nodeHeight / 2 - 6,
@@ -1417,7 +1417,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         group.appendChild(perfLabel);
       }
 
-      // 상태 도트
+      // Status dot
       const dot = svgEl('circle', {
         cx: pos.x - nodeWidth / 2 + 14,
         cy: pos.y - 3,
@@ -1427,7 +1427,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       });
       group.appendChild(dot);
 
-      // 앱 이름
+      // App name
       const label = svgEl('text', {
         x: pos.x + 4,
         y: pos.y - 5,
@@ -1436,7 +1436,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       label.textContent = appDef.short;
       group.appendChild(label);
 
-      // 상태 텍스트
+      // Status text
       const statusLabel = svgEl('text', {
         x: pos.x + 4,
         y: pos.y + 9,
@@ -1445,7 +1445,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       statusLabel.textContent = status.toLowerCase();
       group.appendChild(statusLabel);
 
-      // keepAlive 아이콘 (frozen 상태일 때 ❄ 표시)
+      // keepAlive icon (shows ❄ when frozen)
       if (status === 'FROZEN') {
         const frozenIcon = svgEl('text', {
           x: pos.x + nodeWidth / 2 - 10,
@@ -1458,7 +1458,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         group.appendChild(frozenIcon);
       }
 
-      // 호버 이벤트 → 리치 툴팁
+      // Hover event -> rich tooltip
       group.addEventListener('mouseenter', (e) => {
         const pData = perf.summarize().get(appDef.name);
         const perfRows = pData
@@ -1498,7 +1498,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         topoTooltip.style.left = `${e.clientX - panelRect.left + 14}px`;
         topoTooltip.style.top = `${e.clientY - panelRect.top - 20}px`;
 
-        // 엣지 하이라이트
+        // Edge highlight
         topoSvg.querySelectorAll<SVGLineElement>('.topo-edge').forEach((edge) => {
           const isConnected = edge.getAttribute('data-to') === appDef.name;
           edge.style.stroke = isConnected ? statusColor : '#21262d';
@@ -1522,14 +1522,14 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     }
   }
 
-  /** 노드에 글로우 효과를 일시적으로 적용한다 */
+  /** Temporarily applies a glow effect to a node */
   function pulseNode(appName: string, color: string): void {
     const glow = topoSvg.querySelector<SVGRectElement>(`[data-glow="${appName}"]`);
     if (!glow) return;
     glow.setAttribute('fill', color);
     glow.setAttribute('opacity', '0.6');
 
-    // 기존 타이머 제거
+    // Remove existing timer
     if (glowTimers[appName]) clearTimeout(glowTimers[appName]);
 
     glowTimers[appName] = setTimeout(() => {
@@ -1537,7 +1537,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     }, 600);
   }
 
-  /** 이벤트 발생 시 토폴로지 엣지에 애니메이션 파티클을 표시한다 */
+  /** Displays animated particles on topology edges when events occur */
   function animateParticle(fromApp: string, toApp: string, color: string): void {
     if (topologyPanel.style.display === 'none') return;
 
@@ -1584,11 +1584,11 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     setTimeout(() => particle.remove(), 800);
   }
 
-  // 초기 렌더
+  // Initial render
   setTimeout(() => refreshTopology(), 80);
 
   // ═══════════════════════════════════════════════
-  // ─── FLOW PANEL (시퀀스 다이어그램) ───
+  // ─── FLOW PANEL (sequence diagram) ───
   // ═══════════════════════════════════════════════
 
   const flowContainer = document.createElement('div');
@@ -1616,7 +1616,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   flowArrowSvg.classList.add('flow-arrow-overlay');
   flowSwimlanes.appendChild(flowArrowSvg);
 
-  // 스윔레인 생성 (Host + 각 앱)
+  // Create swim lanes (Host + each app)
   const allLanes = ['Host', ...APP_TOPOLOGY.map((a) => a.short)];
   const laneElements: Record<string, HTMLElement> = {};
 
@@ -1637,16 +1637,16 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     laneElements[laneName] = content;
   }
 
-  /** 앱 이름을 레인 이름으로 매핑한다 */
+  /** Maps an app name to a lane name */
   function toLaneName(appName: string): string {
     if (appName === 'host') return 'Host';
     const found = APP_TOPOLOGY.find((a) => a.name === appName);
     return found ? found.short : shortName(appName);
   }
 
-  /** Flow 뷰를 새로 그린다 */
+  /** Redraws the Flow view */
   function refreshFlowView(): void {
-    // 레인 콘텐츠 초기화
+    // Initialize lane contents
     for (const content of Object.values(laneElements)) {
       content.innerHTML = '';
     }
@@ -1664,7 +1664,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
     flowSwimlanes.style.width = `${totalWidth}px`;
 
-    // 레인 인덱스 → 세로 중심 좌표 매핑
+    // Lane index -> vertical center coordinate mapping
     const laneIndexMap: Record<string, number> = {};
     for (const [i, name] of allLanes.entries()) {
       laneIndexMap[name] = i;
@@ -1700,7 +1700,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const fromLane = toLaneName(flow.from);
       const toLane = toLaneName(flow.to);
 
-      // 소스 레인에 이벤트 도트
+      // Event dot on source lane
       const fromContent = laneElements[fromLane];
       if (fromContent) {
         const dot = document.createElement('div');
@@ -1711,7 +1711,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         fromContent.appendChild(dot);
       }
 
-      // 대상 레인에도 수신 도트
+      // Receiving dot on target lane
       const toContent = laneElements[toLane];
       if (toContent && fromLane !== toLane) {
         const receiveDot = document.createElement('div');
@@ -1724,7 +1724,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         receiveDot.title = `${formatTime(flow.timestamp)} ← ${flow.event}`;
         toContent.appendChild(receiveDot);
 
-        // 레인 간 연결 화살표 (SVG)
+        // Connection arrow between lanes (SVG)
         const fromIdx = laneIndexMap[fromLane];
         const toIdx = laneIndexMap[toLane];
         if (fromIdx !== undefined && toIdx !== undefined) {
@@ -1744,11 +1744,11 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       }
     }
 
-    // 최신 이벤트로 스크롤
+    // Scroll to latest event
     flowCanvas.scrollLeft = flowCanvas.scrollWidth;
   }
 
-  /** 앱 간 플로우를 기록한다 */
+  /** Records inter-app communication flow */
   function addFlow(entry: FlowEntry): void {
     flows.push(entry);
     if (flows.length > MAX_FLOWS) flows.shift();
@@ -1785,7 +1785,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     eventsToolbar.appendChild(btn);
   }
 
-  // Clear 버튼
+  // Clear button
   const clearBtn = document.createElement('button');
   clearBtn.className = 'events-clear-btn';
   clearBtn.textContent = 'Clear';
@@ -1801,7 +1801,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   eventsList.className = 'events-list';
   eventsContainer.appendChild(eventsList);
 
-  /** 필터에 맞는 이벤트만 렌더링한다 */
+  /** Renders only events matching the filter */
   function renderFilteredEvents(): void {
     eventsList.innerHTML = '';
     const filtered = activeFilter.value === 'all'
@@ -1814,7 +1814,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     eventsList.scrollTop = eventsList.scrollHeight;
   }
 
-  /** 이벤트 항목 DOM 요소를 생성한다 */
+  /** Creates a DOM element for an event entry */
   function createEventElement(entry: EventEntry): HTMLElement {
     const row = document.createElement('div');
     row.className = 'event-entry';
@@ -1844,7 +1844,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     return row;
   }
 
-  /** 이벤트를 추가하고 UI를 업데이트한다 */
+  /** Adds an event and updates the UI */
   function addEvent(entry: EventEntry): void {
     events.push(entry);
     if (events.length > MAX_EVENTS) events.shift();
@@ -1882,7 +1882,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   stateHistoryDiv.className = 'state-history';
   stateContainer.appendChild(stateHistoryDiv);
 
-  /** 현재 상태 트리 뷰를 새로 그린다 */
+  /** Redraws the current state tree view */
   function refreshStateView(): void {
     const state = globalState.getState();
     stateCurrent.innerHTML = `
@@ -1892,7 +1892,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     renderStateHistory();
   }
 
-  /** 상태 변경 이력을 렌더링한다 */
+  /** Renders the state change history */
   function renderStateHistory(): void {
     stateHistoryDiv.innerHTML = `<div class="state-section-title">Change History (${stateHistory.length})</div>`;
 
@@ -1925,7 +1925,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   // ─── Wire up data sources ───
   // ═══════════════════════════════════════════════
 
-  /** 상태 전이를 라이프사이클 phase 이름으로 매핑한다 */
+  /** Maps state transitions to lifecycle phase names */
   function resolvePhaseFromTransition(from: string, to: string): { endPhase: string; startPhase: string } | null {
     const upper = (s: string): string => s.toUpperCase();
     const f = upper(from);
@@ -1940,7 +1940,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     return null;
   }
 
-  // 레지스트리 상태 변경 → 토폴로지 + 이벤트 + 플로우 + 파생 성능 데이터
+  // Registry status change -> topology + events + flow + derived perf data
   registry.onStatusChange((event) => {
     statusCache[event.appName] = event.to;
 
@@ -1955,7 +1955,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       appName: event.appName,
     });
 
-    // 라이프사이클 전이에서 성능 데이터 파생
+    // Derive performance data from lifecycle transitions
     const now = performance.now();
     const phaseInfo = resolvePhaseFromTransition(event.from, event.to);
     if (phaseInfo) {
@@ -1966,7 +1966,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         derivedPerfData[event.appName] = { total: 0, phases: {} };
       }
 
-      // 종료되는 phase의 duration 계산
+      // Calculate duration of the ending phase
       if (phaseInfo.endPhase && phaseStartTimes[event.appName][phaseInfo.endPhase]) {
         const duration = now - phaseStartTimes[event.appName][phaseInfo.endPhase];
         derivedPerfData[event.appName].phases[phaseInfo.endPhase] = duration;
@@ -1975,22 +1975,22 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         delete phaseStartTimes[event.appName][phaseInfo.endPhase];
       }
 
-      // 새로 시작되는 phase 기록
+      // Record newly starting phase
       if (phaseInfo.startPhase) {
         phaseStartTimes[event.appName][phaseInfo.startPhase] = now;
       }
 
-      // Perf 탭이 보이면 업데이트
+      // Update if Perf tab is visible
       if (perfPanel.style.display !== 'none') {
         refreshPerfView();
       }
     }
 
-    // 토폴로지 시각 효과
+    // Topology visual effects
     pulseNode(event.appName, CATEGORY_COLORS.lifecycle);
     animateParticle('host', event.appName, CATEGORY_COLORS.lifecycle);
 
-    // 플로우 기록
+    // Record flow
     addFlow({
       timestamp: Date.now(),
       from: 'host',
@@ -2002,7 +2002,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     refreshTopology();
   });
 
-  // 이벤트 버스 구독
+  // Event bus subscription
   try {
     eventBus.on('auth:login', (payload) => {
       addEvent({
@@ -2073,10 +2073,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       });
     });
   } catch {
-    // eventBus API가 on('*')을 지원하지 않으면 무시한다
+    // Ignore if the eventBus API does not support on('*')
   }
 
-  // 글로벌 상태 구독
+  // Global state subscription
   globalState.subscribe((newState, prevState) => {
     const diffs: Array<{ key: string; oldValue: unknown; newValue: unknown }> = [];
     const allKeys = new Set([...Object.keys(newState), ...Object.keys(prevState)]);
@@ -2106,7 +2106,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     }
   });
 
-  // 라우터 이벤트 → Flow에도 기록
+  // Router events -> also record in Flow
   router.afterRouteChange((_from, to) => {
     const now = Date.now();
     addEvent({
@@ -2116,7 +2116,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       detail: `${_from.pathname} → ${to.pathname}`,
     });
 
-    // 라우트 변경을 Host → 대상 앱으로 플로우에 기록
+    // Record route change as Host -> target app in flow
     const targetApp = APP_TOPOLOGY.find((a) => {
       const path = a.name === '@enterprise/dashboard' ? '/dashboard' : `/${a.short.toLowerCase()}`;
       return to.pathname === path || (to.pathname === '/' && a.name === '@enterprise/dashboard');
@@ -2132,7 +2132,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     }
   });
 
-  // 기존 이벤트 히스토리 로드
+  // Load existing event history
   try {
     const history = eventBus.getHistory();
     for (const item of history) {
@@ -2144,13 +2144,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       });
     }
   } catch {
-    // getHistory가 지원되지 않으면 무시한다
+    // Ignore if getHistory is not supported
   }
 
-  // 초기 상태 렌더
+  // Initial state render
   refreshStateView();
 
-  // ─── Perf measurement listener (실시간 성능 데이터) ───
+  // ─── Perf measurement listener (real-time performance data) ───
   if (perf.onMeasurement) {
     try {
       perf.onMeasurement((measurement) => {
@@ -2161,17 +2161,17 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
           detail: `${shortName(measurement.appName)} ${measurement.duration.toFixed(0)}ms`,
           appName: measurement.appName,
         });
-        // 토폴로지가 보이면 성능 바 업데이트를 위해 리프레시
+        // Refresh topology if visible to update performance bars
         if (topologyPanel.style.display !== 'none') {
           refreshTopology();
         }
-        // Perf 탭이 보이면 워터폴 업데이트
+        // Update waterfall if Perf tab is visible
         if (perfPanel.style.display !== 'none') {
           refreshPerfView();
         }
       });
     } catch {
-      // onMeasurement이 지원되지 않으면 무시
+      // Ignore if onMeasurement is not supported
     }
   }
 
@@ -2179,7 +2179,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   // ─── PERF WATERFALL PANEL ───
   // ═══════════════════════════════════════════════
 
-  /** 성능 위상(phase)별 색상 */
+  /** Colors per performance phase */
   const PHASE_COLORS: Record<string, string> = {
     load: '#60a5fa',
     bootstrap: '#c084fc',
@@ -2188,12 +2188,12 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     update: '#fbbf24',
   };
 
-  /** perf.summarize()와 derivedPerfData를 병합한 성능 데이터를 구성한다 */
+  /** Composes performance data by merging perf.summarize() with derivedPerfData */
   function collectPerfSummary(): Map<string, { total: number; phases: Record<string, number> }> {
     const summary = perf.summarize();
     const merged = new Map<string, { total: number; phases: Record<string, number> }>(summary);
 
-    // perf.summarize()에 없는 앱은 derivedPerfData에서 채운다
+    // Fill in apps missing from perf.summarize() using derivedPerfData
     for (const [appName, data] of Object.entries(derivedPerfData)) {
       if (!merged.has(appName) && data.total > 0) {
         merged.set(appName, { total: data.total, phases: { ...data.phases } });
@@ -2202,7 +2202,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     return merged;
   }
 
-  /** 성능 워터폴 뷰를 렌더링한다 */
+  /** Renders the performance waterfall view */
   function refreshPerfView(): void {
     const summary = collectPerfSummary();
 
@@ -2225,10 +2225,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       return;
     }
 
-    // 전체 최대 시간 계산 (스케일링 기준)
+    // Calculate overall max time (scaling reference)
     const maxTotal = Math.max(...Array.from(summary.values()).map((d) => d.total), 1);
 
-    // 스케일 눈금 표시
+    // Scale tick marks
     const scale = document.createElement('div');
     scale.className = 'perf-scale';
     const ticks = [0, Math.round(maxTotal * 0.25), Math.round(maxTotal * 0.5), Math.round(maxTotal * 0.75), Math.round(maxTotal)];
@@ -2240,7 +2240,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     }
     container.appendChild(scale);
 
-    // 앱별 워터폴 행
+    // Per-app waterfall rows
     for (const appDef of APP_TOPOLOGY) {
       const data = summary.get(appDef.name);
       if (!data || data.total === 0) continue;
@@ -2256,7 +2256,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const barContainer = document.createElement('div');
       barContainer.className = 'perf-bar-container';
 
-      // 위상별 세그먼트 (stacked bar)
+      // Per-phase segment (stacked bar)
       const entries = Object.entries(data.phases);
       for (const [phase, duration] of entries) {
         const widthPct = (duration / maxTotal) * 100;
@@ -2285,7 +2285,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       container.appendChild(row);
     }
 
-    // 범례
+    // Legend
     const legend = document.createElement('div');
     legend.className = 'perf-legend';
     for (const [phase, color] of Object.entries(PHASE_COLORS)) {
@@ -2307,7 +2307,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   // ─── DEPS (SHARED MODULE DEPENDENCY) PANEL ───
   // ═══════════════════════════════════════════════
 
-  /** 공유 모듈 의존성 뷰를 렌더링한다 */
+  /** Renders the shared module dependencies view */
   function refreshDepsView(): void {
     depsPanel.innerHTML = '';
 
@@ -2339,7 +2339,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       return;
     }
 
-    // ─── 요약 배너: 버전 충돌 감지 ───
+    // ─── Summary banner: version conflict detection ───
     const conflictModules: string[] = [];
     for (const [modName, candidates] of registered) {
       const versions = new Set(candidates.map((c) => c.version));
@@ -2358,7 +2358,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       container.appendChild(banner);
     }
 
-    // ─── 모듈 카드 리스트 ───
+    // ─── Module card list ───
     for (const [moduleName, candidates] of registered) {
       const loadedInfo = loaded.get(moduleName);
       const uniqueVersions = new Set(candidates.map((c) => c.version));
@@ -2367,7 +2367,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const card = document.createElement('div');
       card.style.cssText = `background:#161b22;border:1px solid ${hasConflict ? '#f8717140' : '#21262d'};border-radius:8px;padding:12px 16px;margin-bottom:10px`;
 
-      // 헤더: 모듈 이름 + 로딩 상태 배지
+      // Header: module name + loading status badge
       const header = document.createElement('div');
       header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px';
 
@@ -2385,7 +2385,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       badge.textContent = loadedInfo ? `v${loadedInfo.version} loaded` : 'not loaded';
       header.appendChild(badge);
 
-      // Singleton 배지
+      // Singleton badge
       const isSingleton = candidates.some((c) => c.singleton);
       if (isSingleton) {
         const singletonBadge = document.createElement('span');
@@ -2394,7 +2394,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         header.appendChild(singletonBadge);
       }
 
-      // Eager 배지
+      // Eager badge
       const isEager = candidates.some((c) => c.eager);
       if (isEager) {
         const eagerBadge = document.createElement('span');
@@ -2403,7 +2403,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         header.appendChild(eagerBadge);
       }
 
-      // Version conflict 배지
+      // Version conflict badge
       if (hasConflict) {
         const conflictBadge = document.createElement('span');
         conflictBadge.style.cssText = 'font-size:10px;padding:1px 8px;border-radius:10px;background:#f8717120;color:#f87171;border:1px solid #f8717140;font-weight:500';
@@ -2413,7 +2413,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
       card.appendChild(header);
 
-      // Provider 목록 (어떤 앱이 이 모듈을 등록했는지)
+      // Provider list (which apps registered this module)
       const providerList = document.createElement('div');
       providerList.style.cssText = 'display:flex;flex-direction:column;gap:4px';
 
@@ -2421,7 +2421,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         const row = document.createElement('div');
         row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:11px';
 
-        // 선택된 버전 표시 (loaded와 일치하면 하이라이트)
+        // Display selected version (highlighted if matching loaded)
         const isActive = loadedInfo?.version === candidate.version && loadedInfo.from === candidate.from;
         const indicator = document.createElement('span');
         indicator.style.cssText = `width:6px;height:6px;border-radius:50%;flex-shrink:0;background:${isActive ? '#4ade80' : '#30363d'}`;
@@ -2451,7 +2451,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       container.appendChild(card);
     }
 
-    // ─── Import Map 엔트리 테이블 ───
+    // ─── Import Map entry table ───
     if (importMap) {
       const imTitle = document.createElement('div');
       imTitle.style.cssText = 'font-size:13px;font-weight:600;color:#e6edf3;margin:20px 0 10px';
@@ -2461,13 +2461,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const table = document.createElement('div');
       table.style.cssText = 'background:#161b22;border:1px solid #21262d;border-radius:8px;overflow:hidden';
 
-      // 헤더
+      // Header
       const headerRow = document.createElement('div');
       headerRow.style.cssText = 'display:flex;padding:8px 12px;border-bottom:1px solid #21262d;font-size:10px;font-weight:600;color:#7d8590;text-transform:uppercase;letter-spacing:0.5px';
       headerRow.innerHTML = '<span style="width:200px;flex-shrink:0">Specifier</span><span style="flex:1">URL</span><span style="width:60px;text-align:right">Type</span>';
       table.appendChild(headerRow);
 
-      // Import 엔트리
+      // Import entries
       const sortedImports = Object.entries(importMap.imports).sort(([a], [b]) => a.localeCompare(b));
       for (const [specifier, url] of sortedImports) {
         const row = document.createElement('div');
@@ -2475,7 +2475,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         row.addEventListener('mouseenter', () => { row.style.background = '#1c2128'; });
         row.addEventListener('mouseleave', () => { row.style.background = ''; });
 
-        // 앱인지 라이브러리인지 판별
+        // Determine if app or library
         const isApp = APP_TOPOLOGY.some((a) => specifier.includes(a.name.replace('@enterprise/', '')));
         const typeColor = isApp ? '#60a5fa' : '#c084fc';
         const typeLabel = isApp ? 'App' : 'Lib';
@@ -2490,7 +2490,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
       container.appendChild(table);
 
-      // Scopes 섹션
+      // Scopes section
       if (importMap.scopes && Object.keys(importMap.scopes).length > 0) {
         const scopeTitle = document.createElement('div');
         scopeTitle.style.cssText = 'font-size:12px;font-weight:600;color:#7d8590;margin:14px 0 8px';
@@ -2512,7 +2512,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       }
     }
 
-    // ─── 의존성 그래프 SVG ───
+    // ─── Dependency graph SVG ───
     const graphTitle = document.createElement('div');
     graphTitle.style.cssText = 'font-size:13px;font-weight:600;color:#e6edf3;margin:20px 0 12px';
     graphTitle.textContent = 'Dependency Graph';
@@ -2527,7 +2527,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     svgEl.setAttribute('height', '100%');
     svgContainer.appendChild(svgEl);
 
-    // 레이아웃 계산: 앱 노드를 좌측, 모듈 노드를 우측에 배치
+    // Layout calculation: app nodes on the left, module nodes on the right
     const rect = svgContainer.getBoundingClientRect();
     const svgW = rect.width || 600;
     const moduleNames = [...registered.keys()];
@@ -2558,7 +2558,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     const appPositions: Record<string, number> = {};
     const modPositions: Record<string, number> = {};
 
-    // 앱 노드 (좌측)
+    // App nodes (left)
     for (const [i, appName] of appNames.entries()) {
       const y = 20 + i * rowHeight + rowHeight / 2;
       appPositions[appName] = y;
@@ -2586,7 +2586,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       svgEl.appendChild(text);
     }
 
-    // 모듈 노드 (우측)
+    // Module nodes (right)
     for (const [i, modName] of moduleNames.entries()) {
       const y = 20 + i * rowHeight + rowHeight / 2;
       modPositions[modName] = y;
@@ -2614,7 +2614,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       svgEl.appendChild(text);
     }
 
-    // 엣지: 각 모듈의 provider 앱 → 모듈
+    // Edges: provider app -> module for each module
     for (const [modName, candidates] of registered) {
       const my = modPositions[modName];
       if (my === undefined) continue;
@@ -2642,7 +2642,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
   // ─── Public API ───
 
-  /** 외부에서 로그 메시지를 패널에 추가한다 */
+  /** Adds a log message to the panel from outside */
   function log(message: string): void {
     addEvent({
       timestamp: Date.now(),
@@ -2652,7 +2652,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     });
   }
 
-  /** 패널을 파괴하고 정리한다 */
+  /** Destroys and cleans up the panel */
   function destroy(): void {
     style.remove();
     root.innerHTML = '';
@@ -2667,14 +2667,14 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 // ─── Resize logic ───
 
 /**
- * 드래그로 패널 높이를 조절하는 리사이즈 핸들러를 설정한다.
- * @param handle - 드래그 핸들 요소
- * @param panel - 리사이즈 대상 패널 요소
+ * Sets up a resize handler that adjusts panel height by dragging.
+ * @param handle - drag handle element
+ * @param panel - the panel element to resize
  */
 function setupResize(handle: HTMLElement, panel: HTMLElement): void {
   const state = { dragging: false, startY: 0, startHeight: 0 };
 
-  /** 마우스 다운 시 드래그를 시작한다 */
+  /** Starts dragging on mouse down */
   const onMouseDown = (e: MouseEvent): void => {
     state.dragging = true;
     state.startY = e.clientY;
@@ -2684,7 +2684,7 @@ function setupResize(handle: HTMLElement, panel: HTMLElement): void {
     e.preventDefault();
   };
 
-  /** 마우스 이동 시 패널 높이를 갱신한다 */
+  /** Updates panel height on mouse move */
   const onMouseMove = (e: MouseEvent): void => {
     if (!state.dragging) return;
     const delta = state.startY - e.clientY;
@@ -2692,7 +2692,7 @@ function setupResize(handle: HTMLElement, panel: HTMLElement): void {
     panel.style.height = `${newHeight}px`;
   };
 
-  /** 마우스 업 시 드래그를 종료한다 */
+  /** Ends dragging on mouse up */
   const onMouseUp = (): void => {
     if (!state.dragging) return;
     state.dragging = false;

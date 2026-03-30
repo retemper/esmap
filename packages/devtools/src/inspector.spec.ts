@@ -7,7 +7,7 @@ describe('createDevtoolsInspector', () => {
     vi.restoreAllMocks();
   });
 
-  /** 테스트용 이벤트 버스 stub을 생성한다 */
+  /** Creates a mock event bus stub for testing */
   function createMockEventBus(
     history: ReadonlyArray<{ event: string; payload: unknown; timestamp: number }> = [],
     listenerCounts: Record<string, number> = {},
@@ -19,7 +19,7 @@ describe('createDevtoolsInspector', () => {
     };
   }
 
-  /** 테스트용 공유 모듈 레지스트리 stub을 생성한다 */
+  /** Creates a mock shared module registry stub for testing */
   function createMockSharedModules(
     registered: ReadonlyMap<string, ReadonlyArray<{ name: string; version: string; singleton?: boolean; eager?: boolean; from?: string }>> = new Map(),
     loaded: ReadonlyMap<string, { version: string; module: unknown; from?: string }> = new Map(),
@@ -30,7 +30,7 @@ describe('createDevtoolsInspector', () => {
     };
   }
 
-  /** 테스트용 앱 레지스트리 stub을 생성한다 */
+  /** Creates a mock app registry stub for testing */
   function createMockRegistry(
     apps: ReadonlyArray<{ name: string; status: string; container: string }> = [],
   ) {
@@ -40,7 +40,7 @@ describe('createDevtoolsInspector', () => {
   }
 
   describe('connect', () => {
-    it('연결 상태를 콘솔에 출력한다', () => {
+    it('prints connection status to the console', () => {
       const inspector = createDevtoolsInspector();
       const logSpy = vi.spyOn(console, 'log');
 
@@ -50,12 +50,12 @@ describe('createDevtoolsInspector', () => {
       });
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('연결됨'),
-        expect.stringContaining('EventBus: 연결'),
+        expect.stringContaining('Connected'),
+        expect.stringContaining('EventBus: connected'),
       );
     });
 
-    it('마지막 연결이 유지된다', () => {
+    it('retains the latest connection', () => {
       const inspector = createDevtoolsInspector();
       const bus1 = createMockEventBus([
         { event: 'old', payload: null, timestamp: 1000 },
@@ -71,24 +71,24 @@ describe('createDevtoolsInspector', () => {
       inspector.events();
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('1건'),
+        expect.stringContaining('1 entries'),
       );
     });
   });
 
   describe('events', () => {
-    it('EventBus 미연결 시 경고를 출력한다', () => {
+    it('prints a warning when EventBus is not connected', () => {
       const inspector = createDevtoolsInspector();
       const warnSpy = vi.spyOn(console, 'warn');
 
       inspector.events();
 
       expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('EventBus가 연결되지 않았습니다'),
+        expect.stringContaining('EventBus is not connected'),
       );
     });
 
-    it('이력이 없으면 없음 메시지를 출력한다', () => {
+    it('prints an empty message when there is no history', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({ eventBus: createMockEventBus() });
 
@@ -96,11 +96,11 @@ describe('createDevtoolsInspector', () => {
       inspector.events();
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('이벤트 이력 없음'),
+        expect.stringContaining('No event history'),
       );
     });
 
-    it('전체 이벤트 이력을 출력한다', () => {
+    it('prints the full event history', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         eventBus: createMockEventBus([
@@ -115,15 +115,15 @@ describe('createDevtoolsInspector', () => {
 
       inspector.events();
 
-      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('2건'));
-      // 이벤트 2건이 각각 출력된다
+      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('2 entries'));
+      // Both events are printed individually
       const logCalls = logSpy.mock.calls.map((args) => args[0] as string);
       expect(logCalls.some((msg) => msg.includes('user:login'))).toBe(true);
       expect(logCalls.some((msg) => msg.includes('app:mounted'))).toBe(true);
       expect(groupEndSpy).toHaveBeenCalled();
     });
 
-    it('와일드카드 필터로 이벤트를 필터링한다', () => {
+    it('filters events using a wildcard filter', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         eventBus: createMockEventBus([
@@ -137,14 +137,14 @@ describe('createDevtoolsInspector', () => {
       inspector.events('user:*');
 
       expect(groupSpy).toHaveBeenCalledWith(
-        expect.stringContaining('2건'),
+        expect.stringContaining('2 entries'),
       );
       expect(groupSpy).toHaveBeenCalledWith(
-        expect.stringContaining('필터: "user:*"'),
+        expect.stringContaining('filter: "user:*"'),
       );
     });
 
-    it('필터에 매칭되는 이벤트가 없으면 없음 메시지를 출력한다', () => {
+    it('prints an empty message when no events match the filter', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         eventBus: createMockEventBus([
@@ -156,11 +156,11 @@ describe('createDevtoolsInspector', () => {
       inspector.events('user:*');
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('필터: "user:*"'),
+        expect.stringContaining('filter: "user:*"'),
       );
     });
 
-    it('정확 일치 필터를 지원한다', () => {
+    it('supports exact match filtering', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         eventBus: createMockEventBus([
@@ -172,23 +172,23 @@ describe('createDevtoolsInspector', () => {
       const groupSpy = vi.spyOn(console, 'group');
       inspector.events('user:login');
 
-      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('1건'));
+      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('1 entries'));
     });
   });
 
   describe('listeners', () => {
-    it('EventBus 미연결 시 경고를 출력한다', () => {
+    it('prints a warning when EventBus is not connected', () => {
       const inspector = createDevtoolsInspector();
       const warnSpy = vi.spyOn(console, 'warn');
 
       inspector.listeners('some:event');
 
       expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('EventBus가 연결되지 않았습니다'),
+        expect.stringContaining('EventBus is not connected'),
       );
     });
 
-    it('특정 이벤트의 리스너 수를 출력한다', () => {
+    it('prints the listener count for a specific event', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         eventBus: createMockEventBus([], { 'user:login': 3 }),
@@ -198,11 +198,11 @@ describe('createDevtoolsInspector', () => {
       inspector.listeners('user:login');
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('"user:login" 리스너: 3개'),
+        expect.stringContaining('"user:login" listeners: 3'),
       );
     });
 
-    it('리스너가 없는 이벤트는 0을 출력한다', () => {
+    it('prints 0 for events with no listeners', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         eventBus: createMockEventBus([], {}),
@@ -212,24 +212,24 @@ describe('createDevtoolsInspector', () => {
       inspector.listeners('unknown:event');
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('리스너: 0개'),
+        expect.stringContaining('listeners: 0'),
       );
     });
   });
 
   describe('shared', () => {
-    it('SharedModuleRegistry 미연결 시 경고를 출력한다', () => {
+    it('prints a warning when SharedModuleRegistry is not connected', () => {
       const inspector = createDevtoolsInspector();
       const warnSpy = vi.spyOn(console, 'warn');
 
       inspector.shared();
 
       expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('SharedModuleRegistry가 연결되지 않았습니다'),
+        expect.stringContaining('SharedModuleRegistry is not connected'),
       );
     });
 
-    it('등록/로드 상태를 출력한다', () => {
+    it('prints registration and loading status', () => {
       const registered = new Map([
         ['react', [{ name: 'react', version: '18.2.0', singleton: true }]],
         ['lodash', [{ name: 'lodash', version: '4.17.0' }, { name: 'lodash', version: '4.18.0' }]],
@@ -250,7 +250,7 @@ describe('createDevtoolsInspector', () => {
       inspector.shared();
 
       expect(groupSpy).toHaveBeenCalledWith(
-        expect.stringContaining('등록: 2, 로드: 1'),
+        expect.stringContaining('registered: 2, loaded: 1'),
       );
       expect(logSpy).toHaveBeenCalledWith(
         expect.stringContaining('react'),
@@ -264,7 +264,7 @@ describe('createDevtoolsInspector', () => {
       expect(groupEndSpy).toHaveBeenCalled();
     });
 
-    it('미로드 모듈은 미로드로 표시한다', () => {
+    it('marks unloaded modules as not loaded', () => {
       const registered = new Map([
         ['vue', [{ name: 'vue', version: '3.3.0' }]],
       ]);
@@ -277,23 +277,23 @@ describe('createDevtoolsInspector', () => {
       const logSpy = vi.spyOn(console, 'log');
       inspector.shared();
 
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('미로드'));
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('not loaded'));
     });
   });
 
   describe('apps', () => {
-    it('AppRegistry 미연결 시 경고를 출력한다', () => {
+    it('prints a warning when AppRegistry is not connected', () => {
       const inspector = createDevtoolsInspector();
       const warnSpy = vi.spyOn(console, 'warn');
 
       inspector.apps();
 
       expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('AppRegistry가 연결되지 않았습니다'),
+        expect.stringContaining('AppRegistry is not connected'),
       );
     });
 
-    it('등록된 앱이 없으면 없음 메시지를 출력한다', () => {
+    it('prints an empty message when no apps are registered', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({ registry: createMockRegistry() });
 
@@ -301,11 +301,11 @@ describe('createDevtoolsInspector', () => {
       inspector.apps();
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('등록된 앱 없음'),
+        expect.stringContaining('No registered apps'),
       );
     });
 
-    it('앱 목록을 출력한다', () => {
+    it('prints the app list', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         registry: createMockRegistry([
@@ -320,7 +320,7 @@ describe('createDevtoolsInspector', () => {
 
       inspector.apps();
 
-      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('2개'));
+      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('(2)'));
       expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('app-home'));
       expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('MOUNTED'));
       expect(groupEndSpy).toHaveBeenCalled();
@@ -328,19 +328,19 @@ describe('createDevtoolsInspector', () => {
   });
 
   describe('status', () => {
-    it('연결되지 않은 상태를 출력한다', () => {
+    it('prints the disconnected state', () => {
       const inspector = createDevtoolsInspector();
       const logSpy = vi.spyOn(console, 'log');
 
       inspector.status();
 
       expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('연결 상태'),
-        expect.stringContaining('미연결'),
+        expect.stringContaining('Connection status'),
+        expect.stringContaining('disconnected'),
       );
     });
 
-    it('모든 리소스 연결 후 상태를 출력한다', () => {
+    it('prints status after connecting all resources', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
         eventBus: createMockEventBus(),
@@ -354,9 +354,9 @@ describe('createDevtoolsInspector', () => {
       const statusOutput = logSpy.mock.calls
         .map((call) => call.join(' '))
         .join(' ');
-      expect(statusOutput).toContain('EventBus: 연결');
-      expect(statusOutput).toContain('SharedModules: 연결');
-      expect(statusOutput).toContain('Registry: 연결');
+      expect(statusOutput).toContain('EventBus: connected');
+      expect(statusOutput).toContain('SharedModules: connected');
+      expect(statusOutput).toContain('Registry: connected');
     });
   });
 });

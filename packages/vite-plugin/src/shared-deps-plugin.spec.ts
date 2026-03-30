@@ -6,16 +6,16 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createHash } from 'node:crypto';
 
-/** writeBundle 훅을 추출하여 실행하는 헬퍼 */
+/** Helper to extract and execute the writeBundle hook */
 async function callWriteBundle(
   plugin: Plugin,
   outDir: string,
   bundle: Rollup.OutputBundle,
 ): Promise<void> {
   const hook = plugin.writeBundle;
-  if (typeof hook !== 'function') throw new Error('writeBundle hook이 없음');
+  if (typeof hook !== 'function') throw new Error('writeBundle hook not found');
 
-  // writeBundle 전에 번들의 원본 파일을 디스크에 기록한다
+  // Write the original bundle files to disk before writeBundle
   await mkdir(outDir, { recursive: true });
   for (const chunk of Object.values(bundle)) {
     if (chunk.type === 'chunk') {
@@ -28,7 +28,7 @@ async function callWriteBundle(
   await hook.call({} as never, outputOptions, bundle);
 }
 
-/** 테스트용 OutputChunk 생성 */
+/** Creates a test OutputChunk */
 function createChunk(
   fileName: string,
   name: string,
@@ -58,7 +58,7 @@ function createChunk(
   };
 }
 
-/** 문자열의 content hash를 계산하는 헬퍼 */
+/** Helper to compute the content hash of a string */
 function expectedHash(content: string): string {
   return createHash('sha256').update(content).digest('hex').slice(0, 8);
 }
@@ -74,23 +74,23 @@ describe('esmapSharedDeps', () => {
     await rm(testDir, { recursive: true, force: true });
   });
 
-  it('플러그인 이름이 esmap:shared-deps이다', () => {
+  it('has plugin name esmap:shared-deps', () => {
     const plugin = esmapSharedDeps({ deps: { react: 'react' } });
     expect(plugin.name).toBe('esmap:shared-deps');
   });
 
-  it('빌드 시에만 적용된다', () => {
+  it('applies only during build', () => {
     const plugin = esmapSharedDeps({ deps: { react: 'react' } });
     expect(plugin.apply).toBe('build');
   });
 
-  it('config 훅이 rollup input과 ES 포맷을 설정한다', () => {
+  it('config hook sets rollup input and ES format', () => {
     const plugin = esmapSharedDeps({
       deps: { react: 'react', lodash: 'lodash-es' },
     });
 
     const configHook = plugin.config;
-    if (typeof configHook !== 'function') throw new Error('config hook이 없음');
+    if (typeof configHook !== 'function') throw new Error('config hook not found');
 
     const result = configHook.call({} as never, {} as never, {} as never);
     expect(result).toStrictEqual({
@@ -106,7 +106,7 @@ describe('esmapSharedDeps', () => {
     });
   });
 
-  it('매니페스트가 올바른 형식으로 생성된다', async () => {
+  it('generates manifest in the correct format', async () => {
     const reactCode = 'export const useState = () => {};';
     const plugin = esmapSharedDeps({
       deps: { react: 'react' },
@@ -130,7 +130,7 @@ describe('esmapSharedDeps', () => {
     expect(arr[0]).toHaveProperty('exports');
   });
 
-  it('content-hash 파일명이 포함된다', async () => {
+  it('includes content-hash file names', async () => {
     const reactCode = 'export const useState = () => {};';
     const hash = expectedHash(reactCode);
 
@@ -152,14 +152,14 @@ describe('esmapSharedDeps', () => {
     const exports = reactManifest.exports as Record<string, string>;
     expect(exports['.']).toBe(`react-${hash}.js`);
 
-    // content-hash 파일이 디스크에 존재한다
+    // content-hash file exists on disk
     const files = await readdir(testDir);
     expect(files).toContain(`react-${hash}.js`);
-    // 원본 파일명은 리네임되어 존재하지 않는다
+    // original file name no longer exists (renamed)
     expect(files).not.toContain('react.js');
   });
 
-  it('exports 매핑이 올바르다', async () => {
+  it('produces correct exports mapping', async () => {
     const reactCode = 'export const useState = () => {};';
     const lodashCode = 'export const debounce = () => {};';
 
@@ -190,7 +190,7 @@ describe('esmapSharedDeps', () => {
     expect(lodashExports).toStrictEqual({ '.': `lodash-${expectedHash(lodashCode)}.js` });
   });
 
-  it('기본 출력 파일명이 적용된다', async () => {
+  it('uses the default output file name', async () => {
     const plugin = esmapSharedDeps({
       deps: { react: 'react' },
     });
@@ -205,7 +205,7 @@ describe('esmapSharedDeps', () => {
     expect(files).toContain('shared-deps-manifest.json');
   });
 
-  it('커스텀 출력 파일명이 적용된다', async () => {
+  it('uses a custom output file name', async () => {
     const plugin = esmapSharedDeps({
       deps: { react: 'react' },
       outputFileName: 'custom-shared.json',

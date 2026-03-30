@@ -1,38 +1,38 @@
 /**
- * 글로벌 오염을 감지하고 방지하는 가드.
- * MFE 앱이 window 객체에 예기치 않은 속성을 추가하는 것을 모니터링한다.
+ * Guard that detects and prevents global pollution.
+ * Monitors MFE apps adding unexpected properties to the window object.
  */
 
-/** 글로벌 가드 옵션 */
+/** Global guard options */
 export interface GlobalGuardOptions {
-  /** 허용된 전역 변수 이름 목록 */
+  /** List of allowed global variable names */
   readonly allowList?: readonly string[];
-  /** 위반 시 호출되는 콜백 */
+  /** Callback invoked on violation */
   readonly onViolation?: (violation: GlobalViolation) => void;
-  /** 폴링 간격(ms). 기본값 1000. 낮은 값은 성능에 영향을 준다. */
+  /** Polling interval in ms. Default 1000. Lower values impact performance. */
   readonly interval?: number;
 }
 
-/** 글로벌 위반 정보 */
+/** Global violation information */
 export interface GlobalViolation {
-  /** 추가/변경된 전역 변수 이름 */
+  /** Name of the added/modified global variable */
   readonly property: string;
-  /** 위반 유형 */
+  /** Violation type */
   readonly type: 'add' | 'modify';
 }
 
-/** 가드 해제 함수 */
+/** Guard disposal handle */
 export interface GlobalGuardHandle {
-  /** 가드를 해제하고 스냅샷 이후 추가된 전역 변수를 반환한다. */
+  /** Disposes the guard and returns global variables added since the snapshot. */
   readonly dispose: () => readonly string[];
-  /** 수동으로 즉시 검사를 트리거한다. */
+  /** Manually triggers an immediate check. */
   readonly check: () => void;
 }
 
 /**
- * 현재 window 전역 변수의 스냅샷을 찍고, 이후 변경을 감지한다.
- * @param options - 가드 옵션
- * @returns 가드 핸들
+ * Takes a snapshot of current window globals and detects subsequent changes.
+ * @param options - guard options
+ * @returns guard handle
  */
 export function createGlobalGuard(options?: GlobalGuardOptions): GlobalGuardHandle {
   const snapshot = new Set(Object.keys(globalThis));
@@ -40,7 +40,7 @@ export function createGlobalGuard(options?: GlobalGuardOptions): GlobalGuardHand
   const addedSet = new Set<string>();
   const interval = options?.interval ?? 1000;
 
-  /** 현재 전역 변수를 스냅샷과 비교하여 새로 추가된 변수를 감지한다. */
+  /** Compares current globals against the snapshot to detect newly added variables. */
   function check(): void {
     const currentKeys = Object.keys(globalThis);
     for (const key of currentKeys) {
@@ -63,10 +63,10 @@ export function createGlobalGuard(options?: GlobalGuardOptions): GlobalGuardHand
 }
 
 /**
- * window 전역 변수의 차이를 한 번만 계산한다 (비동기 폴링 없음).
- * @param before - 이전 전역 변수 이름 Set
- * @param allowList - 허용 목록
- * @returns 새로 추가된 전역 변수 이름 목록
+ * Computes the diff of window globals once (no async polling).
+ * @param before - previous set of global variable names
+ * @param allowList - allow list
+ * @returns list of newly added global variable names
  */
 export function diffGlobals(
   before: ReadonlySet<string>,
@@ -77,7 +77,7 @@ export function diffGlobals(
   return currentKeys.filter((key) => !before.has(key) && !allowSet.has(key));
 }
 
-/** 현재 전역 변수 이름의 스냅샷을 생성한다. */
+/** Creates a snapshot of current global variable names. */
 export function snapshotGlobals(): ReadonlySet<string> {
   return new Set(Object.keys(globalThis));
 }

@@ -4,8 +4,8 @@ import { esmapManifest, esmapCssScope } from '@esmap/vite-plugin';
 import { mfeDevExternals } from '../_shared/dev-externals-plugin.js';
 
 /**
- * Notifications MFE 빌드 설정.
- * 크로스-MFE 이벤트 수집 및 알림 센터 위젯.
+ * Notifications MFE build configuration.
+ * Cross-MFE event collection and notification center widget.
  */
 export default defineConfig(({ command }) => ({
   root: __dirname,

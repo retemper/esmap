@@ -13,7 +13,7 @@ describe('applyCssScope', () => {
     document.body.innerHTML = '<div id="app"></div>';
   });
 
-  it('attribute 모드에서 data-esmap-scope 속성을 추가한다', () => {
+  it('adds data-esmap-scope attribute in attribute mode', () => {
     const container = document.getElementById('app')!;
     const result = applyCssScope(container, { prefix: 'checkout' });
 
@@ -21,7 +21,7 @@ describe('applyCssScope', () => {
     expect(result).toBe(container);
   });
 
-  it('Shadow DOM 모드에서 shadow root를 생성하고 wrapper를 반환한다', () => {
+  it('creates a shadow root and returns a wrapper in Shadow DOM mode', () => {
     const container = document.getElementById('app')!;
     const result = applyCssScope(container, { prefix: 'checkout', useShadowDom: true });
 
@@ -30,7 +30,7 @@ describe('applyCssScope', () => {
     expect(result).not.toBe(container);
   });
 
-  it('이미 shadow root가 있으면 재사용한다', () => {
+  it('reuses the existing shadow root if one exists', () => {
     const container = document.getElementById('app')!;
     container.attachShadow({ mode: 'open' });
 
@@ -42,7 +42,7 @@ describe('applyCssScope', () => {
 });
 
 describe('removeCssScope', () => {
-  it('data-esmap-scope 속성을 제거한다', () => {
+  it('removes the data-esmap-scope attribute', () => {
     const container = document.createElement('div');
     container.setAttribute('data-esmap-scope', 'checkout');
 
@@ -51,22 +51,22 @@ describe('removeCssScope', () => {
     expect(container.hasAttribute('data-esmap-scope')).toBe(false);
   });
 
-  it('Shadow DOM 모드에서는 에러 없이 완료된다', () => {
+  it('completes without errors in Shadow DOM mode', () => {
     const container = document.createElement('div');
     removeCssScope(container, { prefix: 'checkout', useShadowDom: true });
   });
 });
 
 describe('scopeCssText', () => {
-  describe('기본 선택자 스코핑', () => {
-    it('선택자에 스코프 attribute를 추가한다', () => {
+  describe('basic selector scoping', () => {
+    it('adds the scope attribute to selectors', () => {
       const css = '.button { color: red; }';
       const result = scopeCssText(css, 'checkout');
 
       expect(result).toContain('[data-esmap-scope="checkout"] .button');
     });
 
-    it(':root 선택자를 스코프 attribute로 대체한다', () => {
+    it('replaces :root selector with the scope attribute', () => {
       const css = ':root { --color: red; }';
       const result = scopeCssText(css, 'checkout');
 
@@ -74,7 +74,7 @@ describe('scopeCssText', () => {
       expect(result).not.toContain(':root');
     });
 
-    it('html 선택자를 스코프 attribute로 대체한다', () => {
+    it('replaces html selector with the scope attribute', () => {
       const css = 'html { font-size: 16px; }';
       const result = scopeCssText(css, 'checkout');
 
@@ -82,14 +82,14 @@ describe('scopeCssText', () => {
       expect(result).not.toContain('html');
     });
 
-    it('body 선택자를 스코프 attribute로 대체한다', () => {
+    it('replaces body selector with the scope attribute', () => {
       const css = 'body { margin: 0; }';
       const result = scopeCssText(css, 'checkout');
 
       expect(result).toContain('[data-esmap-scope="checkout"]');
     });
 
-    it('여러 선택자를 모두 스코핑한다', () => {
+    it('scopes all selectors in a comma-separated list', () => {
       const css = '.a, .b { color: red; }';
       const result = scopeCssText(css, 'checkout');
 
@@ -97,14 +97,14 @@ describe('scopeCssText', () => {
       expect(result).toContain('[data-esmap-scope="checkout"] .b');
     });
 
-    it('빈 CSS를 처리한다', () => {
+    it('handles empty CSS', () => {
       const result = scopeCssText('', 'checkout');
       expect(result).toBe('');
     });
   });
 
-  describe('@-규칙 처리', () => {
-    it('@media 규칙 내부의 선택자를 재귀적으로 스코핑한다', () => {
+  describe('@-rule handling', () => {
+    it('recursively scopes selectors inside @media rules', () => {
       const css = '@media (max-width: 768px) { .mobile { display: block; } }';
       const result = scopeCssText(css, 'app');
 
@@ -112,7 +112,7 @@ describe('scopeCssText', () => {
       expect(result).toContain('[data-esmap-scope="app"] .mobile');
     });
 
-    it('@supports 규칙 내부의 선택자를 스코핑한다', () => {
+    it('scopes selectors inside @supports rules', () => {
       const css = '@supports (display: grid) { .grid { display: grid; } }';
       const result = scopeCssText(css, 'app');
 
@@ -120,7 +120,7 @@ describe('scopeCssText', () => {
       expect(result).toContain('[data-esmap-scope="app"] .grid');
     });
 
-    it('@keyframes는 변경하지 않는다', () => {
+    it('does not modify @keyframes', () => {
       const css = '@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }';
       const result = scopeCssText(css, 'app');
 
@@ -128,7 +128,7 @@ describe('scopeCssText', () => {
       expect(result).not.toContain('[data-esmap-scope="app"]');
     });
 
-    it('@font-face는 변경하지 않는다', () => {
+    it('does not modify @font-face', () => {
       const css = '@font-face { font-family: "Custom"; src: url("/font.woff2"); }';
       const result = scopeCssText(css, 'app');
 
@@ -136,7 +136,7 @@ describe('scopeCssText', () => {
       expect(result).not.toContain('[data-esmap-scope="app"]');
     });
 
-    it('@media 내부에 여러 규칙이 있어도 모두 스코핑한다', () => {
+    it('scopes all rules inside @media even when there are multiple', () => {
       const css = '@media print { .header { display: none; } .footer { display: none; } }';
       const result = scopeCssText(css, 'app');
 
@@ -144,7 +144,7 @@ describe('scopeCssText', () => {
       expect(result).toContain('[data-esmap-scope="app"] .footer');
     });
 
-    it('일반 규칙과 @media 규칙이 혼합된 CSS를 처리한다', () => {
+    it('handles CSS with a mix of regular rules and @media rules', () => {
       const css = '.main { color: black; } @media (max-width: 600px) { .main { color: white; } }';
       const result = scopeCssText(css, 'app');
 
@@ -156,14 +156,14 @@ describe('scopeCssText', () => {
 });
 
 describe('namespaceCssKeyframes', () => {
-  describe('@keyframes 선언 네임스페이싱', () => {
-    it('@keyframes 이름에 prefix를 추가한다', () => {
+  describe('@keyframes declaration namespacing', () => {
+    it('adds prefix to @keyframes names', () => {
       const css = '@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }';
       const result = namespaceCssKeyframes(css, 'checkout');
       expect(result).toContain('@keyframes checkout__fadeIn');
     });
 
-    it('여러 @keyframes를 각각 네임스페이싱한다', () => {
+    it('namespaces each @keyframes individually', () => {
       const css = `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(10px); } to { transform: translateY(0); } }
@@ -173,15 +173,15 @@ describe('namespaceCssKeyframes', () => {
       expect(result).toContain('@keyframes app__slideUp');
     });
 
-    it('@keyframes가 없으면 CSS를 그대로 반환한다', () => {
+    it('returns CSS unchanged when there are no @keyframes', () => {
       const css = '.btn { color: red; }';
       const result = namespaceCssKeyframes(css, 'app');
       expect(result).toBe(css);
     });
   });
 
-  describe('animation-name 참조 네임스페이싱', () => {
-    it('animation-name 프로퍼티 값을 네임스페이싱한다', () => {
+  describe('animation-name reference namespacing', () => {
+    it('namespaces animation-name property values', () => {
       const css = `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .item { animation-name: fadeIn; }
@@ -190,7 +190,7 @@ describe('namespaceCssKeyframes', () => {
       expect(result).toContain('animation-name: app__fadeIn');
     });
 
-    it('여러 animation-name을 콤마 구분으로 네임스페이싱한다', () => {
+    it('namespaces multiple comma-separated animation-names', () => {
       const css = `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(10px); } to { transform: translateY(0); } }
@@ -200,7 +200,7 @@ describe('namespaceCssKeyframes', () => {
       expect(result).toContain('animation-name: app__fadeIn, app__slideUp');
     });
 
-    it('정의되지 않은 keyframe 이름은 변경하지 않는다', () => {
+    it('does not modify undefined keyframe names', () => {
       const css = `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .item { animation-name: unknown; }
@@ -210,8 +210,8 @@ describe('namespaceCssKeyframes', () => {
     });
   });
 
-  describe('animation 축약 프로퍼티 네임스페이싱', () => {
-    it('animation 축약에서 keyframe 이름을 네임스페이싱한다', () => {
+  describe('animation shorthand property namespacing', () => {
+    it('namespaces keyframe names in animation shorthand', () => {
       const css = `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .item { animation: fadeIn 0.3s ease; }
@@ -220,7 +220,7 @@ describe('namespaceCssKeyframes', () => {
       expect(result).toContain('animation: app__fadeIn 0.3s ease');
     });
 
-    it('여러 animation을 콤마로 구분하여 처리한다', () => {
+    it('handles multiple comma-separated animations', () => {
       const css = `
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(10px); } to { transform: translateY(0); } }
@@ -234,17 +234,17 @@ describe('namespaceCssKeyframes', () => {
 });
 
 describe('isPrescopedCss', () => {
-  it('프리스코핑 마커가 있는 CSS를 감지한다', () => {
+  it('detects CSS with a prescoping marker', () => {
     const css = `${PRESCOPED_MARKER}=checkout */\n.btn { color: red; }`;
     expect(isPrescopedCss(css)).toBe(true);
   });
 
-  it('프리스코핑 마커가 없는 CSS를 감지한다', () => {
+  it('detects CSS without a prescoping marker', () => {
     const css = '.btn { color: red; }';
     expect(isPrescopedCss(css)).toBe(false);
   });
 
-  it('공백으로 시작해도 마커를 감지한다', () => {
+  it('detects the marker even when preceded by whitespace', () => {
     const css = `  ${PRESCOPED_MARKER}=app */\n.btn { color: red; }`;
     expect(isPrescopedCss(css)).toBe(true);
   });

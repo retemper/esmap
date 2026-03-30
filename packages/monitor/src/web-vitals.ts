@@ -1,12 +1,12 @@
 /**
- * MFE별 Web Vitals(CLS, LCP, INP) 어트리뷰션을 제공한다.
- * PerformanceObserver를 활용하여 각 메트릭을 발생시킨 MFE 앱을 식별한다.
+ * Provides per-MFE Web Vitals (CLS, LCP, INP) attribution.
+ * Uses PerformanceObserver to identify which MFE app caused each metric.
  */
 
-/** Web Vitals 메트릭 타입 */
+/** Web Vitals metric type */
 type WebVitalMetric = 'CLS' | 'LCP' | 'INP';
 
-/** 앱별 Web Vital 측정 결과 */
+/** Per-app Web Vital measurement result */
 interface AppWebVital {
   readonly appName: string;
   readonly metric: WebVitalMetric;
@@ -14,28 +14,28 @@ interface AppWebVital {
   readonly entries: readonly PerformanceEntry[];
 }
 
-/** Web Vitals 리스너 */
+/** Web Vitals listener */
 type WebVitalListener = (vital: AppWebVital) => void;
 
-/** Web Vitals 추적 핸들 */
+/** Web Vitals tracking handle */
 interface WebVitalsTracker {
-  /** 특정 메트릭의 앱별 값을 반환한다 */
+  /** Returns per-app values for a specific metric */
   getMetric(metric: WebVitalMetric): ReadonlyMap<string, number>;
-  /** 모든 메트릭을 앱별로 요약한다 */
+  /** Summarizes all metrics per app */
   summarize(): ReadonlyMap<string, { readonly cls: number; readonly lcp: number; readonly inp: number }>;
-  /** 메트릭 이벤트 리스너를 등록한다 */
+  /** Registers a metric event listener */
   onVital(listener: WebVitalListener): () => void;
-  /** 추적을 중단하고 옵저버를 해제한다 */
+  /** Stops tracking and disconnects observers */
   destroy(): void;
 }
 
-/** Web Vitals 추적 옵션 */
+/** Web Vitals tracking options */
 interface WebVitalsOptions {
-  /** 앱 컨테이너를 식별하는 attribute 이름. 기본값 'data-esmap-scope'. */
+  /** Attribute name to identify app containers. Defaults to 'data-esmap-scope'. */
   readonly scopeAttribute?: string;
 }
 
-/** CLS 세션 윈도우 상태 */
+/** CLS session window state */
 interface ClsSession {
   value: number;
   entries: PerformanceEntry[];
@@ -43,38 +43,38 @@ interface ClsSession {
   lastTimestamp: number;
 }
 
-/** 앱별 CLS 세션 추적 상태 */
+/** Per-app CLS session tracking state */
 interface ClsState {
   currentSession: ClsSession;
   maxSessionValue: number;
 }
 
-/** 앱별 INP 인터랙션 추적 상태 */
+/** Per-app INP interaction tracking state */
 interface InpState {
-  /** interactionId → 최대 duration */
+  /** interactionId to max duration */
   interactions: Map<number, number>;
   worstDuration: number;
 }
 
-/** layout-shift 엔트리의 source 속성 타입 */
+/** Type for the source property of a layout-shift entry */
 interface LayoutShiftSource {
   readonly node: Element | null;
 }
 
-/** CLS 세션 윈도우 최대 갭 (ms) */
+/** Maximum gap for CLS session window (ms) */
 const CLS_SESSION_GAP = 1000;
 
-/** CLS 세션 윈도우 최대 길이 (ms) */
+/** Maximum length for CLS session window (ms) */
 const CLS_SESSION_MAX_WINDOW = 5000;
 
-/** 어트리뷰션 실패 시 호스트 앱 이름 */
+/** Host app name used when attribution fails */
 const HOST_APP_NAME = '__host__';
 
 /**
- * 요소에서 가장 가까운 MFE 스코프 이름을 찾는다.
- * @param element - 탐색 시작 요소
- * @param attr - 스코프를 식별하는 attribute 이름
- * @returns 스코프 이름. 찾지 못하면 null
+ * Finds the closest MFE scope name from an element.
+ * @param element - starting element for traversal
+ * @param attr - attribute name to identify the scope
+ * @returns scope name, or null if not found
  */
 function findAppScope(element: Element | null, attr: string): string | null {
   if (!element) return null;
@@ -83,9 +83,9 @@ function findAppScope(element: Element | null, attr: string): string | null {
 }
 
 /**
- * PerformanceEntry에 layout-shift의 sources 속성이 있는지 확인한다.
- * @param entry - 검사할 엔트리
- * @returns sources 속성 존재 여부
+ * Checks whether a PerformanceEntry has the layout-shift sources property.
+ * @param entry - entry to inspect
+ * @returns whether the sources property exists
  */
 function hasLayoutShiftSources(
   entry: PerformanceEntry,
@@ -94,9 +94,9 @@ function hasLayoutShiftSources(
 }
 
 /**
- * PerformanceEntry에 LCP의 element 속성이 있는지 확인한다.
- * @param entry - 검사할 엔트리
- * @returns element 속성 존재 여부
+ * Checks whether a PerformanceEntry has the LCP element property.
+ * @param entry - entry to inspect
+ * @returns whether the element property exists
  */
 function hasLcpElement(
   entry: PerformanceEntry,
@@ -105,9 +105,9 @@ function hasLcpElement(
 }
 
 /**
- * PerformanceEntry에 event의 target과 interactionId 속성이 있는지 확인한다.
- * @param entry - 검사할 엔트리
- * @returns target/interactionId 속성 존재 여부
+ * Checks whether a PerformanceEntry has the event target and interactionId properties.
+ * @param entry - entry to inspect
+ * @returns whether the target/interactionId properties exist
  */
 function hasEventTarget(
   entry: PerformanceEntry,
@@ -116,29 +116,29 @@ function hasEventTarget(
 }
 
 /**
- * 리스너들에게 메트릭 이벤트를 전달한다.
- * 개별 리스너 에러는 격리된다.
- * @param listeners - 등록된 리스너 목록
- * @param vital - 전달할 메트릭 데이터
+ * Dispatches a metric event to listeners.
+ * Individual listener errors are isolated.
+ * @param listeners - list of registered listeners
+ * @param vital - metric data to dispatch
  */
 function notifyListeners(listeners: readonly WebVitalListener[], vital: AppWebVital): void {
   for (const listener of listeners) {
     try {
       listener(vital);
     } catch {
-      // 리스너 에러는 격리 — 다른 리스너 실행을 막지 않는다
+      // Listener errors are isolated -- they do not block other listeners
     }
   }
 }
 
 /**
- * CLS 세션 윈도우를 업데이트하고 최대값을 반환한다.
- * gap >= 1000ms 또는 window >= 5000ms이면 새 세션을 시작한다.
- * @param state - 현재 CLS 상태
- * @param value - 새 layout-shift 값
- * @param timestamp - 엔트리 시작 시각
- * @param entry - layout-shift 엔트리
- * @returns 업데이트된 CLS 최대값
+ * Updates the CLS session window and returns the maximum value.
+ * Starts a new session when gap >= 1000ms or window >= 5000ms.
+ * @param state - current CLS state
+ * @param value - new layout-shift value
+ * @param timestamp - entry start time
+ * @param entry - layout-shift entry
+ * @returns updated CLS maximum value
  */
 function updateClsSession(
   state: ClsState,
@@ -151,7 +151,7 @@ function updateClsSession(
   const windowDuration = timestamp - currentSession.firstTimestamp;
 
   if (gap >= CLS_SESSION_GAP || windowDuration >= CLS_SESSION_MAX_WINDOW) {
-    // 새 세션 시작
+    // Start new session
     state.currentSession = {
       value,
       entries: [entry],
@@ -172,8 +172,8 @@ function updateClsSession(
 }
 
 /**
- * 새로운 CLS 상태를 생성한다.
- * @returns 초기 CLS 상태
+ * Creates a new CLS state.
+ * @returns initial CLS state
  */
 function createClsState(): ClsState {
   return {
@@ -188,8 +188,8 @@ function createClsState(): ClsState {
 }
 
 /**
- * 새로운 INP 상태를 생성한다.
- * @returns 초기 INP 상태
+ * Creates a new INP state.
+ * @returns initial INP state
  */
 function createInpState(): InpState {
   return {
@@ -199,10 +199,10 @@ function createInpState(): InpState {
 }
 
 /**
- * Web Vitals 추적기를 생성한다.
- * PerformanceObserver를 사용하여 CLS, LCP, INP 메트릭을 MFE 앱별로 어트리뷰션한다.
- * @param options - 추적 옵션
- * @returns Web Vitals 추적 핸들. PerformanceObserver가 없으면 no-op 핸들을 반환한다.
+ * Creates a Web Vitals tracker.
+ * Uses PerformanceObserver to attribute CLS, LCP, INP metrics to individual MFE apps.
+ * @param options - tracking options
+ * @returns Web Vitals tracking handle. Returns a no-op handle if PerformanceObserver is unavailable.
  */
 function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
   const scopeAttribute = options?.scopeAttribute ?? 'data-esmap-scope';
@@ -220,8 +220,8 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
   const observers: PerformanceObserver[] = [];
 
   /**
-   * layout-shift 엔트리를 처리하여 앱별 CLS를 업데이트한다.
-   * @param entries - layout-shift 엔트리 목록
+   * Processes layout-shift entries to update per-app CLS.
+   * @param entries - list of layout-shift entries
    */
   const handleLayoutShift = (entries: PerformanceEntryList): void => {
     for (const entry of entries) {
@@ -243,8 +243,8 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
   };
 
   /**
-   * largest-contentful-paint 엔트리를 처리하여 앱별 LCP를 업데이트한다.
-   * @param entries - LCP 엔트리 목록
+   * Processes largest-contentful-paint entries to update per-app LCP.
+   * @param entries - list of LCP entries
    */
   const handleLcp = (entries: PerformanceEntryList): void => {
     for (const entry of entries) {
@@ -267,8 +267,8 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
   };
 
   /**
-   * event 엔트리를 처리하여 앱별 INP를 업데이트한다.
-   * @param entries - event 엔트리 목록
+   * Processes event entries to update per-app INP.
+   * @param entries - list of event entries
    */
   const handleEvent = (entries: PerformanceEntryList): void => {
     for (const entry of entries) {
@@ -297,10 +297,10 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
   };
 
   /**
-   * layout-shift sources에서 앱 이름을 추론한다.
-   * @param sources - LayoutShiftAttribution 목록
-   * @param attr - 스코프 attribute 이름
-   * @returns 앱 이름. 식별 불가 시 HOST_APP_NAME
+   * Infers the app name from layout-shift sources.
+   * @param sources - list of LayoutShiftAttribution
+   * @param attr - scope attribute name
+   * @returns app name, or HOST_APP_NAME if unidentifiable
    */
   const resolveAppFromShiftSources = (sources: readonly LayoutShiftSource[], attr: string): string => {
     for (const source of sources) {
@@ -318,7 +318,7 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
       observer.observe({ type, buffered: true });
       observers.push(observer);
     } catch {
-      // 지원하지 않는 엔트리 타입은 무시한다
+      // Unsupported entry types are silently ignored
     }
   };
 
@@ -386,8 +386,8 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
 }
 
 /**
- * PerformanceObserver가 없는 환경을 위한 no-op 추적기를 생성한다.
- * @returns 모든 메서드가 빈 결과를 반환하는 추적 핸들
+ * Creates a no-op tracker for environments without PerformanceObserver.
+ * @returns tracking handle where all methods return empty results
  */
 function createNoopTracker(): WebVitalsTracker {
   return {

@@ -1,29 +1,29 @@
 import type { ImportMap, MfeManifest, EsmapConfig, SharedDependencyManifest } from '@esmap/shared';
 import { serializeImportMap } from '@esmap/shared';
 
-/** import map 생성에 필요한 입력 */
+/** Input required for import map generation */
 export interface GenerateInput {
-  /** 프레임워크 설정 */
+  /** Framework configuration */
   readonly config: EsmapConfig;
-  /** 각 MFE의 매니페스트 (앱 이름 → 매니페스트) */
+  /** Manifests for each MFE (app name -> manifest) */
   readonly manifests: Readonly<Record<string, MfeManifest>>;
-  /** 공유 의존성 매니페스트 (패키지 이름 → 매니페스트) */
+  /** Shared dependency manifests (package name -> manifest) */
   readonly sharedManifests?: Readonly<Record<string, SharedDependencyManifest>>;
 }
 
-/** import map 생성 결과 */
+/** Import map generation result */
 export interface GenerateResult {
-  /** 생성된 import map 객체 */
+  /** Generated import map object */
   readonly importMap: ImportMap;
-  /** JSON 문자열 (pretty-printed) */
+  /** JSON string (pretty-printed) */
   readonly json: string;
-  /** modulepreload 대상 URL 목록 (앱 이름 → URL 목록) */
+  /** modulepreload target URL list (app name -> URL list) */
   readonly preloadHints: Readonly<Record<string, readonly string[]>>;
 }
 
 /**
- * 설정과 매니페스트로부터 import map JSON을 생성한다.
- * @param input - 생성에 필요한 설정, 매니페스트 데이터
+ * Generates import map JSON from config and manifests.
+ * @param input - config and manifest data required for generation
  */
 export function generateImportMap(input: GenerateInput): GenerateResult {
   const { config, manifests, sharedManifests } = input;
@@ -48,7 +48,7 @@ export function generateImportMap(input: GenerateInput): GenerateResult {
   };
 }
 
-/** 공유 의존성 imports 항목을 추가한다. */
+/** Adds shared dependency imports entries. */
 function addSharedImports(
   imports: Record<string, string>,
   config: EsmapConfig,
@@ -79,7 +79,7 @@ function addSharedImports(
   }
 }
 
-/** MFE 앱의 imports와 scopes 항목을 추가한다. */
+/** Adds MFE app imports and scopes entries. */
 function addAppImports(
   imports: Record<string, string>,
   scopes: Record<string, Record<string, string>>,

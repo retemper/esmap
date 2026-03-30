@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AppRegistry } from './app-registry.js';
 import type { MfeApp } from '@esmap/shared';
 
-/** 테스트용 MfeApp 목을 생성한다 */
+/** Creates a mock MfeApp for testing */
 function createMockApp(): MfeApp {
   return {
     bootstrap: vi.fn().mockResolvedValue(undefined),
@@ -16,7 +16,7 @@ function createMockApp(): MfeApp {
   };
 }
 
-/** import map에 mock-mfe 모듈 URL을 넣어 AppRegistry를 생성한다 */
+/** Creates an AppRegistry with a mock-mfe module URL in the import map */
 function createRegistryWithApp(appName: string, container: string): AppRegistry {
   const mockApp = createMockApp();
   const mockModuleUrl = `data:text/javascript,${encodeURIComponent(
@@ -39,7 +39,7 @@ describe('AppRegistry keep-alive', () => {
     document.body.innerHTML = '<div id="app-a"></div><div id="app-b"></div>';
   });
 
-  it('keep-alive 앱은 unmount 시 FROZEN 상태가 된다', async () => {
+  it('keep-alive app transitions to FROZEN on unmount', async () => {
     const registry = createRegistryWithApp('app-a', '#app-a');
     registry.setKeepAlive('app-a', true);
 
@@ -51,7 +51,7 @@ describe('AppRegistry keep-alive', () => {
     expect(registry.getApp('app-a')?.status).toBe('FROZEN');
   });
 
-  it('FROZEN 시 컨테이너가 display:none이 된다', async () => {
+  it('container becomes display:none when FROZEN', async () => {
     const registry = createRegistryWithApp('app-a', '#app-a');
     registry.setKeepAlive('app-a', true);
 
@@ -63,7 +63,7 @@ describe('AppRegistry keep-alive', () => {
     expect(container?.style.display).toBe('none');
   });
 
-  it('FROZEN 시 DOM 콘텐츠가 보존된다', async () => {
+  it('preserves DOM content when FROZEN', async () => {
     const registry = createRegistryWithApp('app-a', '#app-a');
     registry.setKeepAlive('app-a', true);
 
@@ -74,11 +74,11 @@ describe('AppRegistry keep-alive', () => {
     expect(container?.innerHTML).toBe('<div>mock-mfe</div>');
 
     await registry.unmountApp('app-a');
-    // DOM이 보존된다 (unmount 호출 없이 숨김만)
+    // DOM is preserved (only hidden, without calling unmount)
     expect(container?.innerHTML).toBe('<div>mock-mfe</div>');
   });
 
-  it('FROZEN 앱을 다시 마운트하면 즉시 MOUNTED가 된다', async () => {
+  it('immediately becomes MOUNTED when remounting a FROZEN app', async () => {
     const registry = createRegistryWithApp('app-a', '#app-a');
     registry.setKeepAlive('app-a', true);
 
@@ -91,7 +91,7 @@ describe('AppRegistry keep-alive', () => {
     expect(registry.getApp('app-a')?.status).toBe('MOUNTED');
   });
 
-  it('thaw 후 컨테이너가 다시 표시된다', async () => {
+  it('container becomes visible again after thaw', async () => {
     const registry = createRegistryWithApp('app-a', '#app-a');
     registry.setKeepAlive('app-a', true);
 
@@ -106,9 +106,9 @@ describe('AppRegistry keep-alive', () => {
     expect(container?.style.display).toBe('');
   });
 
-  it('keep-alive가 아닌 앱은 기존처럼 NOT_MOUNTED가 된다', async () => {
+  it('non-keep-alive app transitions to NOT_MOUNTED as before', async () => {
     const registry = createRegistryWithApp('app-a', '#app-a');
-    // setKeepAlive 호출 안 함
+    // setKeepAlive not called
 
     await registry.loadApp('app-a');
     await registry.mountApp('app-a');
@@ -116,7 +116,7 @@ describe('AppRegistry keep-alive', () => {
     expect(registry.getApp('app-a')?.status).toBe('NOT_MOUNTED');
   });
 
-  it('isKeepAlive로 keep-alive 상태를 확인할 수 있다', () => {
+  it('can check keep-alive status with isKeepAlive', () => {
     const registry = new AppRegistry();
     registry.registerApp({ name: 'app-a', activeWhen: '/' });
 
@@ -129,7 +129,7 @@ describe('AppRegistry keep-alive', () => {
     expect(registry.isKeepAlive('app-a')).toBe(false);
   });
 
-  it('destroy 시 FROZEN 앱도 정리된다', async () => {
+  it('cleans up FROZEN apps on destroy', async () => {
     const registry = createRegistryWithApp('app-a', '#app-a');
     registry.setKeepAlive('app-a', true);
 

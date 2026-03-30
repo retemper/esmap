@@ -4,7 +4,7 @@ import type { LifecycleHooks, LifecyclePhase, LifecycleHook } from '@esmap/runti
 import type { PerfTracker } from '@esmap/monitor';
 import { installAutoPerf } from './auto-perf.js';
 
-/** 테스트용 LifecycleHooks 모의 객체를 생성한다 */
+/** Creates a mock LifecycleHooks object for testing */
 function createMockHooks(): LifecycleHooks & {
   readonly registeredBefore: Array<{ readonly phase: LifecyclePhase; readonly hook: LifecycleHook }>;
   readonly registeredAfter: Array<{ readonly phase: LifecyclePhase; readonly hook: LifecycleHook }>;
@@ -27,7 +27,7 @@ function createMockHooks(): LifecycleHooks & {
   };
 }
 
-/** 테스트용 PerfTracker 모의 객체를 생성한다 */
+/** Creates a mock PerfTracker object for testing */
 function createMockPerfTracker(): {
   readonly tracker: PerfTracker;
   readonly markStart: ReturnType<typeof vi.fn>;
@@ -52,7 +52,7 @@ describe('installAutoPerf', () => {
     'update',
   ];
 
-  it('모든 라이프사이클 단계에 대해 before/after 훅이 등록된다', () => {
+  it('registers before/after hooks for all lifecycle phases', () => {
     const hooks = createMockHooks();
     const { tracker } = createMockPerfTracker();
 
@@ -65,7 +65,7 @@ describe('installAutoPerf', () => {
     expect(afterPhases).toStrictEqual([...EXPECTED_PHASES]);
   });
 
-  it('before 훅이 markStart를 호출한다', () => {
+  it('before hook calls markStart', () => {
     const hooks = createMockHooks();
     const { tracker, markStart } = createMockPerfTracker();
 
@@ -77,7 +77,7 @@ describe('installAutoPerf', () => {
     expect(markStart).toHaveBeenCalledWith('test-app', 'mount');
   });
 
-  it('after 훅이 markEnd를 호출한다', () => {
+  it('after hook calls markEnd', () => {
     const hooks = createMockHooks();
     const { tracker, markEnd } = createMockPerfTracker();
 

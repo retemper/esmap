@@ -7,7 +7,7 @@ import type { PluginContext } from '../plugin.js';
 import { AppRegistry, Router, createPrefetch } from '@esmap/runtime';
 import { PerfTracker } from '@esmap/monitor';
 
-/** 테스트용 PluginContext를 생성한다 */
+/** Creates a PluginContext for testing */
 function createTestContext(): PluginContext & { hooks: LifecycleHooks } {
   const registry = new AppRegistry();
   const router = new Router(registry);
@@ -23,18 +23,18 @@ describe('guardPlugin', () => {
     document.body.innerHTML = '<div id="app"></div>';
   });
 
-  it('플러그인 이름이 esmap:guard이다', () => {
+  it('has plugin name esmap:guard', () => {
     const plugin = guardPlugin();
     expect(plugin.name).toBe('esmap:guard');
   });
 
-  it('install이 cleanup 함수를 반환한다', () => {
+  it('install returns a cleanup function', () => {
     const ctx = createTestContext();
     const cleanup = plugin().install(ctx);
     expect(typeof cleanup).toBe('function');
   });
 
-  it('mount 훅에서 data-esmap-scope 속성을 추가한다', async () => {
+  it('adds data-esmap-scope attribute in mount hook', async () => {
     const ctx = createTestContext();
     ctx.registry.registerApp({
       name: 'test-app',
@@ -51,7 +51,7 @@ describe('guardPlugin', () => {
     expect(container?.getAttribute('data-esmap-scope')).toBe('test-app');
   });
 
-  it('unmount 훅에서 격리를 정리한다', async () => {
+  it('cleans up isolation in unmount hook', async () => {
     const ctx = createTestContext();
     ctx.registry.registerApp({
       name: 'test-app',
@@ -70,16 +70,16 @@ describe('guardPlugin', () => {
     expect(container?.hasAttribute('data-esmap-scope')).toBe(false);
   });
 
-  it('onGlobalViolation 콜백이 전달된다', () => {
+  it('passes the onGlobalViolation callback', () => {
     const onViolation = vi.fn();
     const plugin = guardPlugin({ onGlobalViolation: onViolation });
 
     expect(plugin.name).toBe('esmap:guard');
-    // 콜백이 설정된 상태로 플러그인이 생성됨을 확인
+    // Confirm plugin is created with the callback configured
   });
 });
 
-/** guardPlugin 헬퍼 */
+/** guardPlugin helper */
 function plugin(): ReturnType<typeof guardPlugin> {
   return guardPlugin();
 }

@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 import { esmapManifest } from '@esmap/vite-plugin';
 
 /**
- * 디자인 시스템 빌드 설정.
- * React를 external로 처리하여 공유 의존성 번들을 재사용한다.
- * 여러 MFE가 import map을 통해 동일한 디자인 시스템 인스턴스를 소비한다.
+ * Design system build configuration.
+ * Externalizes React to reuse the shared dependency bundle.
+ * Multiple MFEs consume the same design system instance via import map.
  */
 export default defineConfig({
   define: { 'process.env.NODE_ENV': '"production"' },

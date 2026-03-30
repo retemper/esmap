@@ -3,9 +3,9 @@ import { analyzeDependencyConflicts } from './analyze-deps.js';
 import type { AppDependencyDeclaration } from './analyze-deps.js';
 
 /**
- * 테스트 헬퍼: 앱 의존성 선언을 간편하게 생성한다.
- * @param appName - 앱 이름
- * @param deps - 의존성 이름-버전 쌍의 레코드
+ * Test helper: conveniently creates an app dependency declaration.
+ * @param appName - app name
+ * @param deps - record of dependency name-version pairs
  */
 function createDeclaration(
   appName: string,
@@ -18,7 +18,7 @@ function createDeclaration(
 }
 
 describe('analyzeDependencyConflicts', () => {
-  it('호환되는 범위들은 충돌 없이 통과한다', () => {
+  it('compatible ranges pass without conflicts', () => {
     const declarations = [
       createDeclaration('app-a', { react: '^18.0.0' }),
       createDeclaration('app-b', { react: '^18.2.0' }),
@@ -30,7 +30,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.warnings).toStrictEqual([]);
   });
 
-  it('다른 메이저 버전은 에러 충돌로 감지한다', () => {
+  it('detects different major versions as error conflicts', () => {
     const declarations = [
       createDeclaration('app-a', { react: '^17.0.0' }),
       createDeclaration('app-b', { react: '^18.0.0' }),
@@ -44,7 +44,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.conflicts[0].apps.length).toBe(2);
   });
 
-  it('동일 메이저 다른 마이너 버전의 ^범위는 호환으로 판단한다', () => {
+  it('treats ^ ranges with same major but different minor versions as compatible', () => {
     const declarations = [
       createDeclaration('app-a', { lodash: '^4.17.0' }),
       createDeclaration('app-b', { lodash: '^4.10.0' }),
@@ -56,7 +56,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.warnings).toStrictEqual([]);
   });
 
-  it('겹치지 않는 ~범위는 충돌로 감지한다', () => {
+  it('detects non-overlapping ~ ranges as conflicts', () => {
     const declarations = [
       createDeclaration('app-a', { lodash: '~4.17.0' }),
       createDeclaration('app-b', { lodash: '~4.16.0' }),
@@ -69,7 +69,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.conflicts[0].severity).toBe('error');
   });
 
-  it('단일 앱의 의존성은 충돌 없이 통과한다', () => {
+  it('dependencies from a single app pass without conflicts', () => {
     const declarations = [
       createDeclaration('app-a', { react: '^18.0.0', lodash: '^4.17.0' }),
     ];
@@ -80,7 +80,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.warnings).toStrictEqual([]);
   });
 
-  it('빈 선언 목록은 에러 없이 통과한다', () => {
+  it('an empty declaration list passes without errors', () => {
     const result = analyzeDependencyConflicts([]);
 
     expect(result.conflicts).toStrictEqual([]);
@@ -88,7 +88,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.summary).toBe('No dependency conflicts detected.');
   });
 
-  it('summary가 충돌 개수를 포함한다', () => {
+  it('summary includes the number of conflicts', () => {
     const declarations = [
       createDeclaration('app-a', { react: '^17.0.0', vue: '^2.0.0' }),
       createDeclaration('app-b', { react: '^18.0.0', vue: '^3.0.0' }),
@@ -100,7 +100,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.summary).toContain('0 warning(s)');
   });
 
-  it('3개 이상 앱의 다자간 충돌을 감지한다', () => {
+  it('detects multi-party conflicts across three or more apps', () => {
     const declarations = [
       createDeclaration('app-a', { react: '^17.0.0' }),
       createDeclaration('app-b', { react: '^18.0.0' }),
@@ -114,7 +114,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.conflicts[0].severity).toBe('error');
   });
 
-  it('정확 일치 버전이 다르면 에러 충돌로 감지한다', () => {
+  it('detects different exact versions as error conflicts', () => {
     const declarations = [
       createDeclaration('app-a', { react: '18.2.0' }),
       createDeclaration('app-b', { react: '18.3.0' }),
@@ -126,7 +126,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.conflicts[0].severity).toBe('error');
   });
 
-  it('정확 일치 버전이 같으면 충돌 없이 통과한다', () => {
+  it('identical exact versions pass without conflicts', () => {
     const declarations = [
       createDeclaration('app-a', { react: '18.2.0' }),
       createDeclaration('app-b', { react: '18.2.0' }),
@@ -137,7 +137,7 @@ describe('analyzeDependencyConflicts', () => {
     expect(result.conflicts).toStrictEqual([]);
   });
 
-  it('정확 일치 버전이 ^범위를 만족하면 호환으로 판단한다', () => {
+  it('treats an exact version satisfying a ^ range as compatible', () => {
     const declarations = [
       createDeclaration('app-a', { react: '18.2.0' }),
       createDeclaration('app-b', { react: '^18.0.0' }),

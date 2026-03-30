@@ -4,8 +4,8 @@ import type { MfeApp, MfeAppStatus } from '@esmap/shared';
 import type { GlobalState } from '@esmap/communication';
 
 /**
- * esmap Parcel을 명령적으로 마운트하는 훅.
- * ref를 DOM 요소에 연결하면 자동으로 마운트/정리한다.
+ * Hook for imperatively mounting an esmap Parcel.
+ * Attach the ref to a DOM element to automatically mount/cleanup.
  *
  * @example
  * ```tsx
@@ -15,9 +15,9 @@ import type { GlobalState } from '@esmap/communication';
  * }
  * ```
  *
- * @param appOrLoader - MfeApp 또는 비동기 로더
- * @param props - 앱에 전달할 props
- * @returns ref와 현재 상태
+ * @param appOrLoader - MfeApp or async loader
+ * @param props - props to pass to the app
+ * @returns ref and current status
  */
 export function useParcel(
   appOrLoader: MfeApp | (() => Promise<MfeApp>),
@@ -69,7 +69,7 @@ export function useParcel(
     };
   }, [appOrLoader]);
 
-  // props 변경 시 update
+  // Update on props change
   useEffect(() => {
     if (parcelRef.current && props && status === 'MOUNTED') {
       void parcelRef.current.update(props);
@@ -80,22 +80,22 @@ export function useParcel(
 }
 
 /**
- * esmap GlobalState를 React 상태로 구독하는 훅.
- * useSyncExternalStore를 사용하여 concurrent mode에서 안전하다.
+ * Hook for subscribing to esmap GlobalState as React state.
+ * Uses useSyncExternalStore for safety in concurrent mode.
  *
- * 주의: selector 없이 사용하면 상태 변경 시 항상 리렌더링된다.
- * 특정 키만 필요하면 selector를 사용하여 원시값을 반환해야 불필요한 리렌더링을 방지한다.
+ * Note: without a selector, every state change triggers a re-render.
+ * If only specific keys are needed, use a selector returning primitives to avoid unnecessary re-renders.
  *
  * @example
  * ```tsx
  * const state = useGlobalState(globalState);
- * // 또는 selector로 특정 키만:
+ * // Or select specific keys with a selector:
  * const theme = useGlobalState(globalState, s => s.theme);
  * ```
  *
- * @param store - esmap GlobalState 인스턴스
- * @param selector - 상태에서 필요한 부분만 추출하는 셀렉터
- * @returns 현재 상태 또는 선택된 값
+ * @param store - esmap GlobalState instance
+ * @param selector - selector to extract only the needed part of the state
+ * @returns current state or selected value
  */
 export function useGlobalState<T extends Record<string, unknown>>(
   store: GlobalState<T>,
@@ -108,8 +108,8 @@ export function useGlobalState<T extends Record<string, unknown>, S>(
   store: GlobalState<T>,
   selector?: (state: Readonly<T>) => S,
 ): Readonly<T> | S {
-  // 스냅샷 캐시 — subscribe 콜백에서만 갱신하여 useSyncExternalStore가
-  // 매 호출마다 새 레퍼런스를 받는 것을 방지한다 (infinite loop 방지)
+  // Snapshot cache -- updated only in subscribe callback to prevent
+  // useSyncExternalStore from receiving a new reference on every call (prevents infinite loop)
   const cacheRef = useRef<{ state: Readonly<T>; selected: Readonly<T> | S }>({
     state: store.getState(),
     selected: selector ? selector(store.getState()) : store.getState(),
@@ -123,7 +123,7 @@ export function useGlobalState<T extends Record<string, unknown>, S>(
 
         cacheRef.current = { state: newState, selected: nextSelected };
 
-        // selector가 원시값을 반환하면 === 비교로 불필요한 리렌더링 방지
+        // When selector returns a primitive, === comparison prevents unnecessary re-renders
         if (!Object.is(prevSelected, nextSelected)) {
           onStoreChange();
         }
@@ -137,7 +137,7 @@ export function useGlobalState<T extends Record<string, unknown>, S>(
 }
 
 /**
- * esmap AppRegistry의 앱 상태를 구독하는 훅.
+ * Hook for subscribing to app status from the esmap AppRegistry.
  *
  * @example
  * ```tsx
@@ -145,9 +145,9 @@ export function useGlobalState<T extends Record<string, unknown>, S>(
  * if (status === 'MOUNTED') { ... }
  * ```
  *
- * @param registry - AppRegistry 인스턴스
- * @param appName - 감시할 앱 이름
- * @returns 현재 앱 상태
+ * @param registry - AppRegistry instance
+ * @param appName - name of the app to watch
+ * @returns current app status
  */
 export function useAppStatus(
   registry: {

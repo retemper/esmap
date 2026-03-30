@@ -5,7 +5,7 @@ import type { PluginContext } from '../plugin.js';
 import { AppRegistry, Router, createLifecycleHooks, createPrefetch } from '@esmap/runtime';
 import { PerfTracker } from '@esmap/monitor';
 
-/** 테스트용 PluginContext를 생성한다 */
+/** Creates a PluginContext for testing */
 function createTestContext(): PluginContext {
   const registry = new AppRegistry();
   const router = new Router(registry);
@@ -21,12 +21,12 @@ describe('intelligentPrefetchPlugin', () => {
     localStorage.clear();
   });
 
-  it('플러그인 이름이 esmap:intelligent-prefetch이다', () => {
+  it('has plugin name esmap:intelligent-prefetch', () => {
     const { plugin } = intelligentPrefetchPlugin();
     expect(plugin.name).toBe('esmap:intelligent-prefetch');
   });
 
-  it('controller를 통해 학습 데이터에 접근할 수 있다', () => {
+  it('can access learning data through the controller', () => {
     const { controller } = intelligentPrefetchPlugin();
 
     controller.recordNavigation('app-home', 'app-settings');
@@ -37,7 +37,7 @@ describe('intelligentPrefetchPlugin', () => {
     expect(priorities[0].appName).toBe('app-settings');
   });
 
-  it('install 후 cleanup이 함수를 반환한다', () => {
+  it('returns a cleanup function after install', () => {
     const { plugin } = intelligentPrefetchPlugin();
     const ctx = createTestContext();
 
@@ -48,7 +48,7 @@ describe('intelligentPrefetchPlugin', () => {
     if (cleanup) cleanup();
   });
 
-  it('cleanup 시 학습 데이터를 persist한다', () => {
+  it('persists learning data during cleanup', () => {
     const persistKey = 'esmap-test-ip-cleanup';
     const { plugin, controller } = intelligentPrefetchPlugin({ persistKey });
     const ctx = createTestContext();

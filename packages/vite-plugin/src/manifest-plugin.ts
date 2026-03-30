@@ -3,25 +3,25 @@ import type { MfeManifest } from '@esmap/shared';
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
-/** MFE manifest 생성 플러그인 옵션 */
+/** MFE manifest generation plugin options */
 export interface ManifestPluginOptions {
-  /** MFE 앱 이름 (예: "@flex/checkout") */
+  /** MFE app name (e.g., "@flex/checkout") */
   readonly name: string;
-  /** MFE 앱 버전. 미지정 시 package.json에서 읽어온다 */
+  /** MFE app version. Reads from package.json if not specified */
   readonly version?: string;
-  /** 공유 의존성 목록. Vite externals로 설정되고 manifest에 기록된다 */
+  /** Shared dependency list. Set as Vite externals and recorded in the manifest */
   readonly shared?: readonly string[];
-  /** 내부 패키지 의존성 목록 */
+  /** Internal package dependency list */
   readonly internal?: readonly string[];
-  /** manifest 출력 파일명 (기본: "esmap-manifest.json") */
+  /** Manifest output file name (default: "esmap-manifest.json") */
   readonly outputFileName?: string;
 }
 
 /**
- * Vite 빌드 후 MFE manifest JSON을 자동 생성하는 플러그인.
- * 빌드 결과물의 파일명(content hash 포함)을 분석하여 manifest를 생성한다.
+ * Vite plugin that automatically generates MFE manifest JSON after build.
+ * Analyzes file names (including content hashes) from the build output to generate the manifest.
  *
- * @param options - 플러그인 옵션
+ * @param options - plugin options
  */
 export function esmapManifest(options: ManifestPluginOptions): Plugin {
   const outputFileName = options.outputFileName ?? 'esmap-manifest.json';
@@ -33,7 +33,7 @@ export function esmapManifest(options: ManifestPluginOptions): Plugin {
     apply: 'build',
 
     config() {
-      // 공유 의존성을 Vite externals로 설정하여 번들에서 제외한다
+      // Set shared dependencies as Vite externals to exclude them from the bundle
       if (sharedDeps.length > 0) {
         return {
           build: {
@@ -59,14 +59,14 @@ export function esmapManifest(options: ManifestPluginOptions): Plugin {
         if (fileName.endsWith('.js')) {
           jsFiles.push(fileName);
 
-          // 엔트리 청크와 그 직계 import를 modulepreload 후보로 추가
+          // Add entry chunks and their direct imports as modulepreload candidates
           if (chunk.type === 'chunk' && (chunk.isEntry || chunk.isDynamicEntry)) {
             modulepreload.push(fileName);
           }
         }
       }
 
-      // 엔트리 파일 결정: isEntry인 chunk를 찾거나, 첫 번째 JS 파일 사용
+      // Determine entry file: find an isEntry chunk, or fall back to the first JS file
       const entryChunk = Object.values(bundle).find(
         (chunk) => chunk.type === 'chunk' && chunk.isEntry,
       );
@@ -93,7 +93,7 @@ export function esmapManifest(options: ManifestPluginOptions): Plugin {
   };
 }
 
-/** package.json에서 version을 읽어온다. 실패 시 "0.0.0"을 반환한다. */
+/** Reads the version from package.json. Returns "0.0.0" on failure. */
 async function readPackageVersion(cwd: string): Promise<string> {
   try {
     const pkgPath = join(cwd, 'package.json');
@@ -103,7 +103,7 @@ async function readPackageVersion(cwd: string): Promise<string> {
       return String(pkg.version);
     }
   } catch {
-    // package.json이 없거나 읽기 실패
+    // package.json does not exist or read failed
   }
   return '0.0.0';
 }

@@ -3,7 +3,7 @@ import { resolve, extname } from 'node:path';
 import type { EsmapConfig } from '@esmap/shared';
 import { assertValidConfig } from './validate.js';
 
-/** 설정 파일명 탐색 순서 */
+/** Config file name search order */
 const CONFIG_FILE_NAMES = [
   'esmap.config.ts',
   'esmap.config.js',
@@ -12,8 +12,8 @@ const CONFIG_FILE_NAMES = [
 ] as const;
 
 /**
- * 프로젝트 디렉토리에서 설정 파일을 탐색하고 로드한다.
- * @param cwd - 탐색 시작 디렉토리 (기본: process.cwd())
+ * Searches for and loads a config file from the project directory.
+ * @param cwd - directory to start searching from (default: process.cwd())
  */
 export async function loadConfig(cwd?: string): Promise<EsmapConfig> {
   const dir = cwd ?? process.cwd();
@@ -28,13 +28,13 @@ export async function loadConfig(cwd?: string): Promise<EsmapConfig> {
   }
 
   throw new Error(
-    `설정 파일을 찾을 수 없습니다. 다음 중 하나를 생성하세요: ${CONFIG_FILE_NAMES.join(', ')}`,
+    `Config file not found. Please create one of: ${CONFIG_FILE_NAMES.join(', ')}`,
   );
 }
 
 /**
- * 지정된 경로의 설정 파일을 로드한다.
- * @param filePath - 설정 파일 절대 경로
+ * Loads a config file at the specified path.
+ * @param filePath - absolute path to the config file
  */
 export async function loadConfigFile(filePath: string): Promise<EsmapConfig> {
   const ext = extname(filePath);
@@ -47,13 +47,13 @@ export async function loadConfigFile(filePath: string): Promise<EsmapConfig> {
     case '.mjs':
       return loadModuleConfig(filePath);
     default:
-      throw new Error(`지원하지 않는 설정 파일 확장자: ${ext}`);
+      throw new Error(`Unsupported config file extension: ${ext}`);
   }
 }
 
 /**
- * JSON 설정 파일을 로드하고 검증한다.
- * @param filePath - JSON 파일 절대 경로
+ * Loads and validates a JSON config file.
+ * @param filePath - absolute path to the JSON file
  */
 async function loadJsonConfig(filePath: string): Promise<EsmapConfig> {
   const content = await readFile(filePath, 'utf-8');
@@ -61,11 +61,11 @@ async function loadJsonConfig(filePath: string): Promise<EsmapConfig> {
   return assertValidConfig(parsed);
 }
 
-/** TS/JS 모듈 설정 파일을 동적 import로 로드한다. */
+/** Loads a TS/JS module config file via dynamic import. */
 async function loadModuleConfig(filePath: string): Promise<EsmapConfig> {
   const module: unknown = await import(filePath).catch((error: unknown) => {
     throw new Error(
-      `설정 파일을 로드할 수 없습니다: ${filePath}\n원인: ${error instanceof Error ? error.message : String(error)}`,
+      `Failed to load config file: ${filePath}\nCause: ${error instanceof Error ? error.message : String(error)}`,
     );
   });
   const mod = (typeof module === 'object' && module !== null ? module : {}) satisfies object;
@@ -74,8 +74,8 @@ async function loadModuleConfig(filePath: string): Promise<EsmapConfig> {
 }
 
 /**
- * 파일 존재 여부를 확인한다.
- * @param filePath - 확인할 파일 경로
+ * Checks whether a file exists.
+ * @param filePath - path to check
  */
 async function fileExists(filePath: string): Promise<boolean> {
   try {

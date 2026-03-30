@@ -3,13 +3,13 @@ import { resolve } from 'node:path';
 import { copyFile, mkdir } from 'node:fs/promises';
 
 /**
- * esmap DevTools Extension 빌드 설정.
+ * esmap DevTools Extension build configuration.
  *
- * Chrome MV3 content script는 ES module을 지원하지 않으므로
- * 모든 진입점을 IIFE로 빌드하고 정적 파일(HTML, manifest)은 복사한다.
+ * Since Chrome MV3 content scripts do not support ES modules,
+ * all entry points are built as IIFE and static files (HTML, manifest) are copied.
  */
 
-/** 정적 파일을 dist/로 복사하는 플러그인 */
+/** Plugin that copies static files to dist/ */
 function copyStaticFiles(): Plugin {
   return {
     name: 'copy-static',

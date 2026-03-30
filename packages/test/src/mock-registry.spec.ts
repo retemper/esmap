@@ -3,13 +3,13 @@ import { createTestRegistry } from './mock-registry.js';
 import { createMockApp } from './mock-app.js';
 
 describe('createTestRegistry', () => {
-  it('빈 레지스트리를 생성한다', () => {
+  it('creates an empty registry', () => {
     const { registry } = createTestRegistry();
 
     expect(registry.getApps()).toStrictEqual([]);
   });
 
-  it('인라인 앱 정의로 초기 앱을 등록한다', () => {
+  it('registers initial apps with inline app definitions', () => {
     const mockApp = createMockApp();
     const { registry } = createTestRegistry({
       apps: [
@@ -27,7 +27,7 @@ describe('createTestRegistry', () => {
     expect(registered?.app).toBe(mockApp);
   });
 
-  it('여러 인라인 앱을 동시에 등록한다', () => {
+  it('registers multiple inline apps simultaneously', () => {
     const { registry } = createTestRegistry({
       apps: [
         { name: '@test/app-a', activeWhen: '/a', app: createMockApp() },
@@ -38,7 +38,7 @@ describe('createTestRegistry', () => {
     expect(registry.getApps()).toHaveLength(2);
   });
 
-  it('인라인 앱은 이미 NOT_MOUNTED 상태이므로 바로 마운트할 수 있다', async () => {
+  it('inline apps are already in NOT_MOUNTED status so they can be mounted immediately', async () => {
     const container = document.createElement('div');
     container.id = 'app';
     document.body.appendChild(container);
@@ -58,7 +58,7 @@ describe('createTestRegistry', () => {
 });
 
 describe('registerMockApp', () => {
-  it('mock 앱을 이름만으로 간편히 등록한다', () => {
+  it('registers a mock app conveniently by name only', () => {
     const { registry, registerMockApp } = createTestRegistry();
 
     const mockApp = registerMockApp('checkout');
@@ -69,7 +69,7 @@ describe('registerMockApp', () => {
     expect(mockApp.bootstrapSpy).toBeDefined();
   });
 
-  it('기본 activeWhen 경로는 앱 이름 기반이다', () => {
+  it('defaults activeWhen path based on the app name', () => {
     const { registry, registerMockApp } = createTestRegistry();
 
     registerMockApp('dashboard');
@@ -79,7 +79,7 @@ describe('registerMockApp', () => {
     expect(registered?.activeWhen({ pathname: '/other' } as Location)).toBe(false);
   });
 
-  it('커스텀 activeWhen과 container를 지정할 수 있다', () => {
+  it('supports custom activeWhen and container', () => {
     const { registry, registerMockApp } = createTestRegistry();
 
     registerMockApp('settings', { activeWhen: '/my-settings', container: '#settings-root' });
@@ -89,7 +89,7 @@ describe('registerMockApp', () => {
     expect(registered?.container).toBe('#settings-root');
   });
 
-  it('반환된 mock 앱의 라이프사이클 오버라이드가 적용된다', async () => {
+  it('applies lifecycle overrides on the returned mock app', async () => {
     const records: string[] = [];
     const { registerMockApp } = createTestRegistry();
 

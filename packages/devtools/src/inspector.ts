@@ -1,12 +1,12 @@
 /**
- * 런타임 프레임워크 상태를 검사하는 devtools inspector.
- * 이벤트 버스, 공유 모듈, 앱 레지스트리의 상태를 콘솔에서 조회할 수 있다.
+ * Devtools inspector for examining runtime framework state.
+ * Allows querying event bus, shared module, and app registry state from the console.
  *
- * 설계 원칙: Inspector는 프레임워크 패키지를 직접 import하지 않는다.
- * 대신 `connect()`로 런타임 객체의 참조를 받아 약한 결합을 유지한다.
+ * Design principle: The inspector does not directly import framework packages.
+ * Instead, it receives runtime object references via `connect()` to maintain loose coupling.
  */
 
-/** 이벤트 버스 검사용 최소 인터페이스 */
+/** Minimal interface for inspecting the event bus */
 interface InspectableEventBus {
   readonly getHistory: (event?: string) => ReadonlyArray<{
     readonly event: string;
@@ -16,7 +16,7 @@ interface InspectableEventBus {
   readonly listenerCount: (event: string) => number;
 }
 
-/** 공유 모듈 레지스트리 검사용 최소 인터페이스 */
+/** Minimal interface for inspecting the shared module registry */
 interface InspectableSharedModules {
   readonly getRegistered: () => ReadonlyMap<string, ReadonlyArray<{
     readonly name: string;
@@ -33,7 +33,7 @@ interface InspectableSharedModules {
   }>;
 }
 
-/** 앱 레지스트리 검사용 최소 인터페이스 */
+/** Minimal interface for inspecting the app registry */
 interface InspectableRegistry {
   readonly getApps: () => ReadonlyArray<{
     readonly name: string;
@@ -42,44 +42,44 @@ interface InspectableRegistry {
   }>;
 }
 
-/** Inspector에 연결 가능한 리소스 */
+/** Resources connectable to the inspector */
 interface InspectorConnections {
   readonly eventBus?: InspectableEventBus;
   readonly sharedModules?: InspectableSharedModules;
   readonly registry?: InspectableRegistry;
 }
 
-/** DevTools Inspector 인터페이스 */
+/** DevTools Inspector interface */
 export interface DevtoolsInspector {
-  /** 런타임 리소스를 연결한다. 여러 번 호출하면 마지막 연결이 유지된다. */
+  /** Connects runtime resources. Multiple calls retain the latest connection. */
   connect(connections: InspectorConnections): void;
-  /** 이벤트 버스 이력을 콘솔에 출력한다 */
+  /** Prints event bus history to the console */
   events(filter?: string): void;
-  /** 특정 이벤트의 리스너 수를 출력한다 */
+  /** Prints the listener count for a specific event */
   listeners(event: string): void;
-  /** 공유 모듈 등록/로드 상태를 콘솔에 출력한다 */
+  /** Prints shared module registration/loading status to the console */
   shared(): void;
-  /** 앱 상태 목록을 콘솔에 출력한다 */
+  /** Prints the app status list to the console */
   apps(): void;
-  /** 연결 상태를 확인한다 */
+  /** Checks connection status */
   status(): void;
 }
 
 /**
- * DevTools Inspector를 생성한다.
- * `connect()`로 런타임 리소스를 연결한 후 이벤트/모듈/앱 상태를 조회할 수 있다.
+ * Creates a DevTools Inspector.
+ * After connecting runtime resources via `connect()`, you can query event/module/app state.
  *
  * @example
  * ```ts
  * const inspector = createDevtoolsInspector();
  * inspector.connect({ eventBus: comm.resources.eventBus, sharedModules, registry });
- * inspector.events();       // 전체 이벤트 이력
- * inspector.events('user:*'); // 'user:' 시작 이벤트만
- * inspector.shared();       // 공유 모듈 상태
- * inspector.apps();         // 앱 상태
+ * inspector.events();       // full event history
+ * inspector.events('user:*'); // only events starting with 'user:'
+ * inspector.shared();       // shared module state
+ * inspector.apps();         // app state
  * ```
  *
- * @returns DevtoolsInspector 인스턴스
+ * @returns DevtoolsInspector instance
  */
 export function createDevtoolsInspector(): DevtoolsInspector {
   const connections: { current: InspectorConnections } = { current: {} };
@@ -87,13 +87,13 @@ export function createDevtoolsInspector(): DevtoolsInspector {
   return {
     connect(conns: InspectorConnections): void {
       connections.current = conns;
-      console.log('[esmap:inspector] 연결됨:', formatConnectionStatus(conns));
+      console.log('[esmap:inspector] Connected:', formatConnectionStatus(conns));
     },
 
     events(filter?: string): void {
       const bus = connections.current.eventBus;
       if (!bus) {
-        console.warn('[esmap:inspector] EventBus가 연결되지 않았습니다. connect()를 먼저 호출하세요.');
+        console.warn('[esmap:inspector] EventBus is not connected. Call connect() first.');
         return;
       }
 
@@ -103,11 +103,11 @@ export function createDevtoolsInspector(): DevtoolsInspector {
         : history;
 
       if (filtered.length === 0) {
-        console.log(`[esmap:inspector] 이벤트 이력 없음${filter ? ` (필터: "${filter}")` : ''}`);
+        console.log(`[esmap:inspector] No event history${filter ? ` (filter: "${filter}")` : ''}`);
         return;
       }
 
-      console.group(`[esmap:inspector] 이벤트 이력 (${filtered.length}건${filter ? `, 필터: "${filter}"` : ''})`);
+      console.group(`[esmap:inspector] Event history (${filtered.length} entries${filter ? `, filter: "${filter}"` : ''})`);
       for (const record of filtered) {
         const time = new Date(record.timestamp).toISOString().slice(11, 23);
         console.log(`[${time}] ${record.event}`, record.payload);
@@ -118,29 +118,29 @@ export function createDevtoolsInspector(): DevtoolsInspector {
     listeners(event: string): void {
       const bus = connections.current.eventBus;
       if (!bus) {
-        console.warn('[esmap:inspector] EventBus가 연결되지 않았습니다.');
+        console.warn('[esmap:inspector] EventBus is not connected.');
         return;
       }
 
       const count = bus.listenerCount(event);
-      console.log(`[esmap:inspector] "${event}" 리스너: ${count}개`);
+      console.log(`[esmap:inspector] "${event}" listeners: ${count}`);
     },
 
     shared(): void {
       const modules = connections.current.sharedModules;
       if (!modules) {
-        console.warn('[esmap:inspector] SharedModuleRegistry가 연결되지 않았습니다.');
+        console.warn('[esmap:inspector] SharedModuleRegistry is not connected.');
         return;
       }
 
       const registered = modules.getRegistered();
       const loaded = modules.getLoaded();
 
-      console.group(`[esmap:inspector] 공유 모듈 (등록: ${registered.size}, 로드: ${loaded.size})`);
+      console.group(`[esmap:inspector] Shared modules (registered: ${registered.size}, loaded: ${loaded.size})`);
 
       for (const [name, candidates] of registered) {
         const loadedInfo = loaded.get(name);
-        const status = loadedInfo ? `로드됨 v${loadedInfo.version}` : '미로드';
+        const status = loadedInfo ? `loaded v${loadedInfo.version}` : 'not loaded';
         const versions = candidates.map((c) => c.version).join(', ');
         const flags: string[] = [];
         if (candidates.some((c) => c.singleton)) flags.push('singleton');
@@ -158,17 +158,17 @@ export function createDevtoolsInspector(): DevtoolsInspector {
     apps(): void {
       const registry = connections.current.registry;
       if (!registry) {
-        console.warn('[esmap:inspector] AppRegistry가 연결되지 않았습니다.');
+        console.warn('[esmap:inspector] AppRegistry is not connected.');
         return;
       }
 
       const apps = registry.getApps();
       if (apps.length === 0) {
-        console.log('[esmap:inspector] 등록된 앱 없음');
+        console.log('[esmap:inspector] No registered apps');
         return;
       }
 
-      console.group(`[esmap:inspector] 앱 목록 (${apps.length}개)`);
+      console.group(`[esmap:inspector] App list (${apps.length})`);
       for (const app of apps) {
         console.log(`  ${app.name}: ${app.status} → ${app.container}`);
       }
@@ -176,17 +176,17 @@ export function createDevtoolsInspector(): DevtoolsInspector {
     },
 
     status(): void {
-      console.log('[esmap:inspector] 연결 상태:', formatConnectionStatus(connections.current));
+      console.log('[esmap:inspector] Connection status:', formatConnectionStatus(connections.current));
     },
   };
 }
 
 /**
- * 와일드카드 패턴이 이벤트 이름과 매칭되는지 확인한다.
- * 'user:*'는 'user:'로 시작하는 모든 이벤트에 매칭된다.
- * 와일드카드가 없으면 정확 일치를 확인한다.
- * @param event - 이벤트 이름
- * @param pattern - 매칭 패턴 (와일드카드 * 지원)
+ * Checks whether a wildcard pattern matches an event name.
+ * 'user:*' matches all events starting with 'user:'.
+ * Without a wildcard, performs exact match.
+ * @param event - event name
+ * @param pattern - matching pattern (supports wildcard *)
  */
 function matchesPattern(event: string, pattern: string): boolean {
   if (pattern.endsWith('*')) {
@@ -196,13 +196,13 @@ function matchesPattern(event: string, pattern: string): boolean {
 }
 
 /**
- * 연결 상태를 사람이 읽을 수 있는 문자열로 포맷한다.
- * @param conns - 현재 연결 상태
+ * Formats connection status as a human-readable string.
+ * @param conns - current connection state
  */
 function formatConnectionStatus(conns: InspectorConnections): string {
   const parts: string[] = [];
-  parts.push(`EventBus: ${conns.eventBus ? '연결' : '미연결'}`);
-  parts.push(`SharedModules: ${conns.sharedModules ? '연결' : '미연결'}`);
-  parts.push(`Registry: ${conns.registry ? '연결' : '미연결'}`);
+  parts.push(`EventBus: ${conns.eventBus ? 'connected' : 'disconnected'}`);
+  parts.push(`SharedModules: ${conns.sharedModules ? 'connected' : 'disconnected'}`);
+  parts.push(`Registry: ${conns.registry ? 'connected' : 'disconnected'}`);
   return parts.join(', ');
 }

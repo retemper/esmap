@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createEsmap } from './create-esmap.js';
 import type { EsmapOptions } from './types.js';
 
-/** 테스트용 기본 옵션을 생성한다 */
+/** Creates default options for testing */
 function createDefaultOptions(overrides?: Partial<EsmapOptions>): EsmapOptions {
   return {
     config: {
@@ -35,7 +35,7 @@ describe('createEsmap', () => {
     vi.useRealTimers();
   });
 
-  it('기본 인스턴스 생성 — registry, router, hooks, perf가 모두 존재한다', () => {
+  it('creates a default instance with registry, router, hooks, and perf', () => {
     const instance = createEsmap(createDefaultOptions());
 
     expect(instance.registry).toBeDefined();
@@ -47,7 +47,7 @@ describe('createEsmap', () => {
     expect(typeof instance.destroy).toBe('function');
   });
 
-  it('config.apps의 앱들이 자동으로 레지스트리에 등록된다', () => {
+  it('automatically registers apps from config.apps into the registry', () => {
     const instance = createEsmap(createDefaultOptions());
 
     const apps = instance.registry.getApps();
@@ -58,33 +58,33 @@ describe('createEsmap', () => {
     expect(apps).toHaveLength(2);
   });
 
-  it('start()가 라우터를 시작한다', async () => {
+  it('start() starts the router', async () => {
     const instance = createEsmap(createDefaultOptions());
 
     await instance.start();
 
-    // start()를 두 번 호출해도 안전하다 (Router 내부에서 중복 시작 방지)
+    // Calling start() twice is safe (Router prevents duplicate starts internally)
     await instance.start();
 
     await instance.destroy();
   });
 
-  it('destroy()가 모든 리소스를 정리한다', async () => {
+  it('destroy() cleans up all resources', async () => {
     const instance = createEsmap(createDefaultOptions());
 
     await instance.start();
     await instance.destroy();
 
-    // destroy 후 registry에 앱이 없어야 한다
+    // After destroy, registry should have no apps
     expect(instance.registry.getApps()).toHaveLength(0);
-    // destroy 후 perf 측정값이 비워져야 한다
+    // After destroy, perf measurements should be cleared
     expect(instance.perf.getMeasurements()).toHaveLength(0);
   });
 
-  it('성능 자동 계측 — 앱 라이프사이클 시 PerfTracker에 측정값이 기록된다', async () => {
+  it('auto instrumentation records measurements in PerfTracker during app lifecycle', async () => {
     const instance = createEsmap(createDefaultOptions());
 
-    // hooks를 통해 수동으로 라이프사이클 실행하여 자동 계측을 검증한다
+    // Manually run lifecycle via hooks to verify auto instrumentation
     await instance.hooks.runHooks('@test/app-a', 'mount', 'before');
     await instance.hooks.runHooks('@test/app-a', 'mount', 'after');
 
@@ -96,7 +96,7 @@ describe('createEsmap', () => {
     await instance.destroy();
   });
 
-  it('disablePerf: true이면 자동 계측이 비활성화된다', async () => {
+  it('disables auto instrumentation when disablePerf is true', async () => {
     const instance = createEsmap(createDefaultOptions({ disablePerf: true }));
 
     await instance.hooks.runHooks('@test/app-a', 'mount', 'before');

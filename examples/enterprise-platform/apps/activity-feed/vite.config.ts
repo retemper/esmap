@@ -4,8 +4,8 @@ import { esmapManifest, esmapCssScope } from '@esmap/vite-plugin';
 import { mfeDevExternals } from '../_shared/dev-externals-plugin.js';
 
 /**
- * Activity Feed MFE 빌드 설정.
- * 라우트 기반 독립 앱 + Parcel 위젯 듀얼 모드로 동작한다.
+ * Activity Feed MFE build configuration.
+ * Operates in dual mode as both a route-based standalone app and a Parcel widget.
  */
 export default defineConfig(({ command }) => ({
   root: __dirname,

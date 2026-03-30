@@ -1,4 +1,4 @@
-/** 오버레이에 표시할 앱 정보 */
+/** App information to display in the overlay */
 export interface OverlayAppInfo {
   readonly name: string;
   readonly status: string;
@@ -6,11 +6,11 @@ export interface OverlayAppInfo {
   readonly perfDuration?: number;
 }
 
-/** 오버레이 설정 */
+/** Overlay options */
 export interface OverlayOptions {
-  /** 오버레이 토글 키보드 단축키. 기본값 'Alt+Shift+D'. */
+  /** Keyboard shortcut to toggle the overlay. Defaults to 'Alt+Shift+D'. */
   readonly triggerKey?: string;
-  /** 초기 위치. 기본값 'bottom-right'. */
+  /** Initial position. Defaults to 'bottom-right'. */
   readonly position?:
     | 'top-left'
     | 'top-right'
@@ -18,23 +18,23 @@ export interface OverlayOptions {
     | 'bottom-right';
 }
 
-/** 오버레이 제어 핸들 */
+/** Overlay control handle */
 export interface DevtoolsOverlay {
-  /** 오버레이를 표시한다 */
+  /** Shows the overlay */
   show(): void;
-  /** 오버레이를 숨긴다 */
+  /** Hides the overlay */
   hide(): void;
-  /** 표시/숨김을 토글한다 */
+  /** Toggles show/hide */
   toggle(): void;
-  /** 앱 정보를 업데이트한다 */
+  /** Updates the app information */
   update(apps: readonly OverlayAppInfo[]): void;
-  /** 오버레이와 이벤트 리스너를 제거한다 */
+  /** Removes the overlay and event listeners */
   destroy(): void;
-  /** 현재 표시 여부 */
+  /** Whether the overlay is currently visible */
   readonly visible: boolean;
 }
 
-/** 오버레이 패널의 기본 스타일 */
+/** Default styles for the overlay panel */
 const OVERLAY_STYLES = {
   position: 'fixed',
   zIndex: '999999',
@@ -50,7 +50,7 @@ const OVERLAY_STYLES = {
   overflow: 'auto',
 } as const;
 
-/** 앱 상태별 배지 색상 매핑 */
+/** Badge color mapping per app status */
 const STATUS_COLORS: Record<string, string> = {
   MOUNTED: '#4caf50',
   NOT_LOADED: '#9e9e9e',
@@ -61,7 +61,7 @@ const STATUS_COLORS: Record<string, string> = {
   UNMOUNTING: '#ff9800',
 };
 
-/** 파싱된 키보드 단축키 조합 */
+/** Parsed keyboard shortcut combination */
 interface ParsedKeyCombo {
   readonly altKey: boolean;
   readonly ctrlKey: boolean;
@@ -71,8 +71,8 @@ interface ParsedKeyCombo {
 }
 
 /**
- * "Alt+Shift+D" 형식의 단축키 문자열을 KeyboardEvent 비교용 객체로 변환한다.
- * @param combo - 파싱할 단축키 문자열
+ * Converts a shortcut string in "Alt+Shift+D" format into an object for KeyboardEvent comparison.
+ * @param combo - shortcut string to parse
  */
 function parseKeyCombo(combo: string): ParsedKeyCombo {
   const parts = combo.split('+').map((p) => p.trim().toLowerCase());
@@ -88,9 +88,9 @@ function parseKeyCombo(combo: string): ParsedKeyCombo {
 }
 
 /**
- * KeyboardEvent가 파싱된 단축키 조합과 일치하는지 확인한다.
- * @param event - 비교할 키보드 이벤트
- * @param combo - 파싱된 단축키 조합
+ * Checks whether a KeyboardEvent matches a parsed shortcut combination.
+ * @param event - keyboard event to compare
+ * @param combo - parsed shortcut combination
  */
 function matchesKeyCombo(event: KeyboardEvent, combo: ParsedKeyCombo): boolean {
   return (
@@ -102,12 +102,12 @@ function matchesKeyCombo(event: KeyboardEvent, combo: ParsedKeyCombo): boolean {
   );
 }
 
-/** 오버레이 위치를 CSS 속성으로 반환한다. */
+/** Returns the overlay position as CSS properties. */
 type PositionKey = 'top' | 'bottom' | 'left' | 'right';
 
 /**
- * 위치 문자열을 CSS 스타일 속성 객체로 변환한다.
- * @param position - 오버레이 위치
+ * Converts a position string into a CSS style properties object.
+ * @param position - overlay position
  */
 function getPositionStyles(
   position: NonNullable<OverlayOptions['position']>,
@@ -146,8 +146,8 @@ function getPositionStyles(
 }
 
 /**
- * 오버레이의 헤더 영역을 생성한다.
- * @param onClose - 닫기 버튼 클릭 시 호출할 콜백
+ * Creates the overlay header area.
+ * @param onClose - callback to invoke when the close button is clicked
  */
 function createHeader(onClose: () => void): HTMLElement {
   const header = document.createElement('div');
@@ -182,8 +182,8 @@ function createHeader(onClose: () => void): HTMLElement {
 }
 
 /**
- * 앱 목록 테이블의 헤더 행을 생성한다.
- * @param thead - 테이블 헤더 요소
+ * Creates the header row for the app list table.
+ * @param thead - table header element
  */
 function createTableHeader(thead: HTMLTableSectionElement): void {
   const headerRow = document.createElement('tr');
@@ -204,7 +204,7 @@ function createTableHeader(thead: HTMLTableSectionElement): void {
 }
 
 /**
- * 앱 테이블 요소를 생성하고 thead/tbody를 반환한다.
+ * Creates the app table element and returns thead/tbody.
  */
 function createAppTable(): { table: HTMLTableElement; tbody: HTMLTableSectionElement } {
   const table = document.createElement('table');
@@ -222,8 +222,8 @@ function createAppTable(): { table: HTMLTableElement; tbody: HTMLTableSectionEle
 }
 
 /**
- * 상태 배지 요소를 생성한다.
- * @param status - 앱 상태 문자열
+ * Creates a status badge element.
+ * @param status - app status string
  */
 function createStatusBadge(status: string): HTMLSpanElement {
   const badge = document.createElement('span');
@@ -239,8 +239,8 @@ function createStatusBadge(status: string): HTMLSpanElement {
 }
 
 /**
- * 앱 정보를 표시하는 테이블 행을 생성한다.
- * @param app - 표시할 앱 정보
+ * Creates a table row displaying app information.
+ * @param app - app information to display
  */
 function createAppRow(app: OverlayAppInfo): HTMLTableRowElement {
   const row = document.createElement('tr');
@@ -277,9 +277,9 @@ function createAppRow(app: OverlayAppInfo): HTMLTableRowElement {
 }
 
 /**
- * 루트 컨테이너에 스타일과 위치를 적용한다.
- * @param root - 오버레이 루트 요소
- * @param position - 오버레이 위치
+ * Applies styles and position to the root container.
+ * @param root - overlay root element
+ * @param position - overlay position
  */
 function applyRootStyles(
   root: HTMLDivElement,
@@ -302,9 +302,9 @@ function applyRootStyles(
 }
 
 /**
- * DevTools 오버레이를 생성한다.
- * 브라우저 화면에 고정 패널을 추가하여 앱 상태를 시각적으로 확인할 수 있다.
- * @param options - 오버레이 설정
+ * Creates a DevTools overlay.
+ * Adds a fixed panel to the browser screen for visually checking app status.
+ * @param options - overlay options
  */
 export function createDevtoolsOverlay(options?: OverlayOptions): DevtoolsOverlay {
   const triggerKey = options?.triggerKey ?? 'Alt+Shift+D';
@@ -316,19 +316,19 @@ export function createDevtoolsOverlay(options?: OverlayOptions): DevtoolsOverlay
 
   const ref = { visible: false };
 
-  /** 오버레이를 숨긴다 */
+  /** Hides the overlay */
   function hide(): void {
     root.style.display = 'none';
     ref.visible = false;
   }
 
-  /** 오버레이를 표시한다 */
+  /** Shows the overlay */
   function show(): void {
     root.style.display = 'block';
     ref.visible = true;
   }
 
-  /** 표시/숨김을 토글한다 */
+  /** Toggles show/hide */
   function toggle(): void {
     if (ref.visible) {
       hide();
@@ -348,7 +348,7 @@ export function createDevtoolsOverlay(options?: OverlayOptions): DevtoolsOverlay
 
   const parsed = parseKeyCombo(triggerKey);
 
-  /** 키보드 단축키로 오버레이를 토글하는 이벤트 핸들러 */
+  /** Event handler that toggles the overlay via keyboard shortcut */
   const onKeyDown = (e: KeyboardEvent): void => {
     if (matchesKeyCombo(e, parsed)) {
       toggle();
@@ -357,8 +357,8 @@ export function createDevtoolsOverlay(options?: OverlayOptions): DevtoolsOverlay
   document.addEventListener('keydown', onKeyDown);
 
   /**
-   * 앱 정보 목록을 업데이트한다.
-   * @param apps - 표시할 앱 정보 배열
+   * Updates the app information list.
+   * @param apps - array of app information to display
    */
   function update(apps: readonly OverlayAppInfo[]): void {
     while (tbody.firstChild) {
@@ -370,7 +370,7 @@ export function createDevtoolsOverlay(options?: OverlayOptions): DevtoolsOverlay
     }
   }
 
-  /** 오버레이와 이벤트 리스너를 제거한다 */
+  /** Removes the overlay and event listeners */
   function destroy(): void {
     document.removeEventListener('keydown', onKeyDown);
     root.remove();

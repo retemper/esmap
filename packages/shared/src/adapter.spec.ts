@@ -5,7 +5,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { defineAdapter } from './adapter.js';
 import type { AdapterProtocol } from './types/adapter.js';
 
-/** 테스트용 mock 프로토콜을 생성한다 */
+/** Creates a mock protocol for testing */
 function createMockProtocol(): AdapterProtocol<{ id: string }> {
   return {
     mount: vi.fn(() => ({ id: 'test-context' })),
@@ -14,7 +14,7 @@ function createMockProtocol(): AdapterProtocol<{ id: string }> {
   };
 }
 
-/** 테스트용 DOM 컨테이너를 생성한다 */
+/** Creates a DOM container for testing */
 function createContainer(): HTMLElement {
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -22,7 +22,7 @@ function createContainer(): HTMLElement {
 }
 
 describe('defineAdapter', () => {
-  it('MfeApp 라이프사이클 객체를 반환한다', () => {
+  it('returns an MfeApp lifecycle object', () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
 
@@ -32,7 +32,7 @@ describe('defineAdapter', () => {
     expect(app.update).toBeTypeOf('function');
   });
 
-  it('bootstrap은 아무 동작도 하지 않는다', async () => {
+  it('bootstrap does nothing', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
 
@@ -40,7 +40,7 @@ describe('defineAdapter', () => {
     expect(protocol.mount).not.toHaveBeenCalled();
   });
 
-  it('mount 시 protocol.mount를 호출한다', async () => {
+  it('calls protocol.mount on mount', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
@@ -52,7 +52,7 @@ describe('defineAdapter', () => {
     expect(protocol.mount).toHaveBeenCalledOnce();
   });
 
-  it('unmount 시 protocol.unmount를 호출한다', async () => {
+  it('calls protocol.unmount on unmount', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
@@ -65,7 +65,7 @@ describe('defineAdapter', () => {
     expect(protocol.unmount).toHaveBeenCalledOnce();
   });
 
-  it('update 시 protocol.update를 호출한다', async () => {
+  it('calls protocol.update on update', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
@@ -79,7 +79,7 @@ describe('defineAdapter', () => {
     expect(protocol.update).toHaveBeenCalledWith({ id: 'test-context' }, props);
   });
 
-  it('이미 마운트된 상태에서 다시 mount하면 에러를 던진다', async () => {
+  it('throws an error when mounting an already mounted adapter', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'my-adapter', protocol });
     const container = createContainer();
@@ -87,11 +87,11 @@ describe('defineAdapter', () => {
     await app.bootstrap();
     await app.mount(container);
 
-    await expect(app.mount(container)).rejects.toThrow('이미 마운트된 어댑터');
+    await expect(app.mount(container)).rejects.toThrow('already mounted');
     expect(protocol.mount).toHaveBeenCalledOnce();
   });
 
-  it('마운트되지 않은 상태에서 unmount해도 에러를 던지지 않는다', async () => {
+  it('does not throw when unmounting a non-mounted adapter', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
@@ -100,7 +100,7 @@ describe('defineAdapter', () => {
     expect(protocol.unmount).not.toHaveBeenCalled();
   });
 
-  it('마운트되지 않은 상태에서 update해도 에러를 던지지 않는다', async () => {
+  it('does not throw when updating a non-mounted adapter', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
 
@@ -108,7 +108,7 @@ describe('defineAdapter', () => {
     expect(protocol.update).not.toHaveBeenCalled();
   });
 
-  it('unmount 후 update를 호출하면 protocol.update를 호출하지 않는다', async () => {
+  it('does not call protocol.update after unmount', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
@@ -121,7 +121,7 @@ describe('defineAdapter', () => {
     expect(protocol.update).not.toHaveBeenCalled();
   });
 
-  it('unmount 후 다시 mount할 수 있다', async () => {
+  it('can mount again after unmount', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
@@ -134,32 +134,32 @@ describe('defineAdapter', () => {
     expect(protocol.mount).toHaveBeenCalledTimes(2);
   });
 
-  it('protocol.mount에서 에러가 발생하면 전파한다', async () => {
+  it('propagates errors from protocol.mount', async () => {
     const protocol = createMockProtocol();
     vi.mocked(protocol.mount).mockImplementation(() => {
-      throw new Error('setup 실패');
+      throw new Error('setup failed');
     });
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
 
     await app.bootstrap();
-    await expect(app.mount(container)).rejects.toThrow('setup 실패');
+    await expect(app.mount(container)).rejects.toThrow('setup failed');
   });
 
-  it('protocol.unmount에서 에러가 발생하면 전파한다', async () => {
+  it('propagates errors from protocol.unmount', async () => {
     const protocol = createMockProtocol();
     vi.mocked(protocol.unmount).mockImplementation(() => {
-      throw new Error('cleanup 실패');
+      throw new Error('cleanup failed');
     });
     const app = defineAdapter({ name: 'test', protocol });
     const container = createContainer();
 
     await app.bootstrap();
     await app.mount(container);
-    await expect(app.unmount(container)).rejects.toThrow('cleanup 실패');
+    await expect(app.unmount(container)).rejects.toThrow('cleanup failed');
   });
 
-  it('에러 메시지에 어댑터 이름이 포함된다', async () => {
+  it('includes the adapter name in error messages', async () => {
     const protocol = createMockProtocol();
     const app = defineAdapter({ name: 'vue', protocol });
     const container = createContainer();

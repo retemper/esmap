@@ -4,8 +4,8 @@ import { esmapManifest, esmapCssScope } from '@esmap/vite-plugin';
 import { mfeDevExternals } from '../_shared/dev-externals-plugin.js';
 
 /**
- * Task Board MFE 빌드 설정.
- * 칸반 보드 + 크로스-MFE 이벤트 통신 시연 앱.
+ * Task Board MFE build configuration.
+ * Kanban board + cross-MFE event communication demo app.
  */
 export default defineConfig(({ command }) => ({
   root: __dirname,

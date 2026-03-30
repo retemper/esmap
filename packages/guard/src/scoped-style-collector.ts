@@ -1,51 +1,51 @@
 /**
- * CSS-in-JS 라이브러리(styled-components, Emotion 등)가 document.head에
- * 동적으로 주입하는 <style> 요소를 감지하고 자동으로 스코핑한다.
+ * Detects and automatically scopes <style> elements dynamically injected
+ * into document.head by CSS-in-JS libraries (styled-components, Emotion, etc.).
  *
- * 기존 style-collector는 수집만 하고 스코핑은 하지 않았고,
- * style-isolation은 컨테이너 내부만 감시했다.
- * 이 모듈은 둘을 연결하여 head에 주입되는 스타일도 스코핑한다.
+ * The existing style-collector only collects without scoping,
+ * and style-isolation only watches inside the container.
+ * This module bridges both to scope styles injected into head.
  */
 
 import { scopeCssText, isPrescopedCss } from './css-scope.js';
 
-/** 스코핑된 스타일 수집기 옵션 */
+/** Scoped style collector options */
 export interface ScopedStyleCollectorOptions {
-  /** 스코프에 사용할 앱 이름 */
+  /** App name used for scoping */
   readonly appName: string;
   /**
-   * 스코핑에서 제외할 스타일 요소를 판별하는 함수.
-   * true를 반환하면 해당 요소는 스코핑하지 않는다.
+   * Function to determine which style elements to exclude from scoping.
+   * If it returns true, the element will not be scoped.
    */
   readonly exclude?: (element: HTMLStyleElement | HTMLLinkElement) => boolean;
 }
 
-/** 스코핑된 스타일 수집기 핸들 */
+/** Scoped style collector handle */
 export interface ScopedStyleCollectorHandle {
-  /** 수집 및 스코핑을 시작한다 */
+  /** Starts collection and scoping */
   start(): void;
-  /** 수집을 중단한다. 이미 스코핑된 스타일은 유지된다. */
+  /** Stops collection. Already scoped styles are preserved. */
   stop(): void;
-  /** 모든 스코핑된 스타일을 원본으로 복원하고 수집기를 해제한다 */
+  /** Restores all scoped styles to their originals and releases the collector */
   destroy(): void;
-  /** 현재 스코핑된 스타일 요소 수를 반환한다 */
+  /** Returns the number of currently scoped style elements */
   getScopedCount(): number;
 }
 
-/** 스코핑된 스타일 요소의 원본 데이터 */
+/** Original data for a scoped style element */
 interface TrackedStyle {
-  /** 스코핑된 요소 */
+  /** The scoped element */
   readonly element: HTMLStyleElement;
-  /** 원본 CSS 텍스트 */
+  /** Original CSS text */
   readonly originalCss: string;
 }
 
 /**
- * head에 주입되는 스타일 요소를 감지하고 자동으로 CSS 스코핑을 적용하는 수집기를 생성한다.
- * CSS-in-JS 라이브러리(styled-components, Emotion 등)와의 호환성을 제공한다.
+ * Creates a collector that detects style elements injected into head and automatically applies CSS scoping.
+ * Provides compatibility with CSS-in-JS libraries (styled-components, Emotion, etc.).
  *
- * @param options - 수집기 옵션
- * @returns 수집기 핸들
+ * @param options - collector options
+ * @returns collector handle
  */
 export function createScopedStyleCollector(
   options: ScopedStyleCollectorOptions,
@@ -58,8 +58,8 @@ export function createScopedStyleCollector(
   };
 
   /**
-   * style 요소가 수집 대상인지 판별한다.
-   * @param node - 검사할 DOM 노드
+   * Determines whether a style element is a collection target.
+   * @param node - DOM node to check
    */
   function isTargetStyleElement(node: Node): node is HTMLStyleElement {
     if (!(node instanceof HTMLStyleElement)) return false;
@@ -70,13 +70,9 @@ export function createScopedStyleCollector(
   }
 
   /**
-   * style 요소의 CSS를 스코핑한다.
-   * @param element - 스코핑할 style 요소
-   */
-  /**
-   * style 요소의 CSS를 스코핑한다.
-   * 빌드 타임에 이미 프리스코핑된 CSS는 건너뛴다.
-   * @param element - 스코핑할 style 요소
+   * Scopes the CSS of a style element.
+   * Skips CSS that was already prescoped at build time.
+   * @param element - style element to scope
    */
   function scopeElement(element: HTMLStyleElement): void {
     const originalCss = element.textContent ?? '';
@@ -92,9 +88,9 @@ export function createScopedStyleCollector(
   }
 
   /**
-   * CSS-in-JS 라이브러리는 빈 style 태그를 먼저 삽입한 후 나중에 내용을 채우는 경우가 있다.
-   * characterData 변경을 감시하여 내용이 추가되면 스코핑한다.
-   * @param element - 감시할 style 요소
+   * CSS-in-JS libraries may insert an empty style tag first and fill in content later.
+   * Watches for characterData changes and scopes when content is added.
+   * @param element - style element to watch
    */
   function observeContentChange(element: HTMLStyleElement): void {
     const contentObserver = new MutationObserver(() => {
@@ -105,7 +101,7 @@ export function createScopedStyleCollector(
 
       const alreadyTracked = tracked.some((t) => t.element === element);
       if (alreadyTracked) {
-        // 이미 스코핑된 요소의 내용이 변경됨 — 재스코핑
+        // Content of an already scoped element changed -- re-scope
         const idx = tracked.findIndex((t) => t.element === element);
         if (idx !== -1) {
           tracked.splice(idx, 1);
@@ -124,7 +120,7 @@ export function createScopedStyleCollector(
       if (ref.active) return;
       ref.active = true;
 
-      // 이미 head에 있는 스타일 요소 중 스코핑되지 않은 것을 처리
+      // Process unscoped style elements already in head
       const existing = document.head.querySelectorAll<HTMLStyleElement>(
         'style:not([data-esmap-scoped]):not([type="importmap"])',
       );
@@ -133,14 +129,14 @@ export function createScopedStyleCollector(
         scopeElement(el);
       }
 
-      // 새로 추가되는 스타일 요소를 감시
+      // Watch for newly added style elements
       ref.observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           for (const node of mutation.addedNodes) {
             if (!isTargetStyleElement(node)) continue;
 
             if ((node.textContent ?? '').trim().length === 0) {
-              // 빈 style 태그 — 내용 변경을 감시
+              // Empty style tag -- watch for content changes
               observeContentChange(node);
             } else {
               scopeElement(node);
@@ -163,7 +159,7 @@ export function createScopedStyleCollector(
       ref.observer?.disconnect();
       ref.observer = null;
 
-      // 원본 CSS로 복원
+      // Restore original CSS
       for (const { element, originalCss } of tracked) {
         if (element.parentNode) {
           element.textContent = originalCss;
