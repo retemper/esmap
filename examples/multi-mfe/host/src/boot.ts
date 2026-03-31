@@ -21,8 +21,12 @@ import type { ImportMap } from '@esmap/shared';
 // ─── 1. Status log UI ───
 const statusLog = document.getElementById('status-log')!;
 
-/** Adds a log to the status panel */
+/** Adds a log to the status panel, clearing the initial placeholder on first call */
 function log(message: string): void {
+  if (statusLog.dataset['initialized'] === undefined) {
+    statusLog.textContent = '';
+    statusLog.dataset['initialized'] = '';
+  }
   const line = document.createElement('div');
   line.textContent = `${new Date().toLocaleTimeString()} ${message}`;
   statusLog.appendChild(line);
@@ -103,15 +107,15 @@ async function boot(): Promise<void> {
         'app-home': {
           path: '/',
           activeWhen: (loc: Location) => loc.pathname === '/' || loc.pathname === '/index.html',
-          container: '#app-main',
+          container: '#app-home',
         },
         'app-settings': {
           path: '/settings',
-          container: '#app-main',
+          container: '#app-settings',
         },
         'app-react-dashboard': {
           path: '/react',
-          container: '#app-main',
+          container: '#app-react-dashboard',
         },
         'app-broken': {
           path: '/broken',
@@ -139,7 +143,13 @@ async function boot(): Promise<void> {
       }),
       domIsolationPlugin({
         exclude: ['app-nav'], // nav is global navigation, no need for DOM isolation
-        globalSelectors: ['#status-log', '#app-nav'],
+        globalSelectors: [
+          '#status-log',
+          '#app-nav',
+          '#app-home',
+          '#app-settings',
+          '#app-react-dashboard',
+        ],
       }),
       smartPrefetch.plugin,
       comm.plugin,
