@@ -7,7 +7,6 @@
 
 <p align="center">
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License" /></a>
-  <a href="#test-coverage"><img src="https://img.shields.io/badge/tests-841%20unit-brightgreen" alt="Tests" /></a>
   <a href="#packages"><img src="https://img.shields.io/badge/packages-15-orange" alt="15 packages" /></a>
 </p>
 
@@ -253,7 +252,7 @@ pnpm install
 
 ```bash
 pnpm build          # Build all packages
-pnpm test           # Run all 576 unit tests
+pnpm test           # Run all unit tests
 pnpm type-check     # TypeScript validation
 pnpm lint           # Lint
 pnpm format         # Format with Prettier
@@ -274,12 +273,16 @@ cd examples/multi-mfe && pnpm dev
 
 ## Test Coverage
 
-- **841 unit tests** across 15 packages (Vitest)
-- All turbo tasks pass: type-check (28) + test (34) + build (17) + lint (15)
+- Unit tests across 15 packages (Vitest)
+- All turbo tasks pass: type-check, test, build, lint
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
+We welcome contributions! Please see:
+
+- [**CONTRIBUTING.md**](./CONTRIBUTING.md) — Setup, development workflow, PR guidelines
+- [**Code of Conduct**](./CODE_OF_CONDUCT.md) — Community standards
+- [**Security Policy**](./SECURITY.md) — Reporting vulnerabilities
 
 ## License
 
