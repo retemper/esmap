@@ -4,17 +4,17 @@ import { glob } from 'node:fs/promises';
 import { analyzeDependencyConflicts } from '../analyze-deps.js';
 import { extractDeclarationsFromManifests } from '../analyze-manifests.js';
 
-/** analyze 커맨드의 옵션 */
+/** Options for the analyze command */
 export interface AnalyzeOptions {
-  /** 매니페스트 파일 glob 패턴 */
+  /** Glob pattern for manifest files */
   readonly manifests: string;
-  /** 설정 파일 경로 */
+  /** Config file path */
   readonly config?: string;
 }
 
 /**
- * 플래그 맵에서 AnalyzeOptions를 추출한다.
- * @param flags - 파싱된 CLI 플래그
+ * Extracts AnalyzeOptions from the flag map.
+ * @param flags - parsed CLI flags
  */
 export function parseAnalyzeFlags(flags: Readonly<Record<string, string>>): AnalyzeOptions {
   return {
@@ -23,12 +23,12 @@ export function parseAnalyzeFlags(flags: Readonly<Record<string, string>>): Anal
   };
 }
 
-/** 매니페스트 파일 경로를 탐색하는 함수의 타입 (테스트 주입용) */
+/** Type of the function that discovers manifest file paths (for test injection) */
 type DiscoverFn = (pattern: string) => Promise<readonly string[]>;
 
 /**
- * glob 패턴으로 매니페스트 파일 경로를 탐색한다.
- * @param pattern - glob 패턴
+ * Discovers manifest file paths using a glob pattern.
+ * @param pattern - glob pattern
  */
 async function defaultDiscover(pattern: string): Promise<readonly string[]> {
   const paths: string[] = [];
@@ -39,8 +39,8 @@ async function defaultDiscover(pattern: string): Promise<readonly string[]> {
 }
 
 /**
- * 분석 결과를 사람이 읽기 좋은 문자열로 포맷한다.
- * @param result - 의존성 분석 결과
+ * Formats the analysis result as a human-readable string.
+ * @param result - dependency analysis result
  */
 export function formatAnalysisResult(
   result: ReturnType<typeof analyzeDependencyConflicts>,
@@ -78,10 +78,10 @@ export function formatAnalysisResult(
 }
 
 /**
- * 의존성 충돌 분석을 실행한다.
- * @param options - analyze 옵션
- * @param discoverFn - 매니페스트 탐색 함수 (테스트 주입용)
- * @param readFn - 파일 읽기 함수 (테스트 주입용)
+ * Runs the dependency conflict analysis.
+ * @param options - analyze options
+ * @param discoverFn - manifest discovery function (for test injection)
+ * @param readFn - file read function (for test injection)
  */
 export async function analyze(
   options: AnalyzeOptions,
@@ -108,15 +108,15 @@ export async function analyze(
 }
 
 /**
- * analyze 커맨드를 실행한다.
- * @param flags - 파싱된 CLI 플래그
+ * Runs the analyze command.
+ * @param flags - parsed CLI flags
  */
 export async function runAnalyze(flags: Readonly<Record<string, string>>): Promise<void> {
   const options = parseAnalyzeFlags(flags);
   await analyze(options);
 }
 
-/** analyze 커맨드의 도움말 텍스트 */
+/** Help text for the analyze command */
 export const ANALYZE_HELP = `Usage: esmap analyze [options]
 
 Options:

@@ -1,22 +1,22 @@
 import { requireFlag } from './parse-args.js';
 
-/** status 커맨드의 옵션 */
+/** Options for the status command */
 export interface StatusOptions {
-  /** import map 서버 URL */
+  /** Import map server URL */
   readonly server: string;
 }
 
-/** import map 상태 정보 */
+/** Import map status information */
 export interface StatusResult {
-  /** import map의 imports 항목 */
+  /** imports entries of the import map */
   readonly imports: Readonly<Record<string, string>>;
-  /** import map의 scopes 항목 */
+  /** scopes entries of the import map */
   readonly scopes?: Readonly<Record<string, Readonly<Record<string, string>>>>;
 }
 
 /**
- * 서버 응답이 유효한 import map인지 확인한다.
- * @param value - 검증할 값
+ * Checks whether the server response is a valid import map.
+ * @param value - value to validate
  */
 function isImportMapResponse(value: unknown): value is StatusResult {
   if (typeof value !== 'object' || value === null) return false;
@@ -24,8 +24,8 @@ function isImportMapResponse(value: unknown): value is StatusResult {
 }
 
 /**
- * 플래그 맵에서 StatusOptions를 추출한다.
- * @param flags - 파싱된 CLI 플래그
+ * Extracts StatusOptions from the flag map.
+ * @param flags - parsed CLI flags
  */
 export function parseStatusFlags(flags: Readonly<Record<string, string>>): StatusOptions {
   return {
@@ -34,10 +34,10 @@ export function parseStatusFlags(flags: Readonly<Record<string, string>>): Statu
 }
 
 /**
- * import map 서버에서 현재 import map 상태를 조회한다.
- * GET / 엔드포인트를 호출한다.
- * @param options - 상태 조회 옵션
- * @param fetchFn - HTTP fetch 함수 (테스트 주입용)
+ * Queries the current import map status from the import map server.
+ * Calls the GET / endpoint.
+ * @param options - status query options
+ * @param fetchFn - HTTP fetch function (for test injection)
  */
 export async function status(
   options: StatusOptions,
@@ -66,8 +66,8 @@ export async function status(
 }
 
 /**
- * import map 항목을 정렬된 테이블 형태로 포맷한다.
- * @param result - 서버에서 받은 import map 상태
+ * Formats import map entries as a sorted table.
+ * @param result - import map status received from the server
  */
 export function formatStatus(result: StatusResult): string {
   const lines: string[] = [];
@@ -100,8 +100,8 @@ export function formatStatus(result: StatusResult): string {
 }
 
 /**
- * status 커맨드를 실행하고 결과를 콘솔에 출력한다.
- * @param flags - 파싱된 CLI 플래그
+ * Runs the status command and prints the result to the console.
+ * @param flags - parsed CLI flags
  */
 export async function runStatus(flags: Readonly<Record<string, string>>): Promise<void> {
   const options = parseStatusFlags(flags);
@@ -109,7 +109,7 @@ export async function runStatus(flags: Readonly<Record<string, string>>): Promis
   console.log(formatStatus(result));
 }
 
-/** status 커맨드의 도움말 텍스트 */
+/** Help text for the status command */
 export const STATUS_HELP = `Usage: esmap status --server <url>
 
 Options:

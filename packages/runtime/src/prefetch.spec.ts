@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createPrefetch } from './prefetch.js';
 import type { PrefetchAppConfig } from './prefetch.js';
 
-/** 테스트용 앱 설정을 생성한다 */
+/** Creates an app config for testing */
 function createApp(name: string, url?: string): PrefetchAppConfig {
   return { name, url: url ?? `https://cdn.example.com/${name}.js` };
 }
@@ -16,8 +16,8 @@ describe('createPrefetch', () => {
     vi.restoreAllMocks();
   });
 
-  describe('immediate 전략', () => {
-    it('start 호출 시 모든 앱에 대해 modulepreload 링크를 즉시 추가한다', () => {
+  describe('immediate strategy', () => {
+    it('immediately adds modulepreload links for all apps when start is called', () => {
       const apps = [createApp('app-a'), createApp('app-b')];
       const controller = createPrefetch({ strategy: 'immediate', apps });
 
@@ -29,7 +29,7 @@ describe('createPrefetch', () => {
       expect(links[1].href).toBe(apps[1].url);
     });
 
-    it('프리페치된 앱 목록을 반환한다', () => {
+    it('returns the list of prefetched apps', () => {
       const apps = [createApp('app-a'), createApp('app-b')];
       const controller = createPrefetch({ strategy: 'immediate', apps });
 
@@ -39,8 +39,8 @@ describe('createPrefetch', () => {
     });
   });
 
-  describe('idle 전략', () => {
-    it('requestIdleCallback이 있으면 이를 사용한다', () => {
+  describe('idle strategy', () => {
+    it('uses requestIdleCallback when available', () => {
       const callbacks: (() => void)[] = [];
       vi.stubGlobal('requestIdleCallback', (cb: () => void) => {
         callbacks.push(cb);
@@ -62,10 +62,10 @@ describe('createPrefetch', () => {
       expect(controller.getPrefetchedApps()).toStrictEqual(['app-a']);
     });
 
-    it('requestIdleCallback이 없으면 setTimeout 200ms를 폴백으로 사용한다', () => {
+    it('falls back to setTimeout 200ms when requestIdleCallback is unavailable', () => {
       vi.useFakeTimers();
       const original = globalThis.requestIdleCallback;
-      // @ts-expect-error -- 테스트를 위해 의도적으로 undefined로 설정
+      // @ts-expect-error -- intentionally set to undefined for testing
       globalThis.requestIdleCallback = undefined;
 
       const apps = [createApp('app-a')];
@@ -83,7 +83,7 @@ describe('createPrefetch', () => {
       vi.useRealTimers();
     });
 
-    it('stop 호출 시 대기 중인 콜백을 취소한다', () => {
+    it('cancels pending callbacks when stop is called', () => {
       const cancelMock = vi.fn();
       vi.stubGlobal('requestIdleCallback', () => 42);
       vi.stubGlobal('cancelIdleCallback', cancelMock);
@@ -98,8 +98,8 @@ describe('createPrefetch', () => {
     });
   });
 
-  describe('중복 방지', () => {
-    it('같은 앱을 두 번 프리페치해도 링크가 하나만 추가된다', () => {
+  describe('deduplication', () => {
+    it('adds only one link even when the same app is prefetched twice', () => {
       const app = createApp('app-a');
       const controller = createPrefetch({ strategy: 'immediate', apps: [app] });
 
@@ -112,7 +112,7 @@ describe('createPrefetch', () => {
   });
 
   describe('prefetchApp', () => {
-    it('개별 앱을 즉시 프리페치할 수 있다', () => {
+    it('can prefetch an individual app immediately', () => {
       const controller = createPrefetch({ strategy: 'idle', apps: [] });
       const app = createApp('manual-app');
 
@@ -124,8 +124,8 @@ describe('createPrefetch', () => {
     });
   });
 
-  describe('앱이 없는 경우', () => {
-    it('빈 앱 목록으로 start해도 에러가 발생하지 않는다', () => {
+  describe('no apps', () => {
+    it('does not throw when starting with an empty app list', () => {
       const controller = createPrefetch({ strategy: 'immediate', apps: [] });
 
       controller.start();

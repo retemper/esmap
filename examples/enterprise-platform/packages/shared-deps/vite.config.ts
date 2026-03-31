@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 import { esmapSharedDeps } from '@esmap/vite-plugin';
 
 /**
- * 공유 의존성 빌드 설정.
- * React, ReactDOM을 독립 ESM 번들로 빌드하고 content-hash 파일명으로 출력한다.
- * SharedModuleRegistry가 런타임에 버전 협상을 수행할 때 이 번들을 사용한다.
+ * Shared dependency build configuration.
+ * Builds React, ReactDOM as standalone ESM bundles with content-hash filenames.
+ * These bundles are used by SharedModuleRegistry for runtime version negotiation.
  */
 export default defineConfig({
   plugins: [
@@ -22,7 +22,7 @@ export default defineConfig({
     outDir: resolve(__dirname, '../../dist/shared'),
     emptyOutDir: true,
     rollupOptions: {
-      // CJS→ESM 래퍼의 named export가 tree-shake되지 않도록 보존한다
+      // Preserve named exports from CJS->ESM wrappers to prevent tree-shaking
       preserveEntrySignatures: 'strict',
     },
   },

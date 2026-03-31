@@ -1,35 +1,35 @@
-/** semver 버전의 major, minor, patch 구성 요소 */
+/** Major, minor, and patch components of a semver version */
 export interface SemverParts {
   readonly major: number;
   readonly minor: number;
   readonly patch: number;
 }
 
-/** semver 범위 연산자 종류 */
+/** Semver range operator types */
 type RangeOperator = '^' | '~' | '>=' | '=';
 
-/** 파싱된 semver 범위 표현식 */
+/** Parsed semver range expression */
 interface ParsedRange {
   readonly operator: RangeOperator;
   readonly version: SemverParts;
 }
 
 /**
- * 버전 문자열을 major, minor, patch로 파싱한다.
- * @param version - "18.3.1" 형태의 버전 문자열
- * @returns 파싱된 SemverParts 객체
+ * Parses a version string into major, minor, and patch.
+ * @param version - version string in "18.3.1" format
+ * @returns parsed SemverParts object
  */
 export function parseSemver(version: string): SemverParts {
   const cleaned = version.replace(/^v/, '');
 
   if (cleaned === '') {
-    throw new Error(`유효하지 않은 semver 버전: ${version}`);
+    throw new Error(`Invalid semver version: ${version}`);
   }
 
   const parts = cleaned.split('.');
 
   if (parts.length < 1 || parts.length > 3) {
-    throw new Error(`유효하지 않은 semver 버전: ${version}`);
+    throw new Error(`Invalid semver version: ${version}`);
   }
 
   const major = Number(parts[0]);
@@ -37,20 +37,20 @@ export function parseSemver(version: string): SemverParts {
   const patch = parts.length >= 3 ? Number(parts[2]) : 0;
 
   if (Number.isNaN(major) || Number.isNaN(minor) || Number.isNaN(patch)) {
-    throw new Error(`유효하지 않은 semver 버전: ${version}`);
+    throw new Error(`Invalid semver version: ${version}`);
   }
 
   if (major < 0 || minor < 0 || patch < 0) {
-    throw new Error(`유효하지 않은 semver 버전: ${version}`);
+    throw new Error(`Invalid semver version: ${version}`);
   }
 
   return { major, minor, patch };
 }
 
 /**
- * 범위 문자열을 연산자와 버전으로 파싱한다.
- * @param range - "^18.0.0", "~18.3.0", ">=18.0.0", "18.3.1" 형태의 범위 문자열
- * @returns 파싱된 범위 객체
+ * Parses a range string into an operator and version.
+ * @param range - range string in "^18.0.0", "~18.3.0", ">=18.0.0", "18.3.1" format
+ * @returns parsed range object
  */
 function parseRange(range: string): ParsedRange {
   const trimmed = range.trim();
@@ -71,10 +71,10 @@ function parseRange(range: string): ParsedRange {
 }
 
 /**
- * 두 버전 문자열을 비교한다.
- * @param a - 비교할 첫 번째 버전
- * @param b - 비교할 두 번째 버전
- * @returns a < b이면 -1, a === b이면 0, a > b이면 1
+ * Compares two version strings.
+ * @param a - first version to compare
+ * @param b - second version to compare
+ * @returns -1 if a < b, 0 if a === b, 1 if a > b
  */
 export function compareVersions(a: string, b: string): -1 | 0 | 1 {
   const pa = parseSemver(a);
@@ -96,11 +96,11 @@ export function compareVersions(a: string, b: string): -1 | 0 | 1 {
 }
 
 /**
- * 버전이 주어진 범위를 만족하는지 확인한다.
- * 지원 패턴: ^(호환), ~(근사), >=(최소), 정확 일치
- * @param version - 확인할 버전 문자열 (예: "18.3.1")
- * @param range - semver 범위 문자열 (예: "^18.0.0")
- * @returns 만족 여부
+ * Checks whether a version satisfies a given range.
+ * Supported patterns: ^ (compatible), ~ (approximately), >= (minimum), exact match
+ * @param version - version string to check (e.g. "18.3.1")
+ * @param range - semver range string (e.g. "^18.0.0")
+ * @returns whether the version satisfies the range
  */
 export function satisfiesRange(version: string, range: string): boolean {
   const parsed = parseSemver(version);
@@ -135,11 +135,11 @@ export function satisfiesRange(version: string, range: string): boolean {
 }
 
 /**
- * caret 범위(^) 만족 여부를 확인한다.
- * major가 0이 아니면 같은 major 내에서 >= range version이면 만족.
- * major가 0이면 minor도 일치해야 한다.
- * @param version - 확인할 버전
- * @param range - 범위 버전
+ * Checks whether a version satisfies a caret range (^).
+ * If major is non-zero, satisfies when >= range version within the same major.
+ * If major is 0, minor must also match.
+ * @param version - version to check
+ * @param range - range version
  */
 function satisfiesCaret(version: SemverParts, range: SemverParts): boolean {
   if (range.major !== 0) {
@@ -169,10 +169,10 @@ function satisfiesCaret(version: SemverParts, range: SemverParts): boolean {
 }
 
 /**
- * tilde 범위(~) 만족 여부를 확인한다.
- * 같은 major.minor 내에서 >= range version이면 만족.
- * @param version - 확인할 버전
- * @param range - 범위 버전
+ * Checks whether a version satisfies a tilde range (~).
+ * Satisfies when >= range version within the same major.minor.
+ * @param version - version to check
+ * @param range - range version
  */
 function satisfiesTilde(version: SemverParts, range: SemverParts): boolean {
   // ~1.2.3 := >=1.2.3 <1.3.0

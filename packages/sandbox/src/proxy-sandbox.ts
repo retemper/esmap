@@ -1,12 +1,12 @@
-/** 프록시 기반 샌드박스에 전달할 옵션 */
+/** Options for the proxy-based sandbox */
 interface ProxySandboxOptions {
-  /** 샌드박스 인스턴스의 식별 이름 */
+  /** Identifying name for the sandbox instance */
   readonly name: string;
-  /** 실제 window에서 직접 읽을 속성 목록 (기본값 제공) */
+  /** List of properties to read directly from the real window (defaults provided) */
   readonly allowList?: ReadonlyArray<PropertyKey>;
 }
 
-/** 실제 window를 오염시키지 않고 속성을 격리하는 프록시 기반 샌드박스 */
+/** Proxy-based sandbox that isolates properties without polluting the real window */
 const DEFAULT_ALLOW_LIST: ReadonlyArray<PropertyKey> = [
   'document',
   'location',
@@ -23,27 +23,27 @@ const DEFAULT_ALLOW_LIST: ReadonlyArray<PropertyKey> = [
   'performance',
 ];
 
-/** Proxy를 활용하여 window 속성 변경을 격리하는 샌드박스 클래스 */
+/** Sandbox class that uses Proxy to isolate window property modifications */
 class ProxySandbox {
-  /** 샌드박스 이름 */
+  /** Sandbox name */
   readonly name: string;
 
-  /** 현재 활성 상태 여부 */
+  /** Whether the sandbox is currently active */
   private active = false;
 
-  /** 수정된 속성을 저장하는 내부 맵 */
+  /** Internal map storing modified properties */
   private readonly modifiedPropsMap = new Map<PropertyKey, unknown>();
 
-  /** 삭제된 속성을 추적하는 Set */
+  /** Set tracking deleted properties */
   private readonly deletedPropsSet = new Set<PropertyKey>();
 
-  /** 실제 window에서 직접 읽을 속성 목록 */
+  /** List of properties to read directly from the real window */
   private readonly allowList: ReadonlySet<PropertyKey>;
 
-  /** 외부에 노출되는 프록시 객체 */
+  /** Proxy object exposed externally */
   readonly proxy: Window;
 
-  /** 주어진 옵션으로 ProxySandbox 인스턴스를 생성한다 */
+  /** Creates a ProxySandbox instance with the given options */
   constructor(options: ProxySandboxOptions) {
     this.name = options.name;
     this.allowList = new Set(options.allowList ?? DEFAULT_ALLOW_LIST);
@@ -56,7 +56,7 @@ class ProxySandbox {
     const fakeWindow = Object.create(null) as Window;
 
     this.proxy = new Proxy(fakeWindow, {
-      /** 속성 읽기: 내부 맵 > allowList > window 순서로 조회한다 */
+      /** Property read: looks up in internal map > allowList > window, in order */
       get(_target, prop, _receiver): unknown {
         if (modifiedPropsMap.has(prop)) {
           return modifiedPropsMap.get(prop);
@@ -75,7 +75,7 @@ class ProxySandbox {
         return value;
       },
 
-      /** 속성 쓰기: 활성 상태일 때만 내부 맵에 저장한다 */
+      /** Property write: stores in internal map only when active */
       set(_target, prop, value): boolean {
         if (!sandbox.active) {
           return true;
@@ -86,7 +86,7 @@ class ProxySandbox {
         return true;
       },
 
-      /** 속성 존재 확인: 내부 맵과 window 모두 확인한다 */
+      /** Property existence check: checks both internal map and window */
       has(_target, prop): boolean {
         if (deletedPropsSet.has(prop)) {
           return false;
@@ -94,7 +94,7 @@ class ProxySandbox {
         return modifiedPropsMap.has(prop) || prop in window;
       },
 
-      /** 속성 삭제: 내부 맵에서만 제거한다 */
+      /** Property deletion: removes only from internal map */
       deleteProperty(_target, prop): boolean {
         if (!sandbox.active) {
           return true;
@@ -105,7 +105,7 @@ class ProxySandbox {
         return true;
       },
 
-      /** 열거 가능한 속성 목록: 샌드박스 수정분 + window 속성을 합친다 */
+      /** Enumerable property list: merges sandbox modifications with window properties */
       ownKeys(): ArrayLike<string | symbol> {
         const windowKeys = Object.getOwnPropertyNames(window);
         const allKeys = new Set<string | symbol>(windowKeys);
@@ -120,7 +120,7 @@ class ProxySandbox {
         return [...allKeys];
       },
 
-      /** 속성 서술자 조회: 수정된 속성은 configurable + enumerable로 반환한다 */
+      /** Property descriptor lookup: returns modified properties as configurable + enumerable */
       getOwnPropertyDescriptor(_target, prop): PropertyDescriptor | undefined {
         if (modifiedPropsMap.has(prop)) {
           return {
@@ -142,7 +142,7 @@ class ProxySandbox {
         return undefined;
       },
 
-      /** 속성 정의: 활성 상태일 때만 내부 맵에 저장한다 */
+      /** Property definition: stores in internal map only when active */
       defineProperty(_target, prop, descriptor): boolean {
         if (!sandbox.active) {
           return true;
@@ -155,22 +155,22 @@ class ProxySandbox {
     });
   }
 
-  /** 샌드박스를 활성화하고, 이전 수정사항이 있으면 복원한다 */
+  /** Activates the sandbox and restores previous modifications if any */
   activate(): void {
     this.active = true;
   }
 
-  /** 샌드박스를 비활성화한다 */
+  /** Deactivates the sandbox */
   deactivate(): void {
     this.active = false;
   }
 
-  /** 현재까지 수정된 속성 이름 목록을 반환한다 */
+  /** Returns the list of property names modified so far */
   getModifiedProps(): ReadonlyArray<PropertyKey> {
     return [...this.modifiedPropsMap.keys()];
   }
 
-  /** 현재 활성 상태인지 반환한다 */
+  /** Returns whether the sandbox is currently active */
   isActive(): boolean {
     return this.active;
   }

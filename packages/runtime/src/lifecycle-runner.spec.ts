@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createLifecycleRunner } from './lifecycle-runner.js';
 import type { MfeApp } from '@esmap/shared';
 
-/** 테스트용 MfeApp 목을 생성한다 */
+/** Creates a mock MfeApp for testing */
 function createMockApp(options?: { withUpdate?: boolean }): MfeApp {
   const app: MfeApp = {
     bootstrap: vi.fn().mockResolvedValue(undefined),
@@ -25,8 +25,8 @@ describe('createLifecycleRunner', () => {
     document.body.appendChild(container);
   });
 
-  describe('초기 상태', () => {
-    it('NOT_LOADED 상태로 시작한다', () => {
+  describe('initial state', () => {
+    it('starts with NOT_LOADED status', () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
@@ -35,7 +35,7 @@ describe('createLifecycleRunner', () => {
   });
 
   describe('bootstrap', () => {
-    it('NOT_LOADED에서 NOT_MOUNTED로 전이한다', async () => {
+    it('transitions from NOT_LOADED to NOT_MOUNTED', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
@@ -45,7 +45,7 @@ describe('createLifecycleRunner', () => {
       expect(runner.status).toBe('NOT_MOUNTED');
     });
 
-    it('이미 bootstrap된 상태에서는 무시한다', async () => {
+    it('ignores when already bootstrapped', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
@@ -55,16 +55,16 @@ describe('createLifecycleRunner', () => {
       expect(app.bootstrap).toHaveBeenCalledOnce();
     });
 
-    it('실패 시 LOAD_ERROR로 전이하고 에러를 던진다', async () => {
+    it('transitions to LOAD_ERROR and throws on failure', async () => {
       const app = createMockApp();
-      vi.mocked(app.bootstrap).mockRejectedValue(new Error('bootstrap 실패'));
+      vi.mocked(app.bootstrap).mockRejectedValue(new Error('bootstrap failed'));
       const runner = createLifecycleRunner({ app, container });
 
-      await expect(runner.bootstrap()).rejects.toThrow('bootstrap 실패');
+      await expect(runner.bootstrap()).rejects.toThrow('bootstrap failed');
       expect(runner.status).toBe('LOAD_ERROR');
     });
 
-    it('상태 변경 콜백을 호출한다', async () => {
+    it('calls the status change callback', async () => {
       const app = createMockApp();
       const onStatusChange = vi.fn();
       const runner = createLifecycleRunner({ app, container, onStatusChange });
@@ -77,7 +77,7 @@ describe('createLifecycleRunner', () => {
   });
 
   describe('mount', () => {
-    it('NOT_MOUNTED에서 MOUNTED로 전이한다', async () => {
+    it('transitions from NOT_MOUNTED to MOUNTED', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
@@ -88,26 +88,26 @@ describe('createLifecycleRunner', () => {
       expect(runner.status).toBe('MOUNTED');
     });
 
-    it('NOT_MOUNTED가 아닌 상태에서 호출하면 에러를 던진다', async () => {
+    it('throws when called in a state other than NOT_MOUNTED', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
-      await expect(runner.mount()).rejects.toThrow('mount할 수 없는 상태');
+      await expect(runner.mount()).rejects.toThrow('Cannot mount in current state');
     });
 
-    it('실패 시 LOAD_ERROR로 전이하고 에러를 던진다', async () => {
+    it('transitions to LOAD_ERROR and throws on mount failure', async () => {
       const app = createMockApp();
-      vi.mocked(app.mount).mockRejectedValue(new Error('mount 실패'));
+      vi.mocked(app.mount).mockRejectedValue(new Error('mount failed'));
       const runner = createLifecycleRunner({ app, container });
 
       await runner.bootstrap();
-      await expect(runner.mount()).rejects.toThrow('mount 실패');
+      await expect(runner.mount()).rejects.toThrow('mount failed');
       expect(runner.status).toBe('LOAD_ERROR');
     });
   });
 
   describe('unmount', () => {
-    it('MOUNTED에서 NOT_MOUNTED로 전이한다', async () => {
+    it('transitions from MOUNTED to NOT_MOUNTED', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
@@ -119,26 +119,26 @@ describe('createLifecycleRunner', () => {
       expect(runner.status).toBe('NOT_MOUNTED');
     });
 
-    it('MOUNTED가 아닌 상태에서 호출하면 에러를 던진다', async () => {
+    it('throws when called in a state other than MOUNTED', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
       await runner.bootstrap();
-      await expect(runner.unmount()).rejects.toThrow('unmount할 수 없는 상태');
+      await expect(runner.unmount()).rejects.toThrow('Cannot unmount in current state');
     });
 
-    it('실패 시 LOAD_ERROR로 전이하고 에러를 던진다', async () => {
+    it('transitions to LOAD_ERROR and throws on unmount failure', async () => {
       const app = createMockApp();
-      vi.mocked(app.unmount).mockRejectedValue(new Error('unmount 실패'));
+      vi.mocked(app.unmount).mockRejectedValue(new Error('unmount failed'));
       const runner = createLifecycleRunner({ app, container });
 
       await runner.bootstrap();
       await runner.mount();
-      await expect(runner.unmount()).rejects.toThrow('unmount 실패');
+      await expect(runner.unmount()).rejects.toThrow('unmount failed');
       expect(runner.status).toBe('LOAD_ERROR');
     });
 
-    it('UNMOUNTING 중간 상태를 거친다', async () => {
+    it('passes through the UNMOUNTING intermediate state', async () => {
       const app = createMockApp();
       const transitions: Array<[string, string]> = [];
       const runner = createLifecycleRunner({
@@ -162,7 +162,7 @@ describe('createLifecycleRunner', () => {
   });
 
   describe('update', () => {
-    it('props를 앱에 전달한다', async () => {
+    it('passes props to the app', async () => {
       const app = createMockApp({ withUpdate: true });
       const runner = createLifecycleRunner({ app, container });
 
@@ -175,15 +175,15 @@ describe('createLifecycleRunner', () => {
       expect(app.update).toHaveBeenCalledWith(props);
     });
 
-    it('MOUNTED가 아닌 상태에서 호출하면 에러를 던진다', async () => {
+    it('throws when called in a state other than MOUNTED', async () => {
       const app = createMockApp({ withUpdate: true });
       const runner = createLifecycleRunner({ app, container });
 
       await runner.bootstrap();
-      await expect(runner.update({ foo: 'bar' })).rejects.toThrow('update할 수 없는 상태');
+      await expect(runner.update({ foo: 'bar' })).rejects.toThrow('Cannot update in current state');
     });
 
-    it('앱이 update를 구현하지 않으면 에러를 던진다', async () => {
+    it('throws when the app does not implement update', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 
@@ -191,13 +191,13 @@ describe('createLifecycleRunner', () => {
       await runner.mount();
 
       await expect(runner.update({ foo: 'bar' })).rejects.toThrow(
-        'update 라이프사이클을 구현하지 않았습니다',
+        'App does not implement the update lifecycle',
       );
     });
   });
 
   describe('remount', () => {
-    it('unmount 후 다시 mount할 수 있다', async () => {
+    it('can mount again after unmount', async () => {
       const app = createMockApp();
       const runner = createLifecycleRunner({ app, container });
 

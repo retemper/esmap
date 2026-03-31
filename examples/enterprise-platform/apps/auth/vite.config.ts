@@ -3,8 +3,8 @@ import { resolve } from 'node:path';
 import { esmapManifest, esmapCssScope } from '@esmap/vite-plugin';
 
 /**
- * Auth MFE 빌드 설정.
- * React를 external로 처리하고 CSS를 빌드타임 스코핑한다.
+ * Auth MFE build configuration.
+ * Externalizes React and applies build-time CSS scoping.
  */
 export default defineConfig(({ command }) => ({
   root: __dirname,

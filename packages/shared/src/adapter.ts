@@ -2,9 +2,9 @@ import type { MfeApp } from './types/lifecycle.js';
 import type { DefineAdapterOptions } from './types/adapter.js';
 
 /**
- * 프레임워크 어댑터를 정의하여 MfeApp 라이프사이클 객체를 생성한다.
- * 프레임워크별 렌더링 로직(protocol)만 제공하면 bootstrap/mount/unmount/update를
- * 자동으로 구현한다.
+ * Defines a framework adapter and creates an MfeApp lifecycle object.
+ * Provide only the framework-specific rendering logic (protocol) and
+ * bootstrap/mount/unmount/update are implemented automatically.
  *
  * @example
  * ```ts
@@ -27,9 +27,9 @@ import type { DefineAdapterOptions } from './types/adapter.js';
  * });
  * ```
  *
- * @typeParam TContext - 프레임워크별 렌더링 컨텍스트
- * @param options - 어댑터 정의 옵션
- * @returns MfeApp 라이프사이클 객체
+ * @typeParam TContext - framework-specific rendering context
+ * @param options - adapter definition options
+ * @returns MfeApp lifecycle object
  */
 export function defineAdapter<TContext>(options: DefineAdapterOptions<TContext>): MfeApp {
   const { name, protocol } = options;
@@ -41,12 +41,12 @@ export function defineAdapter<TContext>(options: DefineAdapterOptions<TContext>)
 
   return {
     async bootstrap(): Promise<void> {
-      // 대부분의 프레임워크는 bootstrap 단계에서 할 작업이 없다
+      // Most frameworks have nothing to do during the bootstrap phase
     },
 
     async mount(container: HTMLElement): Promise<void> {
       if (ref.context !== null) {
-        throw new Error(`[${name}] 이미 마운트된 어댑터를 다시 마운트할 수 없습니다`);
+        throw new Error(`[${name}] Cannot mount an adapter that is already mounted`);
       }
 
       ref.context = protocol.mount(container);

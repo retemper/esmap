@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Card, Button } from '@enterprise/design-system';
 
-/** 활동 항목 */
+/** Activity item */
 interface ActivityItem {
   readonly id: string;
   readonly type: 'create' | 'update' | 'delete' | 'comment';
@@ -10,19 +10,19 @@ interface ActivityItem {
   readonly time: string;
 }
 
-/** 데모 활동 데이터 */
+/** Demo activity data */
 const DEMO_ACTIVITIES: readonly ActivityItem[] = [
-  { id: '1', type: 'create', user: '김민혁', message: '새 프로젝트 "Q1 OKR"을 생성했습니다', time: '2분 전' },
-  { id: '2', type: 'update', user: '이서연', message: '팀 목록을 업데이트했습니다', time: '15분 전' },
-  { id: '3', type: 'comment', user: '박지훈', message: '"주간 회고" 문서에 댓글을 달았습니다', time: '1시간 전' },
-  { id: '4', type: 'delete', user: '최수빈', message: '만료된 초대 링크를 삭제했습니다', time: '2시간 전' },
-  { id: '5', type: 'create', user: '정다은', message: '새 팀원 "한소리"를 추가했습니다', time: '3시간 전' },
-  { id: '6', type: 'update', user: '김민혁', message: '대시보드 위젯 순서를 변경했습니다', time: '4시간 전' },
-  { id: '7', type: 'comment', user: '이서연', message: '"기술 스택 선정" 문서에 피드백을 남겼습니다', time: '5시간 전' },
-  { id: '8', type: 'create', user: '박지훈', message: '새 채널 "#architecture"를 개설했습니다', time: '어제' },
+  { id: '1', type: 'create', user: 'Minhyeok Kim', message: 'Created new project "Q1 OKR"', time: '2m ago' },
+  { id: '2', type: 'update', user: 'Seoyeon Lee', message: 'Updated the team list', time: '15m ago' },
+  { id: '3', type: 'comment', user: 'Jihoon Park', message: 'Commented on "Weekly Retrospective" document', time: '1h ago' },
+  { id: '4', type: 'delete', user: 'Subin Choi', message: 'Deleted expired invitation links', time: '2h ago' },
+  { id: '5', type: 'create', user: 'Daeun Jeong', message: 'Added new team member "Sori Han"', time: '3h ago' },
+  { id: '6', type: 'update', user: 'Minhyeok Kim', message: 'Reordered dashboard widgets', time: '4h ago' },
+  { id: '7', type: 'comment', user: 'Seoyeon Lee', message: 'Left feedback on "Tech Stack Selection" document', time: '5h ago' },
+  { id: '8', type: 'create', user: 'Jihoon Park', message: 'Created new channel "#architecture"', time: 'Yesterday' },
 ];
 
-/** 활동 타입별 아이콘 */
+/** Icon per activity type */
 const typeIcons: Record<string, string> = {
   create: '+',
   update: '~',
@@ -30,7 +30,7 @@ const typeIcons: Record<string, string> = {
   comment: '#',
 };
 
-/** 활동 타입별 색상 */
+/** Color per activity type */
 const typeColors: Record<string, string> = {
   create: '#16a34a',
   update: '#2563eb',
@@ -38,17 +38,17 @@ const typeColors: Record<string, string> = {
   comment: '#7c3aed',
 };
 
-/** Feed 컴포넌트 props */
+/** Feed component props */
 interface FeedProps {
-  /** 표시 모드: 'page'(전체 페이지) 또는 'widget'(Parcel 임베드) */
+  /** Display mode: 'page' (full page) or 'widget' (Parcel embed) */
   readonly mode?: 'page' | 'widget';
-  /** 최대 표시 항목 수 (widget 모드에서 제한용) */
+  /** Maximum number of items to display (for limiting in widget mode) */
   readonly maxItems?: number;
 }
 
 /**
- * Activity Feed 뷰.
- * props.mode에 따라 전체 페이지 레이아웃 또는 컴팩트 위젯으로 렌더링한다.
+ * Activity Feed view.
+ * Renders as either a full page layout or a compact widget depending on props.mode.
  */
 export function Feed(props: FeedProps): ReactNode {
   const mode = props.mode ?? 'page';
@@ -59,7 +59,7 @@ export function Feed(props: FeedProps): ReactNode {
     (item) => filter === 'all' || item.type === filter,
   ).slice(0, maxItems);
 
-  // ─── Widget 모드: 컴팩트 렌더링 ───
+  // ─── Widget mode: compact rendering ───
   if (mode === 'widget') {
     return (
       <div style={{ fontSize: '13px' }}>
@@ -103,15 +103,15 @@ export function Feed(props: FeedProps): ReactNode {
     );
   }
 
-  // ─── Page 모드: 전체 페이지 레이아웃 ───
+  // ─── Page mode: full page layout ───
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0 }}>Activity Feed</h1>
       <p style={{ color: '#64748b', margin: 0 }}>
-        듀얼 모드 MFE — 이 뷰는 독립 라우트 (/activity) 및 Dashboard Parcel 위젯으로 동작합니다
+        Dual-mode MFE — this view works as both a standalone route (/activity) and a Dashboard Parcel widget
       </p>
 
-      {/* 필터 버튼 */}
+      {/* Filter buttons */}
       <div style={{ display: 'flex', gap: '8px' }}>
         {['all', 'create', 'update', 'delete', 'comment'].map((type) => (
           <Button
@@ -120,12 +120,12 @@ export function Feed(props: FeedProps): ReactNode {
             size="sm"
             onClick={() => setFilter(type)}
           >
-            {type === 'all' ? '전체' : type}
+            {type === 'all' ? 'All' : type}
           </Button>
         ))}
       </div>
 
-      {/* 활동 목록 */}
+      {/* Activity list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {filtered.map((item) => (
           <Card key={item.id} padding="sm">

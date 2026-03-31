@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { convertMfToImportMap, convertMfSharedToImports } from './mf-to-importmap.js';
 
 describe('convertMfToImportMap', () => {
-  it('remote 앱의 scope를 bare specifier로 매핑한다', () => {
+  it('maps remote app scopes to bare specifiers', () => {
     const result = convertMfToImportMap([{ name: 'flexCheckout', scope: '@flex/checkout' }], {
       cdnBase: 'https://cdn.flex.team',
     });
@@ -10,7 +10,7 @@ describe('convertMfToImportMap', () => {
     expect(result.imports['@flex/checkout']).toBe('https://cdn.flex.team/flex-checkout/index.js');
   });
 
-  it('여러 remote를 한번에 변환한다', () => {
+  it('converts multiple remotes at once', () => {
     const result = convertMfToImportMap(
       [
         { name: 'flexCheckout', scope: '@flex/checkout' },
@@ -24,7 +24,7 @@ describe('convertMfToImportMap', () => {
     expect(result.imports['@flex/people']).toBeDefined();
   });
 
-  it('expose된 서브모듈의 specifier를 생성한다', () => {
+  it('generates specifiers for exposed submodules', () => {
     const result = convertMfToImportMap(
       [
         {
@@ -47,7 +47,7 @@ describe('convertMfToImportMap', () => {
     );
   });
 
-  it('CDN base URL 끝의 슬래시를 제거한다', () => {
+  it('strips trailing slash from CDN base URL', () => {
     const result = convertMfToImportMap([{ name: 'flexCheckout', scope: '@flex/checkout' }], {
       cdnBase: 'https://cdn.flex.team/',
     });
@@ -55,12 +55,12 @@ describe('convertMfToImportMap', () => {
     expect(result.imports['@flex/checkout']).toBe('https://cdn.flex.team/flex-checkout/index.js');
   });
 
-  it('빈 remote 목록은 빈 imports를 반환한다', () => {
+  it('returns empty imports for an empty remote list', () => {
     const result = convertMfToImportMap([], { cdnBase: 'https://cdn.flex.team' });
     expect(result.imports).toStrictEqual({});
   });
 
-  it('expose가 없는 remote는 메인 엔트리만 생성한다', () => {
+  it('generates only the main entry for a remote with no exposes', () => {
     const result = convertMfToImportMap(
       [{ name: 'flexCheckout', scope: '@flex/checkout', exposes: [] }],
       { cdnBase: 'https://cdn.flex.team' },
@@ -71,7 +71,7 @@ describe('convertMfToImportMap', () => {
 });
 
 describe('convertMfSharedToImports', () => {
-  it('공유 라이브러리의 import map 엔트리를 생성한다', () => {
+  it('generates import map entries for shared libraries', () => {
     const result = convertMfSharedToImports(
       { react: '18.3.1', 'react-dom': '18.3.1' },
       'https://cdn.flex.team',
@@ -81,7 +81,7 @@ describe('convertMfSharedToImports', () => {
     expect(result['react-dom']).toBe('https://cdn.flex.team/shared/react-dom@18.3.1.js');
   });
 
-  it('scoped 패키지 이름을 안전하게 변환한다', () => {
+  it('safely converts scoped package names', () => {
     const result = convertMfSharedToImports(
       { '@flex-packages/router': '3.0.0' },
       'https://cdn.flex.team',
@@ -92,13 +92,13 @@ describe('convertMfSharedToImports', () => {
     );
   });
 
-  it('CDN base 끝의 슬래시를 제거한다', () => {
+  it('strips trailing slash from CDN base', () => {
     const result = convertMfSharedToImports({ react: '18.3.1' }, 'https://cdn.flex.team/');
 
     expect(result.react).toBe('https://cdn.flex.team/shared/react@18.3.1.js');
   });
 
-  it('빈 shared 객체는 빈 결과를 반환한다', () => {
+  it('returns an empty result for an empty shared object', () => {
     const result = convertMfSharedToImports({}, 'https://cdn.flex.team');
     expect(result).toStrictEqual({});
   });

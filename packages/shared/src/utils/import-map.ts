@@ -3,17 +3,17 @@ import { ImportMapError, ImportMapConflictError } from '../errors.js';
 import { isRecord } from './type-guards.js';
 
 /**
- * 빈 import map을 생성한다.
+ * Creates an empty import map.
  */
 export function createEmptyImportMap(): ImportMap {
   return { imports: {} };
 }
 
 /**
- * 두 import map을 병합한다.
- * @param base - 기준 import map
- * @param overlay - 덮어씌울 import map
- * @param strategy - 충돌 시 해결 전략
+ * Merges two import maps.
+ * @param base - base import map
+ * @param overlay - import map to overlay
+ * @param strategy - conflict resolution strategy
  */
 export function mergeImportMaps(
   base: ImportMap,
@@ -32,8 +32,8 @@ export function mergeImportMaps(
 }
 
 /**
- * import map JSON 문자열을 파싱하고 유효성을 검증한다.
- * @param json - import map JSON 문자열
+ * Parses and validates an import map JSON string.
+ * @param json - import map JSON string
  */
 export function parseImportMap(json: string): ImportMap {
   const parsed: unknown = JSON.parse(json);
@@ -60,8 +60,8 @@ export function parseImportMap(json: string): ImportMap {
 }
 
 /**
- * import map 객체에서 scopes를 파싱하고 검증한다.
- * @param parsed - 파싱된 import map 객체
+ * Parses and validates scopes from an import map object.
+ * @param parsed - parsed import map object
  */
 function parseScopes(
   parsed: Record<string, unknown>,
@@ -84,8 +84,8 @@ function parseScopes(
 }
 
 /**
- * import map 객체에서 integrity를 파싱하고 검증한다.
- * @param parsed - 파싱된 import map 객체
+ * Parses and validates integrity from an import map object.
+ * @param parsed - parsed import map object
  */
 function parseIntegrity(parsed: Record<string, unknown>): Record<string, string> | undefined {
   if (!('integrity' in parsed) || parsed.integrity === undefined) return undefined;
@@ -99,9 +99,9 @@ function parseIntegrity(parsed: Record<string, unknown>): Record<string, string>
 }
 
 /**
- * import map을 정렬된 JSON 문자열로 직렬화한다.
- * @param importMap - 직렬화할 import map
- * @param indent - 들여쓰기 크기
+ * Serializes an import map to a sorted JSON string.
+ * @param importMap - import map to serialize
+ * @param indent - indentation size
  */
 export function serializeImportMap(importMap: ImportMap, indent = 2): string {
   const sorted: ImportMap = {
@@ -121,9 +121,9 @@ export function serializeImportMap(importMap: ImportMap, indent = 2): string {
 }
 
 /**
- * Record의 값이 모두 string인지 검증하고, 타입 안전한 Record를 반환한다.
- * @param record - 검증할 Record
- * @param path - 에러 메시지용 경로
+ * Validates that all values in a Record are strings and returns a type-safe Record.
+ * @param record - Record to validate
+ * @param path - path for error messages
  */
 function validateStringRecord(
   record: Record<string, unknown>,
@@ -137,18 +137,18 @@ function validateStringRecord(
 }
 
 /**
- * Record를 키 기준으로 알파벳순 정렬한다.
- * @param record - 정렬할 Record
+ * Sorts a Record alphabetically by key.
+ * @param record - Record to sort
  */
 function sortRecord(record: Readonly<Record<string, string>>): Record<string, string> {
   return Object.fromEntries(Object.entries(record).sort(([a], [b]) => a.localeCompare(b)));
 }
 
 /**
- * 두 string Record를 병합한다. 충돌 시 strategy에 따라 처리한다.
- * @param base - 기준 레코드
- * @param overlay - 덮어씌울 레코드
- * @param strategy - 충돌 해결 전략
+ * Merges two string Records. Handles conflicts according to the strategy.
+ * @param base - base record
+ * @param overlay - overlay record
+ * @param strategy - conflict resolution strategy
  */
 function mergeRecords(
   base: Readonly<Record<string, string>>,
@@ -181,10 +181,10 @@ function mergeRecords(
 }
 
 /**
- * nullable한 두 Record를 병합한다. 둘 다 없으면 undefined를 반환한다.
- * @param base - 기준 레코드 (optional)
- * @param overlay - 덮어씌울 레코드 (optional)
- * @param strategy - 충돌 해결 전략
+ * Merges two nullable Records. Returns undefined if both are absent.
+ * @param base - base record (optional)
+ * @param overlay - overlay record (optional)
+ * @param strategy - conflict resolution strategy
  */
 function mergeOptionalRecords(
   base: Readonly<Record<string, string>> | undefined,
@@ -198,10 +198,10 @@ function mergeOptionalRecords(
 }
 
 /**
- * import map의 scopes를 병합한다. 동일 스코프 키는 내부 Record를 병합한다.
- * @param base - 기준 scopes (optional)
- * @param overlay - 덮어씌울 scopes (optional)
- * @param strategy - 충돌 해결 전략
+ * Merges import map scopes. Merges inner Records for the same scope key.
+ * @param base - base scopes (optional)
+ * @param overlay - overlay scopes (optional)
+ * @param strategy - conflict resolution strategy
  */
 function mergeScopes(
   base: Readonly<Record<string, Readonly<Record<string, string>>>> | undefined,

@@ -1,77 +1,77 @@
 /**
- * 공유 자원의 준비 상태를 동기화하는 게이트.
- * 인증 토큰, 사용자 정보 등 필수 공유 상태가 준비되기 전에
- * 의존하는 앱이 마운트되는 것을 방지한다.
+ * A gate that synchronizes readiness of shared resources.
+ * Prevents dependent apps from mounting before required shared state
+ * such as auth tokens or user info is ready.
  */
 
-/** 개별 자원의 준비 상태 */
+/** Readiness status of an individual resource */
 interface ResourceStatus {
-  /** 자원 이름 */
+  /** Resource name */
   readonly name: string;
-  /** 준비 완료 여부 */
+  /** Whether the resource is ready */
   readonly ready: boolean;
-  /** 준비 완료 시각. 미완료면 undefined */
+  /** Timestamp when the resource became ready. undefined if not yet ready */
   readonly readyAt: number | undefined;
 }
 
-/** ReadyGate 옵션 */
+/** ReadyGate options */
 interface ReadyGateOptions {
-  /** 모든 자원 준비를 기다리는 최대 시간(ms). 기본값: 10000 */
+  /** Maximum time (ms) to wait for all resources to be ready. Default: 10000 */
   readonly timeout?: number;
 }
 
-/** 공유 자원 준비 동기화 게이트 인터페이스 */
+/** Shared resource readiness synchronization gate interface */
 interface ReadyGate {
-  /** 대기할 자원을 등록한다. 이미 등록된 자원은 무시한다. */
+  /** Registers a resource to wait for. Ignores already registered resources. */
   register: (name: string) => void;
-  /** 자원이 준비되었음을 선언한다. */
+  /** Declares that a resource is ready. */
   markReady: (name: string) => void;
-  /** 특정 자원이 준비될 때까지 기다린다. */
+  /** Waits until the specified resource is ready. */
   waitFor: (name: string) => Promise<void>;
-  /** 등록된 모든 자원이 준비될 때까지 기다린다. */
+  /** Waits until all registered resources are ready. */
   waitForAll: () => Promise<void>;
-  /** 특정 자원 목록이 모두 준비될 때까지 기다린다. */
+  /** Waits until all resources in the specified list are ready. */
   waitForMany: (names: readonly string[]) => Promise<void>;
-  /** 모든 자원의 현재 상태를 조회한다. */
+  /** Returns the current status of all resources. */
   getStatus: () => readonly ResourceStatus[];
-  /** 모든 자원이 준비되었는지 즉시 확인한다. */
+  /** Immediately checks whether all resources are ready. */
   isAllReady: () => boolean;
-  /** 게이트를 초기화한다. 모든 등록과 대기를 리셋한다. */
+  /** Resets the gate. Clears all registrations and pending waiters. */
   reset: () => void;
 }
 
 /**
- * 공유 자원 준비 동기화 게이트를 생성한다.
+ * Creates a shared resource readiness synchronization gate.
  *
  * @example
  * ```ts
- * // 호스트 앱에서 게이트 생성
+ * // Create gate in the host app
  * const gate = createReadyGate({ timeout: 5000 });
  * gate.register('auth');
  * gate.register('config');
  *
- * // 인증 앱에서 토큰 준비 후
+ * // After auth app prepares the token
  * gate.markReady('auth');
  *
- * // 리모트 앱에서 인증 대기 후 마운트
+ * // Remote app waits for auth then mounts
  * await gate.waitFor('auth');
  * renderApp();
  * ```
  *
- * @param options - 게이트 설정
- * @returns ReadyGate 인스턴스
+ * @param options - gate configuration
+ * @returns ReadyGate instance
  */
 function createReadyGate(options?: ReadyGateOptions): ReadyGate {
   const timeout = options?.timeout ?? 10000;
 
-  /** 자원별 준비 시각. undefined면 미준비 */
+  /** Ready timestamp per resource. undefined means not yet ready */
   const resources = new Map<string, number | undefined>();
-  /** 자원별 대기 중인 resolver 목록 */
+  /** Pending resolver list per resource */
   const waiters = new Map<string, Array<() => void>>();
 
   /**
-   * 특정 자원의 대기자들을 모두 해소한다.
-   * @param name - 준비된 자원 이름
+   * Resolves all waiters for the given resource.
+   * @param name - name of the ready resource
    */
   function resolveWaiters(name: string): void {
     const pending = waiters.get(name);
@@ -84,13 +84,13 @@ function createReadyGate(options?: ReadyGateOptions): ReadyGate {
   }
 
   /**
-   * 타임아웃 에러를 생성한다.
-   * @param names - 대기 중인 자원 이름들
+   * Creates a timeout error.
+   * @param names - names of the resources still being waited on
    */
   function createTimeoutError(names: readonly string[]): Error {
     return new Error(
-      `[esmap] ReadyGate 타임아웃 (${timeout}ms): ` +
-      `대기 중인 자원 [${names.join(', ')}]이(가) 준비되지 않았습니다.`,
+      `[esmap] ReadyGate timed out (${timeout}ms): ` +
+      `resources [${names.join(', ')}] are not ready.`,
     );
   }
 
@@ -102,25 +102,25 @@ function createReadyGate(options?: ReadyGateOptions): ReadyGate {
     },
 
     markReady(name: string): void {
-      // 미등록 자원도 mark 가능 (암시적 등록)
+      // Unregistered resources can also be marked (implicit registration)
       resources.set(name, Date.now());
       resolveWaiters(name);
     },
 
     waitFor(name: string): Promise<void> {
-      // 이미 준비된 자원
+      // Already ready resource
       if (resources.get(name) !== undefined) {
         return Promise.resolve();
       }
 
-      // 미등록 자원은 암시적으로 등록
+      // Implicitly register unregistered resources
       if (!resources.has(name)) {
         resources.set(name, undefined);
       }
 
       return new Promise<void>((resolve, reject) => {
         const timer = setTimeout(() => {
-          // 대기자 목록에서 제거
+          // Remove from the waiter list
           const pending = waiters.get(name);
           if (pending) {
             const idx = pending.indexOf(resolve);
@@ -172,9 +172,9 @@ function createReadyGate(options?: ReadyGateOptions): ReadyGate {
     },
 
     reset(): void {
-      // 대기 중인 Promise는 타임아웃에 의해 자연스럽게 reject된다.
-      // 즉시 reject하지 않는 이유: reset은 destroy 시점에 호출되며,
-      // 이미 teardown 중인 앱의 에러 핸들러가 불필요하게 트리거되는 것을 방지한다.
+      // Pending Promises will naturally be rejected by their timeouts.
+      // We do not reject immediately because reset is called at destroy time,
+      // and we want to avoid unnecessarily triggering error handlers in apps already tearing down.
       waiters.clear();
       resources.clear();
     },

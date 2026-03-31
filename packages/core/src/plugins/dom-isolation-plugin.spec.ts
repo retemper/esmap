@@ -5,7 +5,7 @@ import type { PluginContext } from '../plugin.js';
 import { AppRegistry, Router, createLifecycleHooks, createPrefetch } from '@esmap/runtime';
 import { PerfTracker } from '@esmap/monitor';
 
-/** 테스트용 PluginContext를 생성한다 */
+/** Creates a PluginContext for testing */
 function createTestContext(): PluginContext & { registry: AppRegistry } {
   const registry = new AppRegistry();
   const router = new Router(registry);
@@ -21,12 +21,12 @@ describe('domIsolationPlugin', () => {
     document.body.innerHTML = '';
   });
 
-  it('플러그인 이름이 esmap:dom-isolation이다', () => {
+  it('has plugin name esmap:dom-isolation', () => {
     const plugin = domIsolationPlugin();
     expect(plugin.name).toBe('esmap:dom-isolation');
   });
 
-  it('exclude 목록의 앱에는 DOM 격리를 적용하지 않는다', () => {
+  it('does not apply DOM isolation to apps in the exclude list', () => {
     const plugin = domIsolationPlugin({ exclude: ['nav'] });
     const ctx = createTestContext();
 
@@ -36,7 +36,7 @@ describe('domIsolationPlugin', () => {
     if (cleanup) cleanup();
   });
 
-  it('cleanup 시 모든 격리 핸들이 정리된다', () => {
+  it('cleans up all isolation handles during cleanup', () => {
     const plugin = domIsolationPlugin();
     const ctx = createTestContext();
 

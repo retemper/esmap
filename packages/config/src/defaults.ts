@@ -1,6 +1,6 @@
 import type { EsmapConfig, ServerConfig, DevtoolsConfig } from '@esmap/shared';
 
-/** 서버 설정 기본값 */
+/** Default server configuration */
 const DEFAULT_SERVER_CONFIG: Required<ServerConfig> = {
   port: 3100,
   storage: 'filesystem',
@@ -8,7 +8,7 @@ const DEFAULT_SERVER_CONFIG: Required<ServerConfig> = {
   auth: { type: 'none' },
 };
 
-/** 개발자 도구 설정 기본값 */
+/** Default devtools configuration */
 const DEFAULT_DEVTOOLS_CONFIG: Required<DevtoolsConfig> = {
   enabled: true,
   overrideMode: 'native-merge',
@@ -16,8 +16,8 @@ const DEFAULT_DEVTOOLS_CONFIG: Required<DevtoolsConfig> = {
 };
 
 /**
- * 사용자 설정에 기본값을 병합한 완전한 설정을 반환한다.
- * @param config - 사용자가 정의한 설정
+ * Returns a fully resolved config by merging defaults into user-provided settings.
+ * @param config - user-defined configuration
  */
 export function resolveConfig(config: EsmapConfig): ResolvedConfig {
   return {
@@ -29,7 +29,7 @@ export function resolveConfig(config: EsmapConfig): ResolvedConfig {
   };
 }
 
-/** 기본값이 모두 채워진 완전한 설정 타입 */
+/** Fully resolved configuration type with all defaults filled in */
 export interface ResolvedConfig {
   readonly apps: EsmapConfig['apps'];
   readonly shared: EsmapConfig['shared'];

@@ -1,34 +1,34 @@
 /**
- * 앱별 스타일시트 추적 유틸리티.
- * document head에 추가되는 스타일 요소를 앱 단위로 수집하고 관리한다.
+ * Per-app stylesheet tracking utility.
+ * Collects and manages style elements added to document head on a per-app basis.
  */
 
-/** 스타일 수집기 인터페이스 */
+/** Style collector interface */
 export interface StyleCollector {
-  /** 특정 앱의 스타일 수집을 시작한다 */
+  /** Starts style collection for a specific app */
   startCapture(appName: string): void;
-  /** 수집을 중단하고 수집된 스타일 요소를 반환한다 */
+  /** Stops collection and returns collected style elements */
   stopCapture(appName: string): readonly (HTMLStyleElement | HTMLLinkElement)[];
-  /** 특정 앱에 속한 모든 스타일을 DOM에서 제거한다 */
+  /** Removes all styles belonging to a specific app from the DOM */
   removeStyles(appName: string): void;
-  /** 특정 앱에 속한 모든 스타일 요소를 반환한다 */
+  /** Returns all style elements belonging to a specific app */
   getStyles(appName: string): readonly (HTMLStyleElement | HTMLLinkElement)[];
-  /** 수집기를 해제하고 모든 리소스를 정리한다 */
+  /** Releases the collector and cleans up all resources */
   destroy(): void;
 }
 
-/** 앱별 수집 상태 */
+/** Per-app capture state */
 interface CaptureState {
-  /** 수집 중인지 여부 */
+  /** Whether capture is active */
   readonly active: boolean;
-  /** 수집된 스타일 요소 목록 */
+  /** List of collected style elements */
   readonly elements: (HTMLStyleElement | HTMLLinkElement)[];
 }
 
 /**
- * head에 추가되는 스타일/링크 요소가 스타일 관련인지 판별한다.
- * @param node - 검사할 DOM 노드
- * @returns 스타일 관련 요소이면 true
+ * Determines whether a node added to head is a style-related element.
+ * @param node - DOM node to check
+ * @returns true if the element is style-related
  */
 function isStyleRelatedElement(node: Node): node is HTMLStyleElement | HTMLLinkElement {
   if (node instanceof HTMLStyleElement) return true;
@@ -37,9 +37,9 @@ function isStyleRelatedElement(node: Node): node is HTMLStyleElement | HTMLLinkE
 }
 
 /**
- * 스타일 수집기를 생성한다.
- * document head에 MutationObserver를 부착하여 스타일 추가를 감지한다.
- * @returns 스타일 수집기 인스턴스
+ * Creates a style collector.
+ * Attaches a MutationObserver to document head to detect style additions.
+ * @returns style collector instance
  */
 export function createStyleCollector(): StyleCollector {
   const captures = new Map<string, CaptureState>();

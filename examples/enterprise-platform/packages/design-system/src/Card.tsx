@@ -1,17 +1,17 @@
 import type { ReactNode, HTMLAttributes } from 'react';
 import { theme } from './theme.js';
 
-/** Card 컴포넌트 props */
+/** Card component props */
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
-  /** 카드 제목 */
+  /** Card title */
   readonly title?: string;
-  /** 카드 패딩 */
+  /** Card padding */
   readonly padding?: 'sm' | 'md' | 'lg';
-  /** 카드 내용 */
+  /** Card content */
   readonly children: ReactNode;
 }
 
-/** 패딩 크기 맵 */
+/** Padding size map */
 const paddingMap: Record<string, string> = {
   sm: '12px',
   md: '20px',
@@ -19,8 +19,8 @@ const paddingMap: Record<string, string> = {
 };
 
 /**
- * 공유 디자인 시스템 Card.
- * 콘텐츠를 시각적으로 그룹화하는 컨테이너 컴포넌트.
+ * Shared design system Card.
+ * A container component that visually groups content.
  */
 export function Card({
   title,

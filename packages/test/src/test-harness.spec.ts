@@ -3,7 +3,7 @@ import { createTestHarness } from './test-harness.js';
 import { createMockApp } from './mock-app.js';
 import type { TestHarness } from './test-harness.js';
 
-/** 테스트 간 하네스 정리를 위한 참조 */
+/** Reference for cleaning up harnesses between tests */
 const harnesses: TestHarness[] = [];
 
 afterEach(async () => {
@@ -14,8 +14,8 @@ afterEach(async () => {
 });
 
 /**
- * 하네스를 생성하고 정리 목록에 등록한다.
- * @param options - 하네스 옵션
+ * Creates a harness and registers it in the cleanup list.
+ * @param options - harness options
  */
 async function setupHarness(
   options?: Parameters<typeof createTestHarness>[0],
@@ -26,7 +26,7 @@ async function setupHarness(
 }
 
 describe('createTestHarness', () => {
-  it('DOM 컨테이너를 생성한다', async () => {
+  it('creates a DOM container', async () => {
     const harness = await setupHarness();
 
     expect(harness.container).toBeInstanceOf(HTMLElement);
@@ -34,14 +34,14 @@ describe('createTestHarness', () => {
     expect(document.querySelector('#app')).toBe(harness.container);
   });
 
-  it('커스텀 컨테이너 셀렉터를 지원한다', async () => {
+  it('supports custom container selectors', async () => {
     const harness = await setupHarness({ containerSelector: '#custom-root' });
 
     expect(harness.container.id).toBe('custom-root');
     expect(document.querySelector('#custom-root')).toBe(harness.container);
   });
 
-  it('초기 앱을 등록하고 레지스트리에 반영한다', async () => {
+  it('registers initial apps and reflects them in the registry', async () => {
     const mockApp = createMockApp();
     const harness = await setupHarness({
       apps: [{ name: '@test/nav', activeWhen: '/nav', app: mockApp }],
@@ -54,7 +54,7 @@ describe('createTestHarness', () => {
 });
 
 describe('navigate', () => {
-  it('경로를 변경하고 매칭되는 앱을 마운트한다', async () => {
+  it('changes the path and mounts the matching app', async () => {
     const mockApp = createMockApp();
     const harness = await setupHarness({
       apps: [{ name: '@test/users', activeWhen: '/users', app: mockApp }],
@@ -66,7 +66,7 @@ describe('navigate', () => {
     expect(mockApp.mountSpy.callCount - mountCountBefore).toBeGreaterThanOrEqual(1);
   });
 
-  it('비활성 경로로 이동하면 앱을 언마운트한다', async () => {
+  it('unmounts the app when navigating to an inactive path', async () => {
     const mockApp = createMockApp();
     const harness = await setupHarness({
       apps: [{ name: '@test/users', activeWhen: '/users', app: mockApp }],
@@ -81,7 +81,7 @@ describe('navigate', () => {
 });
 
 describe('getActiveApps', () => {
-  it('현재 MOUNTED 상태인 앱 목록을 반환한다', async () => {
+  it('returns the list of apps currently in MOUNTED status', async () => {
     const harness = await setupHarness({
       apps: [
         { name: '@test/a', activeWhen: '/a', app: createMockApp() },
@@ -96,7 +96,7 @@ describe('getActiveApps', () => {
     expect(activeApps[0].name).toBe('@test/a');
   });
 
-  it('마운트된 앱이 없으면 빈 배열을 반환한다', async () => {
+  it('returns an empty array when no apps are mounted', async () => {
     const harness = await setupHarness({
       apps: [{ name: '@test/x', activeWhen: '/x', app: createMockApp() }],
     });
@@ -108,7 +108,7 @@ describe('getActiveApps', () => {
 });
 
 describe('cleanup', () => {
-  it('DOM 컨테이너를 제거한다', async () => {
+  it('removes the DOM container', async () => {
     const harness = await createTestHarness();
 
     await harness.cleanup();
@@ -116,7 +116,7 @@ describe('cleanup', () => {
     expect(document.querySelector('#app')).toBeNull();
   });
 
-  it('마운트된 앱을 언마운트한다', async () => {
+  it('unmounts mounted apps', async () => {
     const mockApp = createMockApp();
     const harness = await createTestHarness({
       apps: [{ name: '@test/cleanup', activeWhen: '/cleanup', app: mockApp }],

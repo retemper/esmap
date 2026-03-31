@@ -1,9 +1,9 @@
 /**
  * esmap DevTools Content Script.
  *
- * 페이지의 postMessage와 extension background 사이의 브릿지.
- * 페이지 코드가 직접 postMessage로 이벤트를 브로드캐스트하므로
- * 별도의 page-hook 주입이 필요 없다.
+ * Bridge between the page's postMessage and extension background.
+ * Since the page code broadcasts events directly via postMessage,
+ * no separate page-hook injection is needed.
  */
 
 const port = chrome.runtime.connect({ name: 'content-script' });

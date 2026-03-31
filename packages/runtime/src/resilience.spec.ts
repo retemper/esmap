@@ -3,7 +3,7 @@ import { withTimeout, withRetry, withResilience, TimeoutError, createCircuitBrea
 import type { CircuitBreakerOptions } from './resilience.js';
 
 describe('TimeoutError', () => {
-  it('timeout 값을 가진 에러를 생성한다', () => {
+  it('creates an error with the timeout value', () => {
     const error = new TimeoutError(3000);
 
     expect(error).toBeInstanceOf(Error);
@@ -13,7 +13,7 @@ describe('TimeoutError', () => {
     expect(error.message).toContain('3000ms');
   });
 
-  it('timeout이 0인 경우에도 올바르게 생성된다', () => {
+  it('creates correctly even when timeout is 0', () => {
     const error = new TimeoutError(0);
 
     expect(error.timeout).toBe(0);
@@ -29,18 +29,18 @@ describe('withTimeout', () => {
     vi.useRealTimers();
   });
 
-  it('시간 내에 완료되면 결과를 반환한다', async () => {
-    const fn = () => Promise.resolve('성공');
+  it('returns the result when completed within the time limit', async () => {
+    const fn = () => Promise.resolve('success');
 
     const result = await withTimeout(fn, 1000);
 
-    expect(result).toBe('성공');
+    expect(result).toBe('success');
   });
 
-  it('시간 내에 완료되지 않으면 TimeoutError를 던진다', async () => {
+  it('throws TimeoutError when not completed within the time limit', async () => {
     const fn = () =>
       new Promise<string>(() => {
-        /* 절대 resolve되지 않음 */
+        /* never resolves */
       });
 
     const promise = withTimeout(fn, 1000);
@@ -51,51 +51,51 @@ describe('withTimeout', () => {
     await expect(promise).rejects.toThrow('1000ms');
   });
 
-  it('함수가 에러를 던지면 해당 에러가 전파된다', async () => {
-    const fn = () => Promise.reject(new Error('원본 에러'));
+  it('propagates the error when the function throws', async () => {
+    const fn = () => Promise.reject(new Error('original error'));
 
-    await expect(withTimeout(fn, 1000)).rejects.toThrow('원본 에러');
+    await expect(withTimeout(fn, 1000)).rejects.toThrow('original error');
   });
 });
 
 describe('withRetry', () => {
-  it('첫 번째 시도에서 성공하면 바로 반환한다', async () => {
-    const fn = vi.fn().mockResolvedValue('성공');
+  it('returns immediately when the first attempt succeeds', async () => {
+    const fn = vi.fn().mockResolvedValue('success');
 
     const result = await withRetry(fn, { retries: 3, delay: 0 });
 
-    expect(result).toBe('성공');
+    expect(result).toBe('success');
     expect(fn).toHaveBeenCalledOnce();
   });
 
-  it('실패 후 재시도하여 성공하면 결과를 반환한다', async () => {
+  it('returns the result when retrying after failure succeeds', async () => {
     const fn = vi
       .fn()
-      .mockRejectedValueOnce(new Error('실패 1'))
-      .mockRejectedValueOnce(new Error('실패 2'))
-      .mockResolvedValue('성공');
+      .mockRejectedValueOnce(new Error('failure 1'))
+      .mockRejectedValueOnce(new Error('failure 2'))
+      .mockResolvedValue('success');
 
     const result = await withRetry(fn, { retries: 3, delay: 0 });
 
-    expect(result).toBe('성공');
+    expect(result).toBe('success');
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
-  it('모든 재시도가 실패하면 마지막 에러를 던진다', async () => {
-    const fn = vi.fn().mockImplementation(() => Promise.reject(new Error('항상 실패')));
+  it('throws the last error when all retries fail', async () => {
+    const fn = vi.fn().mockImplementation(() => Promise.reject(new Error('always fails')));
 
-    await expect(withRetry(fn, { retries: 2, delay: 0 })).rejects.toThrow('항상 실패');
+    await expect(withRetry(fn, { retries: 2, delay: 0 })).rejects.toThrow('always fails');
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
-  it('retries가 0이면 재시도 없이 한 번만 실행한다', async () => {
-    const fn = vi.fn().mockImplementation(() => Promise.reject(new Error('실패')));
+  it('executes only once without retrying when retries is 0', async () => {
+    const fn = vi.fn().mockImplementation(() => Promise.reject(new Error('failed')));
 
-    await expect(withRetry(fn, { retries: 0, delay: 0 })).rejects.toThrow('실패');
+    await expect(withRetry(fn, { retries: 0, delay: 0 })).rejects.toThrow('failed');
     expect(fn).toHaveBeenCalledOnce();
   });
 
-  it('재시도 사이에 지정된 delay만큼 대기한다', async () => {
+  it('waits for the specified delay between retries', async () => {
     vi.useFakeTimers();
 
     const timestamps: number[] = [];
@@ -103,11 +103,11 @@ describe('withRetry', () => {
       .fn()
       .mockImplementationOnce(() => {
         timestamps.push(Date.now());
-        return Promise.reject(new Error('실패'));
+        return Promise.reject(new Error('failed'));
       })
       .mockImplementation(() => {
         timestamps.push(Date.now());
-        return Promise.resolve('성공');
+        return Promise.resolve('success');
       });
 
     const promise = withRetry(fn, { retries: 1, delay: 500 });
@@ -124,7 +124,7 @@ describe('withRetry', () => {
 });
 
 describe('withResilience', () => {
-  it('시간 내에 성공하면 결과를 반환한다', async () => {
+  it('returns the result when successful within the time limit', async () => {
     const fn = () => Promise.resolve(42);
 
     const result = await withResilience(fn, {
@@ -136,7 +136,7 @@ describe('withResilience', () => {
     expect(result).toBe(42);
   });
 
-  it('타임아웃 후 재시도하여 성공하면 결과를 반환한다', async () => {
+  it('returns the result when retrying after timeout succeeds', async () => {
     vi.useFakeTimers();
 
     const fn = vi
@@ -144,7 +144,7 @@ describe('withResilience', () => {
       .mockImplementationOnce(
         () =>
           new Promise<number>(() => {
-            /* 절대 resolve되지 않음 — 타임아웃 유발 */
+            /* never resolves — triggers timeout */
           }),
       )
       .mockResolvedValue(99);
@@ -155,9 +155,9 @@ describe('withResilience', () => {
       delay: 100,
     });
 
-    /* 첫 번째 시도: 1000ms 타임아웃 */
+    /* First attempt: 1000ms timeout */
     await vi.advanceTimersByTimeAsync(1000);
-    /* 재시도 전 delay: 100ms */
+    /* Delay before retry: 100ms */
     await vi.advanceTimersByTimeAsync(100);
 
     const result = await promise;
@@ -168,12 +168,12 @@ describe('withResilience', () => {
     vi.useRealTimers();
   });
 
-  it('모든 시도가 타임아웃되면 TimeoutError를 던진다', async () => {
+  it('throws TimeoutError when all attempts time out', async () => {
     vi.useFakeTimers();
 
     const fn = () =>
       new Promise<never>(() => {
-        /* 절대 resolve되지 않는 promise */
+        /* promise that never resolves */
       });
 
     const promise = withResilience(fn, {
@@ -182,11 +182,11 @@ describe('withResilience', () => {
       delay: 50,
     });
 
-    /* 첫 번째 시도 타임아웃 */
+    /* First attempt timeout */
     await vi.advanceTimersByTimeAsync(100);
     /* delay */
     await vi.advanceTimersByTimeAsync(50);
-    /* 두 번째 시도 타임아웃 — catch를 먼저 걸어둔다 */
+    /* Second attempt timeout — attach catch first */
     const caught = promise.catch((e: unknown) => e);
     await vi.advanceTimersByTimeAsync(100);
 
@@ -196,11 +196,11 @@ describe('withResilience', () => {
     vi.useRealTimers();
   });
 
-  it('함수 에러와 타임아웃이 혼합된 경우 최종 성공을 반환한다', async () => {
+  it('returns the final success when function errors and timeouts are mixed', async () => {
     const fn = vi
       .fn()
-      .mockRejectedValueOnce(new Error('네트워크 에러'))
-      .mockResolvedValue('복구됨');
+      .mockRejectedValueOnce(new Error('network error'))
+      .mockResolvedValue('recovered');
 
     const result = await withResilience(fn, {
       timeout: 1000,
@@ -208,18 +208,18 @@ describe('withResilience', () => {
       delay: 0,
     });
 
-    expect(result).toBe('복구됨');
+    expect(result).toBe('recovered');
   });
 });
 
 describe('CircuitOpenError', () => {
-  it('올바른 이름과 메시지를 가진 에러를 생성한다', () => {
+  it('creates an error with the correct name and message', () => {
     const error = new CircuitOpenError();
 
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(CircuitOpenError);
     expect(error.name).toBe('CircuitOpenError');
-    expect(error.message).toContain('서킷');
+    expect(error.message).toContain('circuit');
   });
 });
 
@@ -237,7 +237,7 @@ describe('createCircuitBreaker', () => {
     vi.useRealTimers();
   });
 
-  it('CLOSED 상태에서 성공하면 CLOSED를 유지한다', async () => {
+  it('stays CLOSED when succeeding in CLOSED state', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
 
     await breaker.execute(() => Promise.resolve('ok'));
@@ -245,7 +245,7 @@ describe('createCircuitBreaker', () => {
     expect(breaker.state).toBe('CLOSED');
   });
 
-  it('CLOSED 상태에서 실패가 threshold에 도달하면 OPEN으로 전환된다', async () => {
+  it('transitions to OPEN when failures reach threshold in CLOSED state', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
     const failing = () => Promise.reject(new Error('fail'));
 
@@ -256,7 +256,7 @@ describe('createCircuitBreaker', () => {
     expect(breaker.state).toBe('OPEN');
   });
 
-  it('OPEN 상태에서 즉시 CircuitOpenError를 던진다', async () => {
+  it('throws CircuitOpenError immediately in OPEN state', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
     const failing = () => Promise.reject(new Error('fail'));
 
@@ -267,7 +267,7 @@ describe('createCircuitBreaker', () => {
     await expect(breaker.execute(() => Promise.resolve('ok'))).rejects.toThrow(CircuitOpenError);
   });
 
-  it('OPEN 상태에서 cooldown 후 HALF_OPEN으로 전환된다', async () => {
+  it('transitions to HALF_OPEN after cooldown in OPEN state', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
     const failing = () => Promise.reject(new Error('fail'));
 
@@ -284,7 +284,7 @@ describe('createCircuitBreaker', () => {
     expect(breaker.state).toBe('CLOSED');
   });
 
-  it('HALF_OPEN 상태에서 성공하면 CLOSED로 복귀한다', async () => {
+  it('returns to CLOSED when succeeding in HALF_OPEN state', async () => {
     const onStateChange = vi.fn();
     const breaker = createCircuitBreaker({ ...defaultOptions, onStateChange });
     const failing = () => Promise.reject(new Error('fail'));
@@ -301,7 +301,7 @@ describe('createCircuitBreaker', () => {
     expect(onStateChange).toHaveBeenCalledWith('HALF_OPEN', 'CLOSED');
   });
 
-  it('HALF_OPEN 상태에서 실패하면 다시 OPEN으로 전환된다', async () => {
+  it('transitions back to OPEN when failing in HALF_OPEN state', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
     const failing = () => Promise.reject(new Error('fail'));
 
@@ -316,7 +316,7 @@ describe('createCircuitBreaker', () => {
     expect(breaker.state).toBe('OPEN');
   });
 
-  it('reset()이 상태를 CLOSED로 초기화한다', async () => {
+  it('resets the state to CLOSED with reset()', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
     const failing = () => Promise.reject(new Error('fail'));
 
@@ -332,7 +332,7 @@ describe('createCircuitBreaker', () => {
     expect(breaker.failureCount).toBe(0);
   });
 
-  it('onStateChange 콜백이 상태 전환 시 호출된다', async () => {
+  it('calls the onStateChange callback on state transitions', async () => {
     const onStateChange = vi.fn();
     const breaker = createCircuitBreaker({ ...defaultOptions, onStateChange });
     const failing = () => Promise.reject(new Error('fail'));
@@ -344,7 +344,7 @@ describe('createCircuitBreaker', () => {
     expect(onStateChange).toHaveBeenCalledWith('CLOSED', 'OPEN');
   });
 
-  it('failureCount가 연속 실패 횟수를 정확히 추적한다', async () => {
+  it('accurately tracks consecutive failure count with failureCount', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
     const failing = () => Promise.reject(new Error('fail'));
 
@@ -357,7 +357,7 @@ describe('createCircuitBreaker', () => {
     expect(breaker.failureCount).toBe(2);
   });
 
-  it('성공 시 failureCount가 0으로 리셋된다', async () => {
+  it('resets failureCount to 0 on success', async () => {
     const breaker = createCircuitBreaker(defaultOptions);
     const failing = () => Promise.reject(new Error('fail'));
 

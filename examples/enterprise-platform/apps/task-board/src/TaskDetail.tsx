@@ -3,10 +3,10 @@ import { Card, Button } from '@enterprise/design-system';
 import { EsmapParcel } from '@esmap/react';
 import type { MfeApp } from '@esmap/shared';
 
-/** 태스크 우선순위 */
+/** Task priority */
 type Priority = 'high' | 'medium' | 'low';
 
-/** TaskDetail 컴포넌트에 전달되는 태스크 데이터 구조 */
+/** Task data structure passed to the TaskDetail component */
 interface TaskDetailTask {
   readonly id: string;
   readonly title: string;
@@ -17,29 +17,29 @@ interface TaskDetailTask {
   readonly status: string;
 }
 
-/** TaskDetail 컴포넌트의 props */
+/** TaskDetail component props */
 interface TaskDetailProps {
-  /** 표시할 태스크 데이터 */
+  /** Task data to display */
   readonly task: TaskDetailTask;
-  /** 상세 패널 닫기 콜백 */
+  /** Callback for closing the detail panel */
   readonly onClose: () => void;
 }
 
-/** 우선순위별 레이블 매핑 */
+/** Label mapping per priority */
 const PRIORITY_LABELS: Record<Priority, string> = {
-  high: '높음',
-  medium: '보통',
-  low: '낮음',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
 };
 
-/** 우선순위별 색상 매핑 */
+/** Color mapping per priority */
 const PRIORITY_COLORS: Record<Priority, string> = {
   high: '#f85149',
   medium: '#d29922',
   low: '#3fb950',
 };
 
-/** 상태별 레이블 매핑 */
+/** Label mapping per status */
 const STATUS_LABELS: Record<string, string> = {
   'todo': 'To Do',
   'in-progress': 'In Progress',
@@ -47,8 +47,8 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 /**
- * Activity Feed MFE를 비동기 로드하여 MfeApp을 반환한다.
- * default export를 추출하여 EsmapParcel이 기대하는 타입에 맞춘다.
+ * Asynchronously loads the Activity Feed MFE and returns its MfeApp.
+ * Extracts the default export to match the type expected by EsmapParcel.
  */
 async function loadActivityFeed(): Promise<MfeApp> {
   const mod = await import(/* @vite-ignore */ '@enterprise/activity-feed');
@@ -56,8 +56,8 @@ async function loadActivityFeed(): Promise<MfeApp> {
 }
 
 /**
- * 태스크 상세 정보를 드로어 형태로 표시한다.
- * 하단에 activity-feed MFE를 Parcel로 임베드하여 태스크 관련 활동 내역을 보여준다.
+ * Displays task detail information in a drawer format.
+ * Embeds the activity-feed MFE as a Parcel at the bottom to show task-related activity history.
  */
 export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
   return (
@@ -73,7 +73,7 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
         height: 'fit-content',
       }}
     >
-      {/* 헤더 — 제목 + 닫기 버튼 */}
+      {/* Header — title + close button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ flex: 1 }}>
           <span style={{ fontSize: '12px', color: '#484f58', marginBottom: '4px', display: 'block' }}>
@@ -88,7 +88,7 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
         </Button>
       </div>
 
-      {/* 메타 정보 */}
+      {/* Meta information */}
       <div
         style={{
           display: 'grid',
@@ -100,20 +100,20 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
           border: '1px solid #21262d',
         }}
       >
-        {/* 상태 */}
+        {/* Status */}
         <div>
           <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>
-            상태
+            Status
           </div>
           <div style={{ fontSize: '13px', color: '#e6edf3' }}>
             {STATUS_LABELS[task.status] ?? task.status}
           </div>
         </div>
 
-        {/* 우선순위 */}
+        {/* Priority */}
         <div>
           <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>
-            우선순위
+            Priority
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span
@@ -131,10 +131,10 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
           </div>
         </div>
 
-        {/* 담당자 */}
+        {/* Assignee */}
         <div style={{ gridColumn: '1 / -1' }}>
           <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>
-            담당자
+            Assignee
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span
@@ -160,29 +160,29 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
         </div>
       </div>
 
-      {/* 설명 */}
+      {/* Description */}
       <div>
         <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '8px', textTransform: 'uppercase', fontWeight: '600' }}>
-          설명
+          Description
         </div>
         <p style={{ fontSize: '14px', color: '#c9d1d9', margin: 0, lineHeight: '1.6' }}>
           {task.description}
         </p>
       </div>
 
-      {/* 임베디드 Activity Feed — Parcel 위젯 */}
-      <Card title={`${task.id} 관련 활동`} padding="sm">
+      {/* Embedded Activity Feed — Parcel widget */}
+      <Card title={`${task.id} Activity`} padding="sm">
         <EsmapParcel
           app={loadActivityFeed}
           appProps={{ mode: 'widget', maxItems: 3 }}
           loading={
             <div style={{ padding: '12px', color: '#8b949e', fontSize: '13px' }}>
-              Activity Feed 로드 중...
+              Loading Activity Feed...
             </div>
           }
           errorFallback={(error) => (
             <div style={{ padding: '12px', color: '#f85149', fontSize: '13px' }}>
-              Activity Feed 로드 실패: {error.message}
+              Failed to load Activity Feed: {error.message}
             </div>
           )}
           className="task-activity-widget"

@@ -9,25 +9,25 @@ import { createDevtoolsInspector } from './inspector.js';
 import type { DevtoolsInspector } from './inspector.js';
 
 /**
- * 브라우저 콘솔에서 사용할 수 있는 devtools API.
- * `window.__ESMAP__`로 접근한다.
+ * Devtools API accessible from the browser console.
+ * Access via `window.__ESMAP__`.
  */
 export interface EsmapDevtoolsApi {
-  /** 현재 활성 override 목록을 출력한다. */
+  /** Prints the list of currently active overrides. */
   readonly overrides: () => void;
-  /** 모듈 URL을 override한다. 페이지 새로고침 후 적용. */
+  /** Overrides a module URL. Takes effect after page reload. */
   readonly override: (specifier: string, url: string) => void;
-  /** 특정 모듈의 override를 해제한다. */
+  /** Removes the override for a specific module. */
   readonly removeOverride: (specifier: string) => void;
-  /** 모든 override를 해제한다. */
+  /** Removes all overrides. */
   readonly clearOverrides: () => void;
-  /** 현재 override 활성 상태를 확인한다. */
+  /** Returns whether any overrides are currently active. */
   readonly isOverriding: () => boolean;
-  /** 런타임 상태 Inspector. connect() 후 이벤트/모듈/앱 상태를 조회한다. */
+  /** Runtime state inspector. Query events/modules/app state after calling connect(). */
   readonly inspect: DevtoolsInspector;
 }
 
-/** devtools API 싱글턴 인스턴스를 생성한다. */
+/** Creates the devtools API singleton instance. */
 function createDevtoolsApi(): EsmapDevtoolsApi {
   return {
     inspect: createDevtoolsInspector(),
@@ -35,10 +35,10 @@ function createDevtoolsApi(): EsmapDevtoolsApi {
     overrides() {
       const entries = getOverrides();
       if (entries.length === 0) {
-        console.log('[esmap] 활성 override 없음');
+        console.log('[esmap] No active overrides');
         return;
       }
-      console.group(`[esmap] 활성 override (${entries.length}개)`);
+      console.group(`[esmap] Active overrides (${entries.length})`);
       for (const entry of entries) {
         console.log(`${entry.specifier} → ${entry.url}`);
       }
@@ -47,18 +47,18 @@ function createDevtoolsApi(): EsmapDevtoolsApi {
 
     override(specifier: string, url: string) {
       setOverride(specifier, url);
-      console.log(`[esmap] override 설정: ${specifier} → ${url}`);
-      console.log('[esmap] 페이지를 새로고침하면 적용됩니다.');
+      console.log(`[esmap] Override set: ${specifier} → ${url}`);
+      console.log('[esmap] Reload the page to apply changes.');
     },
 
     removeOverride(specifier: string) {
       removeOverride(specifier);
-      console.log(`[esmap] override 해제: ${specifier}`);
+      console.log(`[esmap] Override removed: ${specifier}`);
     },
 
     clearOverrides() {
       clearOverrides();
-      console.log('[esmap] 모든 override 해제');
+      console.log('[esmap] All overrides cleared');
     },
 
     isOverriding() {
@@ -67,15 +67,15 @@ function createDevtoolsApi(): EsmapDevtoolsApi {
   };
 }
 
-/** globalThis에 __ESMAP__ 프로퍼티를 추가하기 위한 타입 확장 */
+/** Type augmentation for adding the __ESMAP__ property to globalThis */
 declare global {
-  /** devtools API 인스턴스. window.__ESMAP__으로 접근한다. */
+  /** Devtools API instance. Access via window.__ESMAP__. */
   var __ESMAP__: EsmapDevtoolsApi | undefined;
 }
 
 /**
- * devtools API를 window.__ESMAP__에 등록한다.
- * 이미 등록되어 있으면 건너뛴다.
+ * Registers the devtools API on window.__ESMAP__.
+ * Skips registration if already present.
  */
 export function installDevtoolsApi(): void {
   if (globalThis.__ESMAP__) return;

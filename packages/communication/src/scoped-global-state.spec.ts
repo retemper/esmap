@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createGlobalState } from './global-state.js';
 import { createScopedGlobalState } from './scoped-global-state.js';
 
-/** 테스트용 상태 타입 */
+/** State type for testing */
 interface TestState {
   theme: string;
   locale: string;
@@ -10,14 +10,14 @@ interface TestState {
   count: number;
 }
 
-/** 기본 초기 상태를 생성한다 */
+/** Creates the default initial state */
 function createInitialState(): TestState {
   return { theme: 'dark', locale: 'ko', user: null, count: 0 };
 }
 
 describe('createScopedGlobalState', () => {
-  describe('getState — 허용된 키만 노출', () => {
-    it('허용된 키만 포함하는 부분 상태를 반환한다', () => {
+  describe('getState — exposes only allowed keys', () => {
+    it('returns a partial state containing only the allowed keys', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,
@@ -30,7 +30,7 @@ describe('createScopedGlobalState', () => {
       expect(Object.keys(state)).toStrictEqual(['theme', 'locale']);
     });
 
-    it('상위 상태 변경이 스코프 뷰에 반영된다', () => {
+    it('reflects parent state changes in the scoped view', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,
@@ -43,8 +43,8 @@ describe('createScopedGlobalState', () => {
     });
   });
 
-  describe('setState — 허용된 키만 수정 가능', () => {
-    it('허용된 키를 수정할 수 있다', () => {
+  describe('setState — only allowed keys can be modified', () => {
+    it('can modify allowed keys', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,
@@ -54,11 +54,11 @@ describe('createScopedGlobalState', () => {
       scoped.setState({ theme: 'light' });
 
       expect(global.getState().theme).toBe('light');
-      // 다른 키는 영향받지 않음
+      // Other keys are not affected
       expect(global.getState().user).toBeNull();
     });
 
-    it('readonly 모드에서 setState를 호출하면 에러가 발생한다', () => {
+    it('throws an error when calling setState in readonly mode', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,
@@ -67,13 +67,13 @@ describe('createScopedGlobalState', () => {
       });
 
       expect(() => scoped.setState({ theme: 'light' })).toThrow(
-        '읽기 전용 스코프에서는 상태를 변경할 수 없습니다',
+        'Cannot modify state in a read-only scope',
       );
     });
   });
 
-  describe('subscribe — 허용된 키 변경만 구독', () => {
-    it('허용된 키가 변경되면 리스너가 호출된다', () => {
+  describe('subscribe — subscribes only to allowed key changes', () => {
+    it('calls the listener when an allowed key changes', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,
@@ -91,7 +91,7 @@ describe('createScopedGlobalState', () => {
       );
     });
 
-    it('허용되지 않은 키만 변경되면 리스너가 호출되지 않는다', () => {
+    it('does not call the listener when only non-allowed keys change', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,
@@ -105,7 +105,7 @@ describe('createScopedGlobalState', () => {
       expect(listener).not.toHaveBeenCalled();
     });
 
-    it('구독 해제가 동작한다', () => {
+    it('unsubscribe works correctly', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,
@@ -121,8 +121,8 @@ describe('createScopedGlobalState', () => {
     });
   });
 
-  describe('격리 보장', () => {
-    it('서로 다른 스코프가 독립적으로 동작한다', () => {
+  describe('isolation guarantee', () => {
+    it('different scopes operate independently', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const themeScope = createScopedGlobalState({
         state: global,
@@ -144,7 +144,7 @@ describe('createScopedGlobalState', () => {
       expect(userListener).not.toHaveBeenCalled();
     });
 
-    it('readonly 스코프의 getState는 항상 최신 상태를 반영한다', () => {
+    it('getState of a readonly scope always reflects the latest state', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const readonlyScope = createScopedGlobalState({
         state: global,
@@ -158,8 +158,8 @@ describe('createScopedGlobalState', () => {
     });
   });
 
-  describe('allowedKeys 속성', () => {
-    it('허용된 키 목록을 반환한다', () => {
+  describe('allowedKeys property', () => {
+    it('returns the list of allowed keys', () => {
       const global = createGlobalState<TestState>(createInitialState());
       const scoped = createScopedGlobalState({
         state: global,

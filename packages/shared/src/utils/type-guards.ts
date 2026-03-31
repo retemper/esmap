@@ -1,7 +1,7 @@
 /**
- * 값이 plain object(Record)인지 확인하는 타입 가드.
- * Array, Date, RegExp 등 non-plain object는 제외한다.
- * @param value - 검증할 값
+ * Type guard that checks whether a value is a plain object (Record).
+ * Excludes non-plain objects such as Array, Date, RegExp, etc.
+ * @param value - value to check
  */
 export function isRecord(value: unknown): value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {

@@ -3,7 +3,7 @@ import { createEventBus } from './event-bus.js';
 import { createScopedEventBus } from './scoped-event-bus.js';
 
 describe('createScopedEventBus', () => {
-  it('emit 시 스코프 prefix가 자동으로 붙는다', () => {
+  it('automatically adds scope prefix on emit', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'checkout');
     const handler = vi.fn();
@@ -14,7 +14,7 @@ describe('createScopedEventBus', () => {
     expect(handler).toHaveBeenCalledWith({ ready: true });
   });
 
-  it('on으로 스코프된 이벤트를 구독한다', () => {
+  it('subscribes to scoped events with on', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'nav');
     const handler = vi.fn();
@@ -25,7 +25,7 @@ describe('createScopedEventBus', () => {
     expect(handler).toHaveBeenCalledWith({ target: 'home' });
   });
 
-  it('다른 스코프의 이벤트는 수신하지 않는다', () => {
+  it('does not receive events from a different scope', () => {
     const bus = createEventBus();
     const checkoutBus = createScopedEventBus(bus, 'checkout');
     const navBus = createScopedEventBus(bus, 'nav');
@@ -41,7 +41,7 @@ describe('createScopedEventBus', () => {
     expect(navHandler).not.toHaveBeenCalled();
   });
 
-  it('once로 스코프된 이벤트를 한 번만 구독한다', () => {
+  it('subscribes to a scoped event only once with once', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'app');
     const handler = vi.fn();
@@ -54,7 +54,7 @@ describe('createScopedEventBus', () => {
     expect(handler).toHaveBeenCalledWith('first');
   });
 
-  it('off로 스코프된 이벤트의 리스너를 제거한다', () => {
+  it('removes listeners for a scoped event with off', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'app');
     const handler = vi.fn();
@@ -66,7 +66,7 @@ describe('createScopedEventBus', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('getHistory가 스코프에 해당하는 이벤트만 반환한다', () => {
+  it('getHistory returns only events belonging to the scope', () => {
     const bus = createEventBus();
     const scopedA = createScopedEventBus(bus, 'a');
     const scopedB = createScopedEventBus(bus, 'b');
@@ -81,7 +81,7 @@ describe('createScopedEventBus', () => {
     expect(historyA[1].event).toBe('a:event3');
   });
 
-  it('getHistory에 이벤트 이름을 전달하면 스코프 + 이벤트로 필터한다', () => {
+  it('getHistory filters by scope + event when an event name is provided', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'app');
 
@@ -95,14 +95,14 @@ describe('createScopedEventBus', () => {
     expect(loadHistory[1].payload).toBe(3);
   });
 
-  it('scope 프로퍼티가 네임스페이스를 반환한다', () => {
+  it('scope property returns the namespace', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'checkout');
 
     expect(scoped.scope).toBe('checkout');
   });
 
-  it('구독 해제 함수가 정상 동작한다', () => {
+  it('unsubscribe function works correctly', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'app');
     const handler = vi.fn();
@@ -116,7 +116,7 @@ describe('createScopedEventBus', () => {
     expect(handler).toHaveBeenCalledWith('before');
   });
 
-  it('replay 옵션이 스코프된 이벤트에서도 동작한다', () => {
+  it('replay option works with scoped events', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'app');
 
@@ -126,13 +126,13 @@ describe('createScopedEventBus', () => {
     const handler = vi.fn();
     scoped.on('data', handler, { replay: true });
 
-    // 이력 2건이 재생된 후 구독 상태
+    // 2 history entries replayed upon subscription
     expect(handler).toHaveBeenCalledTimes(2);
     expect(handler).toHaveBeenNthCalledWith(1, { id: 1 });
     expect(handler).toHaveBeenNthCalledWith(2, { id: 2 });
   });
 
-  it('onAny로 스코프 내 와일드카드 패턴을 구독한다', () => {
+  it('subscribes to wildcard patterns within the scope using onAny', () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'checkout');
     const handler = vi.fn();
@@ -147,7 +147,7 @@ describe('createScopedEventBus', () => {
     expect(handler).toHaveBeenNthCalledWith(2, { id: 2 });
   });
 
-  it('onAny가 다른 스코프의 같은 패턴 이벤트를 수신하지 않는다', () => {
+  it('onAny does not receive events matching the same pattern from a different scope', () => {
     const bus = createEventBus();
     const scopedA = createScopedEventBus(bus, 'a');
     const scopedB = createScopedEventBus(bus, 'b');
@@ -159,13 +159,13 @@ describe('createScopedEventBus', () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it('request로 스코프 내 Request-Response를 수행한다', async () => {
+  it('performs Request-Response within the scope using request', async () => {
     const bus = createEventBus();
     const scoped = createScopedEventBus(bus, 'user');
 
-    // 스코프 내 응답자 등록
+    // Register responder within the scope
     scoped.on('getProfile', (userId) => {
-      // 응답은 상위 버스의 'user:getProfile:response'로 전달됨
+      // Response is delivered via the parent bus's 'user:getProfile:response'
       bus.emit('user:getProfile:response', { name: 'Kim', id: userId });
     });
 
@@ -174,10 +174,10 @@ describe('createScopedEventBus', () => {
     expect(result).toStrictEqual({ name: 'Kim', id: 'user-123' });
   });
 
-  it('request 타임아웃이 스코프에서도 동작한다', async () => {
+  it('request timeout works within the scope', async () => {
     const bus = createEventBus({ defaultRequestTimeout: 50 });
     const scoped = createScopedEventBus(bus, 'service');
 
-    await expect(scoped.request('noResponder', 'data', 50)).rejects.toThrow('타임아웃');
+    await expect(scoped.request('noResponder', 'data', 50)).rejects.toThrow('timed out');
   });
 });

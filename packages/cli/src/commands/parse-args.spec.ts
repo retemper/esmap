@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { parseArgs, requireFlag } from './parse-args.js';
 
 describe('parseArgs', () => {
-  it('서브커맨드를 추출한다', () => {
+  it('extracts the subcommand', () => {
     const result = parseArgs(['node', 'esmap', 'deploy']);
 
     expect(result.command).toBe('deploy');
     expect(result.help).toBe(false);
   });
 
-  it('--key value 형태의 플래그를 파싱한다', () => {
+  it('parses --key value style flags', () => {
     const result = parseArgs([
       'node',
       'esmap',
@@ -27,33 +27,33 @@ describe('parseArgs', () => {
     });
   });
 
-  it('--help 플래그를 인식한다', () => {
+  it('recognizes the --help flag', () => {
     const result = parseArgs(['node', 'esmap', '--help']);
 
     expect(result.help).toBe(true);
   });
 
-  it('-h 단축 플래그를 인식한다', () => {
+  it('recognizes the -h shorthand flag', () => {
     const result = parseArgs(['node', 'esmap', '-h']);
 
     expect(result.help).toBe(true);
   });
 
-  it('커맨드와 --help을 함께 사용할 수 있다', () => {
+  it('allows a command and --help to be used together', () => {
     const result = parseArgs(['node', 'esmap', 'deploy', '--help']);
 
     expect(result.command).toBe('deploy');
     expect(result.help).toBe(true);
   });
 
-  it('인자가 없으면 command가 undefined이다', () => {
+  it('returns undefined command when no arguments are provided', () => {
     const result = parseArgs(['node', 'esmap']);
 
     expect(result.command).toBeUndefined();
     expect(result.flags).toStrictEqual({});
   });
 
-  it('값 없는 플래그는 "true"로 처리한다', () => {
+  it('treats flags without values as "true"', () => {
     const result = parseArgs(['node', 'esmap', 'status', '--verbose']);
 
     expect(result.flags.verbose).toBe('true');
@@ -61,19 +61,19 @@ describe('parseArgs', () => {
 });
 
 describe('requireFlag', () => {
-  it('존재하는 플래그 값을 반환한다', () => {
+  it('returns the value of an existing flag', () => {
     const result = requireFlag({ server: 'http://localhost' }, 'server', 'test');
 
     expect(result).toBe('http://localhost');
   });
 
-  it('플래그가 없으면 에러를 던진다', () => {
+  it('throws an error when the flag is missing', () => {
     expect(() => requireFlag({}, 'server', 'deploy')).toThrow(
       "Missing required flag --server for 'deploy' command",
     );
   });
 
-  it('플래그 값이 "true"(값 없음)이면 에러를 던진다', () => {
+  it('throws an error when the flag value is "true" (no value)', () => {
     expect(() => requireFlag({ server: 'true' }, 'server', 'deploy')).toThrow(
       "Missing required flag --server for 'deploy' command",
     );

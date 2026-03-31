@@ -11,8 +11,8 @@ describe('createSnapshotSandbox', () => {
     delete windowRecord.__snap_b__;
   });
 
-  describe('activate / deactivate 사이클', () => {
-    it('활성화 중 변경한 window 속성이 비활성화 시 원래 값으로 복원된다', () => {
+  describe('activate / deactivate cycle', () => {
+    it('window properties modified during activation are restored to original values on deactivation', () => {
       const sandbox = createSnapshotSandbox('test');
 
       sandbox.activate();
@@ -23,7 +23,7 @@ describe('createSnapshotSandbox', () => {
       expect(windowRecord[TEST_PROP]).toStrictEqual(undefined);
     });
 
-    it('활성화 중 새로 추가된 속성이 비활성화 시 제거된다', () => {
+    it('newly added properties during activation are removed on deactivation', () => {
       const sandbox = createSnapshotSandbox('test');
 
       sandbox.activate();
@@ -33,7 +33,7 @@ describe('createSnapshotSandbox', () => {
       expect(Object.prototype.hasOwnProperty.call(window, TEST_PROP)).toStrictEqual(false);
     });
 
-    it('재활성화 시 이전 변경사항이 다시 적용된다', () => {
+    it('reapplies previous changes on reactivation', () => {
       const sandbox = createSnapshotSandbox('test');
 
       sandbox.activate();
@@ -49,8 +49,8 @@ describe('createSnapshotSandbox', () => {
     });
   });
 
-  describe('상태 관리', () => {
-    it('isActive가 현재 상태를 올바르게 반환한다', () => {
+  describe('state management', () => {
+    it('isActive correctly returns the current state', () => {
       const sandbox = createSnapshotSandbox('test');
 
       expect(sandbox.isActive()).toStrictEqual(false);
@@ -62,7 +62,7 @@ describe('createSnapshotSandbox', () => {
       expect(sandbox.isActive()).toStrictEqual(false);
     });
 
-    it('이미 활성화된 상태에서 activate를 호출해도 중복 실행되지 않는다', () => {
+    it('does not execute redundantly when activate is called while already active', () => {
       const sandbox = createSnapshotSandbox('test');
 
       sandbox.activate();
@@ -74,7 +74,7 @@ describe('createSnapshotSandbox', () => {
       sandbox.deactivate();
     });
 
-    it('이미 비활성화된 상태에서 deactivate를 호출해도 에러가 발생하지 않는다', () => {
+    it('does not throw when deactivate is called while already inactive', () => {
       const sandbox = createSnapshotSandbox('test');
 
       expect(() => {
@@ -83,8 +83,8 @@ describe('createSnapshotSandbox', () => {
     });
   });
 
-  describe('다중 샌드박스', () => {
-    it('여러 샌드박스가 순차적으로 동작한다', () => {
+  describe('multiple sandboxes', () => {
+    it('multiple sandboxes operate sequentially', () => {
       const sandbox1 = createSnapshotSandbox('sb1');
       const sandbox2 = createSnapshotSandbox('sb2');
 
@@ -106,7 +106,7 @@ describe('createSnapshotSandbox', () => {
       sandbox1.deactivate();
     });
 
-    it('name 속성이 올바르게 설정된다', () => {
+    it('sets the name property correctly', () => {
       const sandbox = createSnapshotSandbox('my-sandbox');
       expect(sandbox.name).toStrictEqual('my-sandbox');
     });

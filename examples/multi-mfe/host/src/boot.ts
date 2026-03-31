@@ -1,8 +1,8 @@
 /**
- * Host 앱 부트스트랩 — @esmap/core 기반.
+ * Host app bootstrap — based on @esmap/core.
  *
- * 이전에 340줄이던 수동 wire-up 코드가 @esmap/core 커널 + 플러그인 시스템으로
- * 간결해진 예시. createEsmap() 하나로 전체 프레임워크가 초기화된다.
+ * Example of how 340 lines of manual wire-up code became concise with the
+ * @esmap/core kernel + plugin system. A single createEsmap() initializes the entire framework.
  */
 
 import {
@@ -18,10 +18,10 @@ import { createDevtoolsOverlay } from '@esmap/devtools';
 import { loadImportMap } from '@esmap/runtime';
 import type { ImportMap } from '@esmap/shared';
 
-// ─── 1. 상태 로그 UI ───
+// ─── 1. Status log UI ───
 const statusLog = document.getElementById('status-log')!;
 
-/** 상태 패널에 로그를 추가한다 */
+/** Adds a log to the status panel */
 function log(message: string): void {
   const line = document.createElement('div');
   line.textContent = `${new Date().toLocaleTimeString()} ${message}`;
@@ -32,7 +32,7 @@ function log(message: string): void {
   }
 }
 
-// ─── 2. Import map 정의 ───
+// ─── 2. Import map definition ───
 const BASE_URL = '/apps';
 
 const importMap: ImportMap = {
@@ -45,7 +45,7 @@ const importMap: ImportMap = {
   },
 };
 
-// ─── 3. 플러그인 초기화 ───
+// ─── 3. Plugin initialization ───
 const smartPrefetch = intelligentPrefetchPlugin({
   persistKey: 'esmap-demo-prefetch',
   threshold: 0.15,
@@ -63,35 +63,35 @@ const comm = communicationPlugin({
 
 comm.resources.globalState.subscribe((state, prev) => {
   if (state.currentApp !== prev.currentApp) {
-    log(`현재 앱: ${state.currentApp}`);
+    log(`Current app: ${state.currentApp}`);
   }
 });
 
 comm.resources.eventBus.on('app:message', (payload) => {
-  log(`앱 메시지: ${JSON.stringify(payload)}`);
+  log(`App message: ${JSON.stringify(payload)}`);
 });
 
-// 와일드카드 구독 — 'app:' 접두어를 가진 모든 이벤트를 로깅
+// Wildcard subscription — log all events with 'app:' prefix
 comm.resources.eventBus.onAny('app:*', (payload) => {
-  log(`[와일드카드] app 이벤트: ${JSON.stringify(payload)}`);
+  log(`[Wildcard] app event: ${JSON.stringify(payload)}`);
 });
 
-// ─── 4. 부팅 ───
+// ─── 4. Boot ───
 async function boot(): Promise<void> {
-  log('부팅 시작');
+  log('Boot started');
 
-  // import map DOM 주입
+  // Inject import map into DOM
   await loadImportMap({
     inlineImportMap: importMap,
     injectPreload: true,
   });
-  log('import map 주입 완료');
+  log('Import map injected');
 
-  // createEsmap — 한 줄로 전체 프레임워크 초기화
+  // createEsmap — initialize entire framework in one call
   const esmap = createEsmap({
     router: {
       onNoMatch: (ctx) => {
-        log(`404: ${ctx.pathname} 에 매칭되는 앱 없음`);
+        log(`404: No matching app for ${ctx.pathname}`);
       },
     },
     config: {
@@ -128,18 +128,18 @@ async function boot(): Promise<void> {
         cssStrategy: 'attribute',
         observeDynamic: true,
         onGlobalViolation: (appName, prop) => {
-          log(`전역 오염 감지: ${appName} → ${prop}`);
+          log(`Global pollution detected: ${appName} → ${prop}`);
         },
       }),
       sandboxPlugin({
-        exclude: ['app-nav'], // nav는 항상 마운트되므로 샌드박스 불필요
+        exclude: ['app-nav'], // nav is always mounted, no need for sandbox
       }),
       keepAlivePlugin({
         apps: ['app-home', 'app-settings', 'app-react-dashboard'],
         maxCached: 3,
       }),
       domIsolationPlugin({
-        exclude: ['app-nav'], // nav는 글로벌 네비게이션이므로 DOM 격리 불필요
+        exclude: ['app-nav'], // nav is global navigation, no need for DOM isolation
         globalSelectors: ['#status-log', '#app-nav'],
       }),
       smartPrefetch.plugin,
@@ -147,17 +147,17 @@ async function boot(): Promise<void> {
     ],
   });
 
-  // 라이프사이클 로깅 훅
+  // Lifecycle logging hooks
   esmap.hooks.beforeEach('mount', (ctx) => {
-    log(`${ctx.appName} 마운트 준비`);
+    log(`${ctx.appName} preparing to mount`);
     comm.resources.globalState.setState({ currentApp: ctx.appName });
   });
 
   esmap.hooks.afterEach('unmount', (ctx) => {
-    log(`${ctx.appName} 정리 완료`);
+    log(`${ctx.appName} cleanup complete`);
   });
 
-  // 앱 상태 변경 로깅
+  // App status change logging
   esmap.registry.onStatusChange((event) => {
     log(`${event.appName}: ${event.from} → ${event.to}`);
     comm.resources.eventBus.emit('lifecycle', {
@@ -167,21 +167,21 @@ async function boot(): Promise<void> {
     });
   });
 
-  log(`${esmap.registry.getApps().length}개 앱 등록 완료`);
+  log(`${esmap.registry.getApps().length} apps registered`);
 
-  // DevTools 오버레이 (Alt+Shift+D)
+  // DevTools overlay (Alt+Shift+D)
   const overlay = createDevtoolsOverlay({ position: 'top-right' });
 
-  // 라우트 가드
+  // Route guard
   esmap.router.beforeRouteChange((from, to) => {
-    log(`라우트 가드: ${from.pathname} → ${to.pathname}`);
+    log(`Route guard: ${from.pathname} → ${to.pathname}`);
     return true;
   });
 
   esmap.router.afterRouteChange((_from, to) => {
-    log(`라우트 전환 완료: ${to.pathname}`);
+    log(`Route transition complete: ${to.pathname}`);
 
-    // 오버레이 앱 목록 업데이트
+    // Update overlay app list
     overlay.update(
       esmap.registry.getApps().map((app) => ({
         name: app.name,
@@ -191,16 +191,16 @@ async function boot(): Promise<void> {
     );
   });
 
-  // 프로그래매틱 네비게이션 API 데모
-  // esmap.router.push('/settings')  — 설정 페이지로 이동
-  // esmap.router.replace('/react')  — 현재 URL 교체
-  // esmap.router.back()             — 뒤로 가기
+  // Programmatic navigation API demo
+  // esmap.router.push('/settings')  — navigate to settings page
+  // esmap.router.replace('/react')  — replace current URL
+  // esmap.router.back()             — go back
 
-  // 시작!
+  // Start!
   await esmap.start();
-  log('라우터 시작');
+  log('Router started');
 
-  // 성능 요약
+  // Performance summary
   setTimeout(() => {
     const summary = esmap.perf.summarize();
     for (const [appName, data] of summary) {
@@ -210,6 +210,6 @@ async function boot(): Promise<void> {
 }
 
 boot().catch((error) => {
-  log(`부팅 실패: ${error instanceof Error ? error.message : String(error)}`);
+  log(`Boot failed: ${error instanceof Error ? error.message : String(error)}`);
   console.error(error);
 });

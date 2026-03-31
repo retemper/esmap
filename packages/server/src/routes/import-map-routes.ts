@@ -4,21 +4,21 @@ import { createEmptyImportMap, mergeImportMaps } from '@esmap/shared';
 import type { ImportMap } from '@esmap/shared';
 import { createEventStream } from '../sse/event-stream.js';
 
-/** 배포 요청 본문 */
+/** Deploy request body */
 interface DeployRequest {
   readonly url: string;
   readonly deployedBy?: string;
 }
 
 /**
- * Import map 서빙 및 배포 API 라우트를 생성한다.
- * @param storage - import map 저장소 구현체
+ * Creates routes for the import map serving and deployment API.
+ * @param storage - import map storage implementation
  */
 export function createImportMapRoutes(storage: ImportMapStorage): Hono {
   const app = new Hono();
   const eventStream = createEventStream();
 
-  /** GET / — 현재 import map JSON을 반환한다. */
+  /** GET / -- Returns the current import map JSON. */
   app.get('/', async (c) => {
     const importMap = (await storage.read()) ?? createEmptyImportMap();
 
@@ -28,7 +28,7 @@ export function createImportMapRoutes(storage: ImportMapStorage): Hono {
     });
   });
 
-  /** GET /events — SSE 스트림을 통해 import map 변경 이벤트를 실시간으로 전달한다. */
+  /** GET /events -- Delivers import map change events in real time via SSE stream. */
   app.get('/events', (_c) => {
     const stream = eventStream.connect();
     return new Response(stream, {
@@ -40,18 +40,18 @@ export function createImportMapRoutes(storage: ImportMapStorage): Hono {
     });
   });
 
-  /** PATCH /services/:name{.+} — 특정 MFE의 URL을 갱신한다. 이름에 /가 포함될 수 있다. */
+  /** PATCH /services/:name{.+} -- Updates the URL for a specific MFE. Name may contain /. */
   app.patch('/services/:name{.+}', async (c) => {
     const serviceName = decodeURIComponent(c.req.param('name'));
 
     if (!isValidServiceName(serviceName)) {
-      return c.json({ error: `잘못된 서비스 이름: "${serviceName}"` }, 400);
+      return c.json({ error: `Invalid service name: "${serviceName}"` }, 400);
     }
 
     const body: unknown = await c.req.json();
 
     if (!isDeployRequest(body)) {
-      return c.json({ error: '"url" 필드는 필수입니다' }, 400);
+      return c.json({ error: '"url" field is required' }, 400);
     }
 
     const currentMap = (await storage.read()) ?? createEmptyImportMap();
@@ -85,12 +85,12 @@ export function createImportMapRoutes(storage: ImportMapStorage): Hono {
     });
   });
 
-  /** DELETE /services/:name{.+} — 특정 MFE를 import map에서 제거한다. */
+  /** DELETE /services/:name{.+} -- Removes a specific MFE from the import map. */
   app.delete('/services/:name{.+}', async (c) => {
     const serviceName = decodeURIComponent(c.req.param('name'));
 
     if (!isValidServiceName(serviceName)) {
-      return c.json({ error: `잘못된 서비스 이름: "${serviceName}"` }, 400);
+      return c.json({ error: `Invalid service name: "${serviceName}"` }, 400);
     }
 
     const updated = await storage.update((current) => {
@@ -106,7 +106,7 @@ export function createImportMapRoutes(storage: ImportMapStorage): Hono {
     return c.json({ service: serviceName, removed: true, importMap: updated });
   });
 
-  /** GET /history — 배포 이력을 조회한다. */
+  /** GET /history -- Retrieves deployment history. */
   app.get('/history', async (c) => {
     const limitParam = c.req.query('limit');
     const parsed = limitParam ? Number(limitParam) : NaN;
@@ -115,19 +115,19 @@ export function createImportMapRoutes(storage: ImportMapStorage): Hono {
     return c.json(history);
   });
 
-  /** POST /rollback/:name{.+} — 특정 MFE를 이전 버전으로 롤백한다. */
+  /** POST /rollback/:name{.+} -- Rolls back a specific MFE to its previous version. */
   app.post('/rollback/:name{.+}', async (c) => {
     const serviceName = decodeURIComponent(c.req.param('name'));
 
     if (!isValidServiceName(serviceName)) {
-      return c.json({ error: `잘못된 서비스 이름: "${serviceName}"` }, 400);
+      return c.json({ error: `Invalid service name: "${serviceName}"` }, 400);
     }
 
     const history = await storage.getHistory(100);
     const lastDeploy = history.find((h) => h.service === serviceName && h.previousUrl);
 
     if (!lastDeploy) {
-      return c.json({ error: `"${serviceName}"의 롤백 대상 이력이 없습니다` }, 404);
+      return c.json({ error: `No rollback history found for "${serviceName}"` }, 404);
     }
 
     const updated = await storage.update((current) => {
@@ -164,21 +164,21 @@ export function createImportMapRoutes(storage: ImportMapStorage): Hono {
   return app;
 }
 
-/** 프로토타입 오염을 유발하는 위험한 프로퍼티 이름 집합 */
+/** Set of dangerous property names that can cause prototype pollution */
 const DANGEROUS_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 /**
- * 서비스 이름이 안전한지 검증한다.
- * 프로토타입 오염을 유발하는 키와 빈 문자열을 거부한다.
- * @param name - 검증할 서비스 이름
+ * Validates that a service name is safe.
+ * Rejects keys that could cause prototype pollution and empty strings.
+ * @param name - service name to validate
  */
 function isValidServiceName(name: string): boolean {
   return name.length > 0 && !DANGEROUS_KEYS.has(name);
 }
 
 /**
- * 배포 요청 본문이 유효한지 검증한다.
- * url 필드가 문자열이고 http(s) 프로토콜인지 확인한다.
+ * Validates that the deploy request body is valid.
+ * Checks that the url field is a string with http(s) protocol.
  */
 function isDeployRequest(body: unknown): body is DeployRequest {
   if (typeof body !== 'object' || body === null || !('url' in body) || typeof body.url !== 'string') {

@@ -1,41 +1,41 @@
 import { readFile } from 'node:fs/promises';
 import { requireFlag } from './parse-args.js';
 
-/** deploy 커맨드의 옵션 */
+/** Options for the deploy command */
 export interface DeployOptions {
-  /** import map 서버 URL */
+  /** Import map server URL */
   readonly server: string;
-  /** 서비스(앱) 이름 */
+  /** Service (app) name */
   readonly name: string;
-  /** 앱 URL */
+  /** App URL */
   readonly url: string;
-  /** 배포자 이름 */
+  /** Deployer name */
   readonly deployedBy?: string;
-  /** 매니페스트 파일 경로 (URL 자동 해석용) */
+  /** Manifest file path (for automatic URL resolution) */
   readonly manifest?: string;
-  /** CDN 베이스 URL (매니페스트 사용 시) */
+  /** CDN base URL (used with manifest) */
   readonly cdnBase?: string;
 }
 
-/** deploy 커맨드의 결과 */
+/** Result of the deploy command */
 export interface DeployResult {
-  /** 서비스 이름 */
+  /** Service name */
   readonly name: string;
-  /** 배포된 URL */
+  /** Deployed URL */
   readonly url: string;
-  /** 성공 여부 */
+  /** Whether the deployment succeeded */
   readonly success: boolean;
 }
 
-/** 서버 응답 형태의 타입 가드용 인터페이스 */
+/** Interface for type-guarding the server response body */
 interface DeployResponseBody {
   readonly service: string;
   readonly url: string;
 }
 
 /**
- * 서버 응답이 유효한 DeployResponseBody인지 확인한다.
- * @param value - 검증할 값
+ * Checks whether the server response is a valid DeployResponseBody.
+ * @param value - value to validate
  */
 function isDeployResponseBody(value: unknown): value is DeployResponseBody {
   if (typeof value !== 'object' || value === null) return false;
@@ -48,8 +48,8 @@ function isDeployResponseBody(value: unknown): value is DeployResponseBody {
 }
 
 /**
- * 플래그 맵에서 DeployOptions를 추출한다.
- * @param flags - 파싱된 CLI 플래그
+ * Extracts DeployOptions from the flag map.
+ * @param flags - parsed CLI flags
  */
 export function parseDeployFlags(flags: Readonly<Record<string, string>>): DeployOptions {
   return {
@@ -63,9 +63,9 @@ export function parseDeployFlags(flags: Readonly<Record<string, string>>): Deplo
 }
 
 /**
- * 매니페스트 파일에서 엔트리 URL을 해석한다.
- * @param manifestPath - 매니페스트 JSON 파일 경로
- * @param cdnBase - CDN 베이스 URL
+ * Resolves the entry URL from a manifest file.
+ * @param manifestPath - manifest JSON file path
+ * @param cdnBase - CDN base URL
  */
 export async function resolveUrlFromManifest(
   manifestPath: string,
@@ -90,10 +90,10 @@ export async function resolveUrlFromManifest(
 }
 
 /**
- * import map 서버에 서비스 URL을 배포(업데이트)한다.
- * PATCH /services/:name 엔드포인트를 호출한다.
- * @param options - 배포 옵션
- * @param fetchFn - HTTP fetch 함수 (테스트 주입용)
+ * Deploys (updates) a service URL to the import map server.
+ * Calls the PATCH /services/:name endpoint.
+ * @param options - deploy options
+ * @param fetchFn - HTTP fetch function (for test injection)
  */
 export async function deploy(
   options: DeployOptions,
@@ -141,8 +141,8 @@ export async function deploy(
 }
 
 /**
- * deploy 커맨드를 실행하고 결과를 콘솔에 출력한다.
- * @param flags - 파싱된 CLI 플래그
+ * Runs the deploy command and prints the result to the console.
+ * @param flags - parsed CLI flags
  */
 export async function runDeploy(flags: Readonly<Record<string, string>>): Promise<void> {
   const options = parseDeployFlags(flags);
@@ -150,7 +150,7 @@ export async function runDeploy(flags: Readonly<Record<string, string>>): Promis
   console.log(`✓ Deployed ${result.name} → ${result.url}`);
 }
 
-/** deploy 커맨드의 도움말 텍스트 */
+/** Help text for the deploy command */
 export const DEPLOY_HELP = `Usage: esmap deploy --server <url> --name <app-name> --url <app-url> [options]
 
 Options:

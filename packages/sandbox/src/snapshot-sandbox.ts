@@ -1,42 +1,42 @@
-/** 스냅샷 샌드박스의 공개 인터페이스 */
+/** Public interface for the snapshot sandbox */
 interface SnapshotSandbox {
-  /** 샌드박스 이름 */
+  /** Sandbox name */
   readonly name: string;
-  /** 샌드박스를 활성화하고, 이전 변경사항이 있으면 재적용한다 */
+  /** Activates the sandbox and reapplies previous changes if any */
   activate(): void;
-  /** 샌드박스를 비활성화하고, 변경사항을 되돌린다 */
+  /** Deactivates the sandbox and reverts changes */
   deactivate(): void;
-  /** 현재 활성 상태인지 반환한다 */
+  /** Returns whether the sandbox is currently active */
   isActive(): boolean;
 }
 
 /**
- * 스냅샷 방식의 샌드박스를 생성하는 팩토리 함수.
- * activate 시 window의 모든 own property를 스냅샷으로 저장하고,
- * deactivate 시 변경사항을 감지하여 되돌린 뒤 diff로 보관한다.
- * @param name - 샌드박스 식별 이름
- * @returns 스냅샷 샌드박스 인스턴스
+ * Factory function that creates a snapshot-based sandbox.
+ * On activate, takes a snapshot of all window own properties,
+ * and on deactivate, detects changes, reverts them, and stores the diff.
+ * @param name - identifying name for the sandbox
+ * @returns snapshot sandbox instance
  */
 function createSnapshotSandbox(name: string): SnapshotSandbox {
-  /** 활성화 시점의 window 속성 스냅샷 */
+  /** Snapshot of window properties at activation time */
   const snapshot = new Map<PropertyKey, unknown>();
 
-  /** 비활성화 시 저장된 변경사항 diff */
+  /** Change diff stored on deactivation */
   const diff = new Map<PropertyKey, unknown>();
 
-  /** 스냅샷에 있었지만 deactivate 시 삭제된 속성 */
+  /** Properties added during activation that were removed on deactivate */
   const addedProps = new Set<PropertyKey>();
 
-  /** 현재 활성 상태 */
+  /** Current active state */
   const state = { active: false };
 
-  /** 쓰기 가능한 속성인지 확인한다 */
+  /** Checks whether a property is writable */
   function isWritable(key: string): boolean {
     const descriptor = Object.getOwnPropertyDescriptor(window, key);
     return descriptor?.writable === true || descriptor?.set !== undefined;
   }
 
-  /** window의 모든 writable own property를 스냅샷에 저장한다 */
+  /** Captures all writable own properties of window into the snapshot */
   function captureSnapshot(): void {
     snapshot.clear();
     const keys = Object.getOwnPropertyNames(window);
@@ -48,7 +48,7 @@ function createSnapshotSandbox(name: string): SnapshotSandbox {
     }
   }
 
-  /** 현재 window와 스냅샷의 차이를 감지하여 diff에 저장하고 되돌린다 */
+  /** Detects differences between current window and snapshot, stores them in diff, and reverts */
   function restoreAndCaptureDiff(): void {
     diff.clear();
     addedProps.clear();
@@ -70,29 +70,29 @@ function createSnapshotSandbox(name: string): SnapshotSandbox {
         try {
           windowRecord[key] = snapshot.get(key);
         } catch {
-          // read-only 속성은 복원 불가
+          // Cannot restore read-only properties
         }
       }
     }
   }
 
-  /** window에서 속성을 안전하게 삭제한다 */
+  /** Safely deletes a property from window */
   function deleteWindowProp(key: PropertyKey): void {
     try {
       delete (window as unknown as Record<PropertyKey, unknown>)[key];
     } catch {
-      // configurable: false인 속성은 삭제 불가
+      // Cannot delete properties with configurable: false
     }
   }
 
-  /** 저장된 diff를 window에 재적용한다 */
+  /** Reapplies the stored diff to window */
   function applyDiff(): void {
     const windowRecord = window as unknown as Record<PropertyKey, unknown>;
     for (const [key, value] of diff) {
       try {
         windowRecord[key] = value;
       } catch {
-        // read-only 속성은 재적용 불가
+        // Cannot reapply read-only properties
       }
     }
   }

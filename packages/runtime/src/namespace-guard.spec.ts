@@ -2,15 +2,15 @@ import { describe, it, expect, vi } from 'vitest';
 import { createNamespaceGuard } from './namespace-guard.js';
 
 describe('createNamespaceGuard', () => {
-  describe('claim — 키 등록', () => {
-    it('미등록 키를 등록하면 성공한다', () => {
+  describe('claim — key registration', () => {
+    it('succeeds when registering an unregistered key', () => {
       const guard = createNamespaceGuard();
 
       expect(guard.claim('theme', 'app-a')).toBe(true);
       expect(guard.getOwner('theme')).toBe('app-a');
     });
 
-    it('같은 소유자가 같은 키를 재등록하면 성공한다', () => {
+    it('succeeds when the same owner re-registers the same key', () => {
       const guard = createNamespaceGuard();
 
       guard.claim('theme', 'app-a');
@@ -18,7 +18,7 @@ describe('createNamespaceGuard', () => {
       expect(guard.claim('theme', 'app-a')).toBe(true);
     });
 
-    it('다른 소유자가 같은 키를 등록하면 warn 모드에서 false를 반환한다', () => {
+    it('returns false in warn mode when a different owner registers the same key', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const guard = createNamespaceGuard({ onConflict: 'warn' });
 
@@ -27,21 +27,21 @@ describe('createNamespaceGuard', () => {
 
       expect(result).toBe(false);
       expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('네임스페이스 충돌'),
+        expect.stringContaining('Namespace conflict'),
       );
 
       warnSpy.mockRestore();
     });
 
-    it('다른 소유자가 같은 키를 등록하면 error 모드에서 throw한다', () => {
+    it('throws in error mode when a different owner registers the same key', () => {
       const guard = createNamespaceGuard({ onConflict: 'error' });
 
       guard.claim('theme', 'app-a');
 
-      expect(() => guard.claim('theme', 'app-b')).toThrow('네임스페이스 충돌');
+      expect(() => guard.claim('theme', 'app-b')).toThrow('Namespace conflict');
     });
 
-    it('다른 소유자가 같은 키를 등록하면 skip 모드에서 silent false를 반환한다', () => {
+    it('returns false silently in skip mode when a different owner registers the same key', () => {
       const guard = createNamespaceGuard({ onConflict: 'skip' });
 
       guard.claim('theme', 'app-a');
@@ -51,8 +51,8 @@ describe('createNamespaceGuard', () => {
     });
   });
 
-  describe('allowedSharedKeys — 공유 허용 키', () => {
-    it('공유 허용 키는 여러 앱이 등록해도 충돌하지 않는다', () => {
+  describe('allowedSharedKeys — shared key allowlist', () => {
+    it('does not conflict when multiple apps register an allowed shared key', () => {
       const guard = createNamespaceGuard({
         onConflict: 'error',
         allowedSharedKeys: ['locale', 'auth-token'],
@@ -62,7 +62,7 @@ describe('createNamespaceGuard', () => {
       expect(guard.claim('locale', 'app-b')).toBe(true);
     });
 
-    it('공유 허용 키의 소유자는 최초 등록자로 유지된다', () => {
+    it('retains the first registrant as the owner of a shared key', () => {
       const guard = createNamespaceGuard({
         allowedSharedKeys: ['locale'],
       });
@@ -74,8 +74,8 @@ describe('createNamespaceGuard', () => {
     });
   });
 
-  describe('release — 키 해제', () => {
-    it('소유자가 자신의 키를 해제할 수 있다', () => {
+  describe('release — key release', () => {
+    it('allows the owner to release their own key', () => {
       const guard = createNamespaceGuard();
 
       guard.claim('theme', 'app-a');
@@ -84,7 +84,7 @@ describe('createNamespaceGuard', () => {
       expect(guard.getOwner('theme')).toBeUndefined();
     });
 
-    it('다른 소유자의 키를 해제할 수 없다', () => {
+    it('cannot release a key owned by another owner', () => {
       const guard = createNamespaceGuard();
 
       guard.claim('theme', 'app-a');
@@ -93,7 +93,7 @@ describe('createNamespaceGuard', () => {
       expect(guard.getOwner('theme')).toBe('app-a');
     });
 
-    it('해제 후 다른 앱이 같은 키를 등록할 수 있다', () => {
+    it('allows another app to register the same key after release', () => {
       const guard = createNamespaceGuard({ onConflict: 'error' });
 
       guard.claim('theme', 'app-a');
@@ -104,8 +104,8 @@ describe('createNamespaceGuard', () => {
     });
   });
 
-  describe('releaseAll — 앱별 일괄 해제', () => {
-    it('특정 앱이 소유한 모든 키를 해제한다', () => {
+  describe('releaseAll — bulk release by app', () => {
+    it('releases all keys owned by a specific app', () => {
       const guard = createNamespaceGuard();
 
       guard.claim('theme', 'app-a');
@@ -120,8 +120,8 @@ describe('createNamespaceGuard', () => {
     });
   });
 
-  describe('조회 메서드', () => {
-    it('getAll()이 전체 레지스트리를 반환한다', () => {
+  describe('query methods', () => {
+    it('getAll() returns the entire registry', () => {
       const guard = createNamespaceGuard();
 
       guard.claim('a', 'app-1');
@@ -134,7 +134,7 @@ describe('createNamespaceGuard', () => {
       expect(all.get('b')?.owner).toBe('app-2');
     });
 
-    it('getOwnedBy()가 특정 앱의 키 목록을 반환한다', () => {
+    it('getOwnedBy() returns the list of keys owned by a specific app', () => {
       const guard = createNamespaceGuard();
 
       guard.claim('x', 'app-a');
@@ -146,7 +146,7 @@ describe('createNamespaceGuard', () => {
       expect(guard.getOwnedBy('app-c')).toStrictEqual([]);
     });
 
-    it('미등록 키의 소유자는 undefined다', () => {
+    it('returns undefined for the owner of an unregistered key', () => {
       const guard = createNamespaceGuard();
 
       expect(guard.getOwner('nonexistent')).toBeUndefined();

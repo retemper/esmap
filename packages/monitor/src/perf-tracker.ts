@@ -1,26 +1,26 @@
 /**
- * MFE 앱 로딩 성능을 추적한다.
- * Performance API(mark/measure)를 활용하여 각 라이프사이클 단계의 소요 시간을 기록한다.
+ * Tracks MFE app loading performance.
+ * Uses the Performance API (mark/measure) to record the elapsed time of each lifecycle phase.
  */
 
-/** 단일 성능 측정 결과 */
+/** A single performance measurement result */
 export interface PerfMeasurement {
-  /** 앱 이름 */
+  /** App name */
   readonly appName: string;
-  /** 라이프사이클 단계 */
+  /** Lifecycle phase */
   readonly phase: string;
-  /** 소요 시간 (ms) */
+  /** Elapsed time (ms) */
   readonly duration: number;
-  /** 시작 시간 (ms, performance.now 기준) */
+  /** Start time (ms, based on performance.now) */
   readonly startTime: number;
 }
 
-/** 성능 이벤트 리스너 */
+/** Performance event listener */
 type PerfListener = (measurement: PerfMeasurement) => void;
 
 /**
- * MFE 라이프사이클 성능을 추적하는 트래커.
- * Performance API를 사용하여 정밀한 시간 측정을 제공한다.
+ * Tracker for MFE lifecycle performance.
+ * Provides precise time measurements using the Performance API.
  */
 export class PerfTracker {
   private readonly measurements: PerfMeasurement[] = [];
@@ -28,9 +28,9 @@ export class PerfTracker {
   private readonly activeMarks = new Map<string, number>();
 
   /**
-   * 측정을 시작한다. markEnd와 쌍으로 사용한다.
-   * @param appName - 앱 이름
-   * @param phase - 라이프사이클 단계 (예: "load", "bootstrap", "mount")
+   * Starts a measurement. Used in pair with markEnd.
+   * @param appName - app name
+   * @param phase - lifecycle phase (e.g., "load", "bootstrap", "mount")
    */
   markStart(appName: string, phase: string): void {
     const key = `${appName}:${phase}`;
@@ -38,11 +38,11 @@ export class PerfTracker {
   }
 
   /**
-   * 측정을 종료하고 결과를 기록한다.
-   * 리스너 에러는 격리되어 다른 리스너에 영향을 주지 않는다.
-   * @param appName - 앱 이름
-   * @param phase - 라이프사이클 단계
-   * @returns 측정 결과. markStart가 없었으면 undefined
+   * Ends a measurement and records the result.
+   * Listener errors are isolated and do not affect other listeners.
+   * @param appName - app name
+   * @param phase - lifecycle phase
+   * @returns measurement result, or undefined if markStart was not called
    */
   markEnd(appName: string, phase: string): PerfMeasurement | undefined {
     const key = `${appName}:${phase}`;
@@ -60,26 +60,26 @@ export class PerfTracker {
       try {
         listener(measurement);
       } catch {
-        // 리스너 에러는 격리 — 다른 리스너 실행을 막지 않는다
+        // Listener errors are isolated -- they do not block other listeners
       }
     }
 
     return measurement;
   }
 
-  /** 기록된 모든 측정 결과를 반환한다. */
+  /** Returns all recorded measurement results. */
   getMeasurements(): readonly PerfMeasurement[] {
     return this.measurements;
   }
 
-  /** 특정 앱의 측정 결과만 반환한다. */
+  /** Returns measurement results for a specific app only. */
   getMeasurementsForApp(appName: string): readonly PerfMeasurement[] {
     return this.measurements.filter((m) => m.appName === appName);
   }
 
   /**
-   * 측정 결과를 앱별로 요약한다.
-   * 각 앱의 총 로딩 시간(load + bootstrap + mount)을 계산한다.
+   * Summarizes measurement results per app.
+   * Calculates total loading time (load + bootstrap + mount) for each app.
    */
   summarize(): ReadonlyMap<
     string,
@@ -98,7 +98,7 @@ export class PerfTracker {
     return summary;
   }
 
-  /** 측정 이벤트 리스너를 등록한다. 해제 함수를 반환한다. */
+  /** Registers a measurement event listener. Returns an unsubscribe function. */
   onMeasurement(listener: PerfListener): () => void {
     this.listeners.push(listener);
     return () => {
@@ -107,7 +107,7 @@ export class PerfTracker {
     };
   }
 
-  /** 기록과 리스너를 모두 초기화한다. */
+  /** Resets all records and listeners. */
   clear(): void {
     this.measurements.length = 0;
     this.activeMarks.clear();

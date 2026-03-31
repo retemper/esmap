@@ -6,7 +6,7 @@ describe('PerfTracker', () => {
     vi.restoreAllMocks();
   });
 
-  it('markStart/markEnd로 duration을 측정한다', () => {
+  it('measures duration using markStart/markEnd', () => {
     const tracker = new PerfTracker();
 
     vi.spyOn(performance, 'now').mockReturnValueOnce(100).mockReturnValueOnce(250);
@@ -21,13 +21,13 @@ describe('PerfTracker', () => {
     expect(result!.startTime).toBe(100);
   });
 
-  it('markStart 없이 markEnd를 호출하면 undefined를 반환한다', () => {
+  it('returns undefined when markEnd is called without markStart', () => {
     const tracker = new PerfTracker();
     const result = tracker.markEnd('@flex/checkout', 'load');
     expect(result).toBeUndefined();
   });
 
-  it('getMeasurements()는 모든 측정 결과를 반환한다', () => {
+  it('getMeasurements() returns all measurement results', () => {
     const tracker = new PerfTracker();
 
     vi.spyOn(performance, 'now')
@@ -44,7 +44,7 @@ describe('PerfTracker', () => {
     expect(tracker.getMeasurements()).toHaveLength(2);
   });
 
-  it('getMeasurementsForApp()는 특정 앱의 결과만 반환한다', () => {
+  it('getMeasurementsForApp() returns only results for a specific app', () => {
     const tracker = new PerfTracker();
 
     vi.spyOn(performance, 'now')
@@ -67,7 +67,7 @@ describe('PerfTracker', () => {
     expect(appAMeasurements.every((m) => m.appName === 'app-a')).toBe(true);
   });
 
-  it('summarize()는 앱별 총 시간과 phase별 시간을 제공한다', () => {
+  it('summarize() provides total time and per-phase time for each app', () => {
     const tracker = new PerfTracker();
 
     vi.spyOn(performance, 'now')
@@ -95,7 +95,7 @@ describe('PerfTracker', () => {
     expect(appSummary!.phases.mount).toBe(50);
   });
 
-  it('onMeasurement 리스너가 측정 완료 시 호출된다', () => {
+  it('onMeasurement listener is called when measurement completes', () => {
     const tracker = new PerfTracker();
     const listener = vi.fn();
 
@@ -115,7 +115,7 @@ describe('PerfTracker', () => {
     );
   });
 
-  it('리스너 해제 후에는 호출되지 않는다', () => {
+  it('is not called after the listener is unsubscribed', () => {
     const tracker = new PerfTracker();
     const listener = vi.fn();
 
@@ -130,7 +130,7 @@ describe('PerfTracker', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('clear()는 모든 측정과 활성 마크를 초기화한다', () => {
+  it('clear() resets all measurements and active marks', () => {
     const tracker = new PerfTracker();
 
     vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValueOnce(100);
@@ -143,7 +143,7 @@ describe('PerfTracker', () => {
     expect(tracker.getMeasurements()).toStrictEqual([]);
   });
 
-  it('동시에 여러 앱의 다른 phase를 추적할 수 있다', () => {
+  it('can track different phases of multiple apps concurrently', () => {
     const tracker = new PerfTracker();
 
     vi.spyOn(performance, 'now')
@@ -163,13 +163,13 @@ describe('PerfTracker', () => {
     expect(measurements[1].duration).toBe(150);
   });
 
-  it('summarize()는 앱이 없으면 빈 Map을 반환한다', () => {
+  it('summarize() returns an empty Map when there are no apps', () => {
     const tracker = new PerfTracker();
     const summary = tracker.summarize();
     expect(summary.size).toBe(0);
   });
 
-  it('clear()는 리스너도 초기화한다', () => {
+  it('clear() also resets listeners', () => {
     const tracker = new PerfTracker();
     const listener = vi.fn();
 
@@ -183,10 +183,10 @@ describe('PerfTracker', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
-  it('리스너가 에러를 던져도 다른 리스너는 실행된다', () => {
+  it('other listeners still execute even if one throws an error', () => {
     const tracker = new PerfTracker();
     const listener1 = vi.fn(() => {
-      throw new Error('리스너 에러');
+      throw new Error('listener error');
     });
     const listener2 = vi.fn();
 

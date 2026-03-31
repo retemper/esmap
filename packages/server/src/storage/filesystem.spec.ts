@@ -23,13 +23,13 @@ describe('FileSystemStorage', () => {
   });
 
   describe('read', () => {
-    it('파일이 없으면 null을 반환한다', async () => {
+    it('returns null when the file does not exist', async () => {
       const { storage } = await createTempStorage();
       const result = await storage.read();
       expect(result).toBeNull();
     });
 
-    it('저장된 import map을 읽는다', async () => {
+    it('reads a stored import map', async () => {
       const { storage } = await createTempStorage();
 
       await storage.update(() => ({
@@ -42,7 +42,7 @@ describe('FileSystemStorage', () => {
   });
 
   describe('update', () => {
-    it('import map을 생성한다', async () => {
+    it('creates an import map', async () => {
       const { storage } = await createTempStorage();
 
       const result = await storage.update(() => ({
@@ -52,7 +52,7 @@ describe('FileSystemStorage', () => {
       expect(result.imports.react).toBe('https://cdn.example.com/react.js');
     });
 
-    it('기존 import map을 갱신한다', async () => {
+    it('updates an existing import map', async () => {
       const { storage } = await createTempStorage();
 
       await storage.update(() => ({
@@ -68,7 +68,7 @@ describe('FileSystemStorage', () => {
       expect(result.imports.vue).toBe('https://cdn.example.com/vue.js');
     });
 
-    it('동시 업데이트를 직렬화한다', async () => {
+    it('serializes concurrent updates', async () => {
       const { storage } = await createTempStorage();
 
       await storage.update(() => ({
@@ -87,13 +87,13 @@ describe('FileSystemStorage', () => {
       const results = await Promise.all(updates);
       const finalMap = await storage.read();
 
-      // 모든 서비스가 최종 맵에 존재해야 함
+      // All services should exist in the final map
       expect(Object.keys(finalMap!.imports)).toHaveLength(11); // counter + 10 services
     });
   });
 
   describe('history', () => {
-    it('배포 이력을 저장하고 조회한다', async () => {
+    it('stores and retrieves deployment history', async () => {
       const { storage } = await createTempStorage();
 
       await storage.appendHistory({
@@ -109,7 +109,7 @@ describe('FileSystemStorage', () => {
       expect(history[0].service).toBe('@flex/checkout');
     });
 
-    it('최신 이력이 먼저 나온다', async () => {
+    it('returns the most recent history first', async () => {
       const { storage } = await createTempStorage();
 
       await storage.appendHistory({
@@ -132,7 +132,7 @@ describe('FileSystemStorage', () => {
       expect(history[1].service).toBe('first');
     });
 
-    it('limit으로 조회 개수를 제한한다', async () => {
+    it('limits the number of results with limit', async () => {
       const { storage } = await createTempStorage();
 
       for (const i of [0, 1, 2, 3, 4]) {
@@ -148,7 +148,7 @@ describe('FileSystemStorage', () => {
       expect(history).toHaveLength(2);
     });
 
-    it('이력이 없으면 빈 배열을 반환한다', async () => {
+    it('returns an empty array when there is no history', async () => {
       const { storage } = await createTempStorage();
       const history = await storage.getHistory();
       expect(history).toStrictEqual([]);

@@ -1,43 +1,43 @@
-/** 프리페치 전략 */
+/** Prefetch strategy */
 export type PrefetchStrategy = 'idle' | 'immediate';
 
-/** 프리페치 대상 앱 정보 */
+/** Prefetch target app info */
 export interface PrefetchAppConfig {
-  /** 앱 이름 */
+  /** App name */
   readonly name: string;
-  /** 앱 모듈 URL */
+  /** App module URL */
   readonly url: string;
 }
 
-/** 프리페치 생성 옵션 */
+/** Prefetch creation options */
 export interface PrefetchOptions {
-  /** 프리페치 전략 */
+  /** Prefetch strategy */
   readonly strategy: PrefetchStrategy;
-  /** 프리페치할 앱 목록 */
+  /** List of apps to prefetch */
   readonly apps: readonly PrefetchAppConfig[];
-  /** import map — 이름 기반 프리페치 시 URL을 해석하는 데 사용한다 */
+  /** Import map — used to resolve URLs for name-based prefetching */
   readonly importMap?: { readonly imports: Readonly<Record<string, string>> };
 }
 
-/** 프리페치 컨트롤러 */
+/** Prefetch controller */
 export interface PrefetchController {
-  /** 프리페치를 시작한다 */
+  /** Starts prefetching */
   start(): void;
-  /** 프리페치를 중지한다 */
+  /** Stops prefetching */
   stop(): void;
-  /** 특정 앱을 즉시 프리페치한다 */
+  /** Immediately prefetches a specific app */
   prefetchApp(app: PrefetchAppConfig): void;
-  /** 이름으로 앱을 프리페치한다. import map에서 URL을 해석한다. */
+  /** Prefetches an app by name. Resolves URL from the import map. */
   prefetchByName(name: string): void;
-  /** 프리페치된 앱 이름 목록을 반환한다 */
+  /** Returns the list of prefetched app names */
   getPrefetchedApps(): readonly string[];
 }
 
 /**
- * 스마트 프리로딩 컨트롤러를 생성한다.
- * idle 전략은 requestIdleCallback을, immediate 전략은 즉시 실행을 사용한다.
- * @param options - 프리페치 옵션
- * @returns 프리페치 컨트롤러
+ * Creates a smart preloading controller.
+ * The idle strategy uses requestIdleCallback, and the immediate strategy executes right away.
+ * @param options - prefetch options
+ * @returns prefetch controller
  */
 export function createPrefetch(options: PrefetchOptions): PrefetchController {
   const prefetched = new Set<string>();
@@ -45,7 +45,7 @@ export function createPrefetch(options: PrefetchOptions): PrefetchController {
   const pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
   const addedLinks = new Set<string>();
 
-  /** modulepreload 링크 태그를 추가한다 */
+  /** Adds a modulepreload link element */
   function addPreloadLink(url: string): void {
     if (addedLinks.has(url)) return;
 
@@ -57,8 +57,8 @@ export function createPrefetch(options: PrefetchOptions): PrefetchController {
   }
 
   /**
-   * 단일 앱을 프리페치 처리한다. 빈 URL은 무시한다.
-   * @param app - 프리페치할 앱 설정
+   * Prefetches a single app. Ignores empty URLs.
+   * @param app - app config to prefetch
    */
   function doPrefetchApp(app: PrefetchAppConfig): void {
     if (prefetched.has(app.name) || !app.url) return;
@@ -77,7 +77,7 @@ export function createPrefetch(options: PrefetchOptions): PrefetchController {
         return;
       }
 
-      /* idle 전략: requestIdleCallback이 있으면 사용, 없으면 setTimeout 폴백 */
+      /* idle strategy: use requestIdleCallback if available, otherwise fall back to setTimeout */
       if (typeof requestIdleCallback === 'function') {
         for (const app of apps) {
           const id = requestIdleCallback(() => {

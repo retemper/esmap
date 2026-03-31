@@ -4,9 +4,9 @@ import { esmapManifest, esmapCssScope } from '@esmap/vite-plugin';
 import { mfeDevExternals } from '../_shared/dev-externals-plugin.js';
 
 /**
- * Dashboard MFE 빌드 설정.
- * React + 디자인 시스템을 external로 처리한다.
- * 중첩 Parcel(activity-feed 위젯)을 포함하는 복합 MFE.
+ * Dashboard MFE build configuration.
+ * Externalizes React and design system.
+ * A composite MFE that includes a nested Parcel (activity-feed widget).
  */
 export default defineConfig(({ command }) => ({
   root: __dirname,

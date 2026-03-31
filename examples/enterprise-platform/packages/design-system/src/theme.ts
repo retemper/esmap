@@ -1,4 +1,4 @@
-/** 디자인 시스템 테마 토큰 인터페이스 */
+/** Design system theme token interface */
 export interface Theme {
   readonly colors: {
     readonly primary: string;
@@ -21,7 +21,7 @@ export interface Theme {
   };
 }
 
-/** 기본 라이트 테마 */
+/** Default light theme */
 export const theme: Theme = {
   colors: {
     primary: '#2563eb',

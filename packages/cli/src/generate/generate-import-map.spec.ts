@@ -53,7 +53,7 @@ const TEST_SHARED_MANIFESTS: Record<string, SharedDependencyManifest> = {
 };
 
 describe('generateImportMap', () => {
-  it('MFE 앱 엔트리를 import map에 포함한다', () => {
+  it('includes MFE app entries in the import map', () => {
     const result = generateImportMap({
       config: TEST_CONFIG,
       manifests: TEST_MANIFESTS,
@@ -67,7 +67,7 @@ describe('generateImportMap', () => {
     );
   });
 
-  it('공유 의존성 매니페스트로 imports를 생성한다', () => {
+  it('generates imports from shared dependency manifests', () => {
     const result = generateImportMap({
       config: TEST_CONFIG,
       manifests: TEST_MANIFESTS,
@@ -88,7 +88,7 @@ describe('generateImportMap', () => {
     );
   });
 
-  it('공유 의존성에 url이 명시되면 그대로 사용한다', () => {
+  it('uses the explicit url when specified for a shared dependency', () => {
     const config: EsmapConfig = {
       ...TEST_CONFIG,
       shared: {
@@ -101,7 +101,7 @@ describe('generateImportMap', () => {
     expect(result.importMap.imports['react']).toBe('https://esm.sh/react@18.3.1');
   });
 
-  it('매니페스트가 없는 앱은 건너뛴다', () => {
+  it('skips apps without manifests', () => {
     const result = generateImportMap({
       config: TEST_CONFIG,
       manifests: { '@flex/checkout': TEST_MANIFESTS['@flex/checkout'] },
@@ -111,7 +111,7 @@ describe('generateImportMap', () => {
     expect(result.importMap.imports['@flex/people']).toBeUndefined();
   });
 
-  it('modulepreload 힌트를 반환한다', () => {
+  it('returns modulepreload hints', () => {
     const result = generateImportMap({
       config: TEST_CONFIG,
       manifests: TEST_MANIFESTS,
@@ -126,7 +126,7 @@ describe('generateImportMap', () => {
     ]);
   });
 
-  it('JSON 출력은 유효한 JSON이다', () => {
+  it('produces valid JSON output', () => {
     const result = generateImportMap({
       config: TEST_CONFIG,
       manifests: TEST_MANIFESTS,
@@ -137,7 +137,7 @@ describe('generateImportMap', () => {
     expect(parsed.imports).toBeDefined();
   });
 
-  it('scopes가 없으면 import map에 포함하지 않는다', () => {
+  it('does not include scopes in the import map when there are none', () => {
     const result = generateImportMap({
       config: TEST_CONFIG,
       manifests: TEST_MANIFESTS,
@@ -146,7 +146,7 @@ describe('generateImportMap', () => {
     expect(result.importMap.scopes).toBeUndefined();
   });
 
-  it('cdnBase가 없으면 빈 문자열로 처리한다', () => {
+  it('treats missing cdnBase as an empty string', () => {
     const config: EsmapConfig = {
       apps: { '@flex/a': { path: 'apps/a' } },
       shared: {},
@@ -167,7 +167,7 @@ describe('generateImportMap', () => {
     expect(result.importMap.imports['@flex/a']).toBe('/apps/a/a-123.js');
   });
 
-  it('cdnBase 끝의 슬래시를 제거한다', () => {
+  it('strips trailing slash from cdnBase', () => {
     const config: EsmapConfig = {
       ...TEST_CONFIG,
       cdnBase: 'https://cdn.flex.team/',
@@ -183,7 +183,7 @@ describe('generateImportMap', () => {
     );
   });
 
-  it('공유 의존성 exports의 절대 URL은 cdnBase를 붙이지 않는다', () => {
+  it('does not prepend cdnBase to absolute URLs in shared dependency exports', () => {
     const sharedManifests: Record<string, SharedDependencyManifest> = {
       react: {
         name: 'react',

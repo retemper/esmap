@@ -1,36 +1,36 @@
 import type { ImportMap } from '@esmap/shared';
 import { ImportMapLoadError } from '@esmap/shared';
 
-/** import map 로더 공통 옵션 */
+/** Common options for the import map loader */
 interface LoaderBaseOptions {
-  /** modulepreload 힌트를 자동 주입할지 여부 */
+  /** Whether to automatically inject modulepreload hints */
   readonly injectPreload?: boolean;
 }
 
-/** URL에서 import map을 fetch하는 서버 모드 옵션 */
+/** Server mode options for fetching import map from a URL */
 interface LoaderUrlOptions extends LoaderBaseOptions {
-  /** import map JSON을 가져올 URL */
+  /** URL to fetch the import map JSON from */
   readonly importMapUrl: string;
   readonly inlineImportMap?: never;
 }
 
-/** 인라인 import map 객체를 사용하는 정적 모드 옵션 */
+/** Static mode options using an inline import map object */
 interface LoaderInlineOptions extends LoaderBaseOptions {
   readonly importMapUrl?: never;
-  /** 인라인 import map 객체 */
+  /** Inline import map object */
   readonly inlineImportMap: ImportMap;
 }
 
 /**
- * import map 로더 옵션.
- * importMapUrl 또는 inlineImportMap 중 하나를 반드시 제공해야 한다.
+ * Import map loader options.
+ * Either importMapUrl or inlineImportMap must be provided.
  */
 export type LoaderOptions = LoaderUrlOptions | LoaderInlineOptions;
 
 /**
- * import map을 로드하고 DOM에 적용한다.
- * 네이티브 import map이 이미 있으면 건너뛴다.
- * @param options - 로더 옵션
+ * Loads and applies the import map to the DOM.
+ * Skips injection if a native import map already exists.
+ * @param options - loader options
  */
 export async function loadImportMap(options: LoaderOptions): Promise<ImportMap> {
   const importMap = await resolveImportMap(options);
@@ -46,7 +46,7 @@ export async function loadImportMap(options: LoaderOptions): Promise<ImportMap> 
   return importMap;
 }
 
-/** import map을 URL에서 가져오거나 인라인 객체를 사용한다. */
+/** Fetches the import map from a URL or uses the inline object. */
 async function resolveImportMap(options: LoaderOptions): Promise<ImportMap> {
   if (options.inlineImportMap) {
     return options.inlineImportMap;
@@ -56,7 +56,7 @@ async function resolveImportMap(options: LoaderOptions): Promise<ImportMap> {
     const response = await fetch(options.importMapUrl);
     if (!response.ok) {
       throw new ImportMapLoadError(
-        `Import map 로드 실패: ${response.status} ${response.statusText}`,
+        `Failed to load import map: ${response.status} ${response.statusText}`,
         {
           url: options.importMapUrl,
           status: response.status,
@@ -67,10 +67,10 @@ async function resolveImportMap(options: LoaderOptions): Promise<ImportMap> {
     return parseImportMapJson(json, options.importMapUrl);
   }
 
-  throw new ImportMapLoadError('importMapUrl 또는 inlineImportMap 중 하나는 필수입니다');
+  throw new ImportMapLoadError('Either importMapUrl or inlineImportMap is required');
 }
 
-/** JSON 응답이 유효한 ImportMap 구조인지 확인하는 타입 가드 */
+/** Type guard that checks whether a JSON response is a valid ImportMap structure */
 function isImportMap(value: unknown): value is ImportMap {
   if (typeof value !== 'object' || value === null) return false;
   if (!('imports' in value) || typeof value.imports !== 'object' || value.imports === null) {
@@ -79,20 +79,20 @@ function isImportMap(value: unknown): value is ImportMap {
   return Object.values(value.imports).every((v) => typeof v === 'string');
 }
 
-/** JSON 응답을 ImportMap으로 파싱한다. 유효하지 않으면 에러를 던진다. */
+/** Parses a JSON response into an ImportMap. Throws an error if invalid. */
 function parseImportMapJson(json: unknown, url: string): ImportMap {
   if (isImportMap(json)) {
     return json;
   }
-  throw new ImportMapLoadError(`Import map 형식이 올바르지 않습니다: ${url}`);
+  throw new ImportMapLoadError(`Invalid import map format: ${url}`);
 }
 
-/** 이미 적용된 import map이 있는지 확인한다. */
+/** Checks whether an import map has already been applied. */
 function hasExistingImportMap(): boolean {
   return document.querySelector('script[type="importmap"]') !== null;
 }
 
-/** import map JSON을 <script type="importmap">으로 DOM에 주입한다. */
+/** Injects the import map JSON into the DOM as a <script type="importmap">. */
 function injectImportMapScript(importMap: ImportMap): void {
   const script = document.createElement('script');
   script.type = 'importmap';
@@ -106,7 +106,7 @@ function injectImportMapScript(importMap: ImportMap): void {
   }
 }
 
-/** import map의 모든 모듈에 대해 modulepreload 링크를 주입한다. */
+/** Injects modulepreload link elements for all modules in the import map. */
 function injectModulePreloadHints(importMap: ImportMap): void {
   const existingPreloads = new Set(
     Array.from(document.querySelectorAll<HTMLLinkElement>('link[rel="modulepreload"]')).map(

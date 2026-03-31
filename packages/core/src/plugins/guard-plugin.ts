@@ -1,7 +1,7 @@
 /**
- * CSS 격리 + 글로벌 오염 감지 플러그인.
- * 앱 mount 시 자동으로 CSS 스코핑과 글로벌 가드를 적용하고,
- * unmount 시 정리한다.
+ * CSS isolation + global pollution detection plugin.
+ * Automatically applies CSS scoping and global guards on app mount,
+ * and cleans up on unmount.
  */
 
 import {
@@ -13,32 +13,32 @@ import {
 import type { StyleIsolationHandle, GlobalGuardHandle, CssScopeOptions } from '@esmap/guard';
 import type { EsmapPlugin, PluginContext, PluginCleanup } from '../plugin.js';
 
-/** guard 플러그인 옵션 */
+/** Guard plugin options */
 export interface GuardPluginOptions {
-  /** CSS 격리 전략. 기본값 'attribute'. */
+  /** CSS isolation strategy. Default 'attribute'. */
   readonly cssStrategy?: 'attribute' | 'shadow';
-  /** 동적 스타일 추가를 MutationObserver로 감시할지 여부. 기본값 true. */
+  /** Whether to watch for dynamic style additions via MutationObserver. Default true. */
   readonly observeDynamic?: boolean;
-  /** 글로벌 오염 감지 활성화 여부. 기본값 true. */
+  /** Whether to enable global pollution detection. Default true. */
   readonly detectGlobalPollution?: boolean;
-  /** 글로벌 오염 허용 목록 */
+  /** Global pollution allow list */
   readonly globalAllowList?: readonly string[];
-  /** 글로벌 오염 감지 시 콜백 */
+  /** Callback invoked when global pollution is detected */
   readonly onGlobalViolation?: (appName: string, property: string) => void;
 }
 
-/** 앱별 격리 상태 */
+/** Per-app isolation state */
 interface AppIsolation {
   readonly styleHandle: StyleIsolationHandle;
   readonly guardHandle: GlobalGuardHandle | null;
 }
 
 /**
- * CSS 격리 + 글로벌 오염 감지 플러그인을 생성한다.
- * mount 시 자동으로 CSS 스코핑과 글로벌 가드를 적용하고, unmount 시 정리한다.
+ * Creates a CSS isolation + global pollution detection plugin.
+ * Automatically applies CSS scoping and global guards on mount, and cleans up on unmount.
  *
- * @param options - guard 플러그인 옵션
- * @returns EsmapPlugin 인스턴스
+ * @param options - guard plugin options
+ * @returns EsmapPlugin instance
  */
 export function guardPlugin(options: GuardPluginOptions = {}): EsmapPlugin {
   const {

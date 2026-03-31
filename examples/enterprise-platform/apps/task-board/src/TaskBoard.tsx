@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import { Card, Button } from '@enterprise/design-system';
 import { TaskDetail } from './TaskDetail.js';
 
-/** 태스크 상태를 나타내는 칸반 컬럼 식별자 */
+/** Kanban column identifier representing task status */
 type TaskStatus = 'todo' | 'in-progress' | 'done';
 
-/** 태스크 항목의 데이터 구조 */
+/** Data structure for a task item */
 interface Task {
   readonly id: string;
   readonly title: string;
@@ -16,7 +16,7 @@ interface Task {
   readonly status: TaskStatus;
 }
 
-/** 칸반 컬럼의 표시 설정 */
+/** Display settings for a kanban column */
 interface ColumnConfig {
   readonly key: TaskStatus;
   readonly label: string;
@@ -24,40 +24,40 @@ interface ColumnConfig {
   readonly headerBg: string;
 }
 
-/** 우선순위별 뱃지 색상 매핑 */
+/** Badge color mapping per priority */
 const PRIORITY_COLORS: Record<Task['priority'], string> = {
   high: '#f85149',
   medium: '#d29922',
   low: '#3fb950',
 };
 
-/** 칸반 컬럼 설정 목록 */
+/** Kanban column configuration list */
 const COLUMNS: readonly ColumnConfig[] = [
   { key: 'todo', label: 'To Do', color: '#8b949e', headerBg: '#1c2128' },
   { key: 'in-progress', label: 'In Progress', color: '#d29922', headerBg: '#1c2128' },
   { key: 'done', label: 'Done', color: '#3fb950', headerBg: '#1c2128' },
 ] as const;
 
-/** 상태 전환 순서를 정의하는 배열 */
+/** Array defining the state transition order */
 const STATUS_ORDER: readonly TaskStatus[] = ['todo', 'in-progress', 'done'] as const;
 
-/** 데모 태스크 데이터 */
+/** Demo task data */
 const INITIAL_TASKS: readonly Task[] = [
-  { id: 'task-1', title: 'SSO 인증 모듈 설계', description: 'SAML/OIDC 기반 SSO 인증 플로우 아키텍처 설계 문서 작성', assigneeId: 'user-1', assigneeName: '김민혁', priority: 'high', status: 'in-progress' },
-  { id: 'task-2', title: 'API 게이트웨이 라우팅 설정', description: '마이크로서비스 간 API 게이트웨이 라우팅 규칙 정의 및 구현', assigneeId: 'user-2', assigneeName: '이서연', priority: 'high', status: 'todo' },
-  { id: 'task-3', title: '대시보드 위젯 성능 최적화', description: '대시보드 위젯 렌더링 성능 프로파일링 및 React.memo 적용', assigneeId: 'user-3', assigneeName: '박지훈', priority: 'medium', status: 'in-progress' },
-  { id: 'task-4', title: '팀원 온보딩 체크리스트 구현', description: '신규 팀원 온보딩 워크플로우 체크리스트 UI 구현', assigneeId: 'user-1', assigneeName: '김민혁', priority: 'medium', status: 'todo' },
-  { id: 'task-5', title: '알림 서비스 WebSocket 연동', description: '실시간 알림을 위한 WebSocket 연결 및 재연결 로직 구현', assigneeId: 'user-4', assigneeName: '최수빈', priority: 'high', status: 'todo' },
-  { id: 'task-6', title: '사용자 권한 매트릭스 설계', description: 'RBAC 기반 사용자 권한 매트릭스 정의 및 관리 UI 설계', assigneeId: 'user-2', assigneeName: '이서연', priority: 'medium', status: 'done' },
-  { id: 'task-7', title: '배포 파이프라인 CI/CD 구성', description: 'GitHub Actions 기반 멀티 스테이지 배포 파이프라인 구성', assigneeId: 'user-5', assigneeName: '정다은', priority: 'low', status: 'done' },
-  { id: 'task-8', title: 'E2E 테스트 시나리오 작성', description: 'Playwright 기반 주요 사용자 플로우 E2E 테스트 시나리오 작성', assigneeId: 'user-3', assigneeName: '박지훈', priority: 'low', status: 'todo' },
-  { id: 'task-9', title: '국제화(i18n) 키 정리', description: '중복 및 미사용 i18n 키 정리, 네이밍 컨벤션 통일', assigneeId: 'user-5', assigneeName: '정다은', priority: 'low', status: 'in-progress' },
-  { id: 'task-10', title: '모니터링 대시보드 Grafana 연동', description: 'Prometheus 메트릭 기반 Grafana 대시보드 템플릿 구성', assigneeId: 'user-4', assigneeName: '최수빈', priority: 'medium', status: 'todo' },
+  { id: 'task-1', title: 'Design SSO Auth Module', description: 'Write architecture design document for SAML/OIDC-based SSO authentication flow', assigneeId: 'user-1', assigneeName: 'Minhyeok Kim', priority: 'high', status: 'in-progress' },
+  { id: 'task-2', title: 'Configure API Gateway Routing', description: 'Define and implement API gateway routing rules between microservices', assigneeId: 'user-2', assigneeName: 'Seoyeon Lee', priority: 'high', status: 'todo' },
+  { id: 'task-3', title: 'Optimize Dashboard Widget Performance', description: 'Profile dashboard widget rendering performance and apply React.memo', assigneeId: 'user-3', assigneeName: 'Jihoon Park', priority: 'medium', status: 'in-progress' },
+  { id: 'task-4', title: 'Implement Team Onboarding Checklist', description: 'Build onboarding workflow checklist UI for new team members', assigneeId: 'user-1', assigneeName: 'Minhyeok Kim', priority: 'medium', status: 'todo' },
+  { id: 'task-5', title: 'Integrate Notification Service WebSocket', description: 'Implement WebSocket connection and reconnection logic for real-time notifications', assigneeId: 'user-4', assigneeName: 'Subin Choi', priority: 'high', status: 'todo' },
+  { id: 'task-6', title: 'Design User Permission Matrix', description: 'Define RBAC-based user permission matrix and design management UI', assigneeId: 'user-2', assigneeName: 'Seoyeon Lee', priority: 'medium', status: 'done' },
+  { id: 'task-7', title: 'Set Up CI/CD Deployment Pipeline', description: 'Configure multi-stage deployment pipeline using GitHub Actions', assigneeId: 'user-5', assigneeName: 'Daeun Jeong', priority: 'low', status: 'done' },
+  { id: 'task-8', title: 'Write E2E Test Scenarios', description: 'Write Playwright-based E2E test scenarios for key user flows', assigneeId: 'user-3', assigneeName: 'Jihoon Park', priority: 'low', status: 'todo' },
+  { id: 'task-9', title: 'Clean Up i18n Keys', description: 'Remove duplicate and unused i18n keys, unify naming conventions', assigneeId: 'user-5', assigneeName: 'Daeun Jeong', priority: 'low', status: 'in-progress' },
+  { id: 'task-10', title: 'Integrate Grafana Monitoring Dashboard', description: 'Configure Grafana dashboard templates based on Prometheus metrics', assigneeId: 'user-4', assigneeName: 'Subin Choi', priority: 'medium', status: 'todo' },
 ] as const;
 
 /**
- * esmap:task:select 커스텀 이벤트를 디스패치한다.
- * @param task - 선택된 태스크
+ * Dispatches an esmap:task:select custom event.
+ * @param task - the selected task
  */
 const dispatchTaskSelect = (task: Task): void => {
   window.dispatchEvent(
@@ -68,11 +68,11 @@ const dispatchTaskSelect = (task: Task): void => {
 };
 
 /**
- * esmap:task:status-change 커스텀 이벤트를 디스패치한다.
- * @param taskId - 태스크 식별자
- * @param from - 이전 상태
- * @param to - 변경된 상태
- * @param assigneeId - 담당자 식별자
+ * Dispatches an esmap:task:status-change custom event.
+ * @param taskId - task identifier
+ * @param from - previous status
+ * @param to - new status
+ * @param assigneeId - assignee identifier
  */
 const dispatchStatusChange = (taskId: string, from: TaskStatus, to: TaskStatus, assigneeId: string): void => {
   window.dispatchEvent(
@@ -83,9 +83,9 @@ const dispatchStatusChange = (taskId: string, from: TaskStatus, to: TaskStatus, 
 };
 
 /**
- * 태스크의 상태를 다음 단계로 전환한다.
- * @param currentStatus - 현재 태스크 상태
- * @returns 다음 상태 (done이면 todo로 순환)
+ * Transitions the task status to the next step.
+ * @param currentStatus - current task status
+ * @returns the next status (cycles back to todo from done)
  */
 const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
   const currentIndex = STATUS_ORDER.indexOf(currentStatus);
@@ -94,8 +94,8 @@ const getNextStatus = (currentStatus: TaskStatus): TaskStatus => {
 };
 
 /**
- * Task Board 메인 뷰.
- * 칸반 형태의 3-컬럼 보드를 렌더링하고, MFE 간 이벤트 통신을 시연한다.
+ * Task Board main view.
+ * Renders a kanban-style 3-column board and demonstrates inter-MFE event communication.
  */
 export function TaskBoard(): ReactNode {
   const [tasks, setTasks] = useState<readonly Task[]>(INITIAL_TASKS);
@@ -106,13 +106,13 @@ export function TaskBoard(): ReactNode {
     ? tasks.find((t) => t.id === selectedTaskId) ?? null
     : null;
 
-  /** 태스크 클릭 시 선택 상태를 업데이트하고 이벤트를 디스패치한다. */
+  /** Updates selection state and dispatches event on task click. */
   const handleTaskClick = useCallback((task: Task): void => {
     setSelectedTaskId(task.id);
     dispatchTaskSelect(task);
   }, []);
 
-  /** 상태 칩 클릭 시 태스크를 다음 상태로 이동시킨다. */
+  /** Moves the task to the next status when the status chip is clicked. */
   const handleStatusChange = useCallback((task: Task): void => {
     const nextStatus = getNextStatus(task.status);
     setTasks((prev) =>
@@ -123,14 +123,14 @@ export function TaskBoard(): ReactNode {
     dispatchStatusChange(task.id, task.status, nextStatus, task.assigneeId);
   }, []);
 
-  /** 상세 패널을 닫는다. */
+  /** Closes the detail panel. */
   const handleCloseDetail = useCallback((): void => {
     setSelectedTaskId(null);
   }, []);
 
-  // team:member-select 이벤트 구독 — 팀 디렉토리에서 멤버 선택 시 필터 적용
+  // Subscribe to team:member-select event — apply filter when a member is selected in team directory
   useEffect(() => {
-    /** team:member-select 이벤트 핸들러 */
+    /** team:member-select event handler */
     const handleMemberSelect = (e: Event): void => {
       if (!(e instanceof CustomEvent)) return;
       const detail: { memberId: string } = e.detail;
@@ -143,9 +143,9 @@ export function TaskBoard(): ReactNode {
     };
   }, []);
 
-  // notification:click 이벤트 구독 — 알림 클릭 시 해당 태스크 자동 선택
+  // Subscribe to notification:click event — auto-select the task when notification is clicked
   useEffect(() => {
-    /** notification:click 이벤트 핸들러 */
+    /** notification:click event handler */
     const handleNotificationClick = (e: Event): void => {
       if (!(e instanceof CustomEvent)) return;
       const detail: { taskId: string } = e.detail;
@@ -162,9 +162,9 @@ export function TaskBoard(): ReactNode {
     };
   }, [tasks]);
 
-  // workspace.selectedMemberId 전역 상태 변경 구독
+  // Subscribe to workspace.selectedMemberId global state changes
   useEffect(() => {
-    /** workspace:state-change 이벤트 핸들러 */
+    /** workspace:state-change event handler */
     const handleGlobalState = (e: Event): void => {
       if (!(e instanceof CustomEvent)) return;
       const detail: { key: string; value: string | null } = e.detail;
@@ -183,7 +183,7 @@ export function TaskBoard(): ReactNode {
     ? tasks.filter((t) => t.assigneeId === filterMemberId)
     : tasks;
 
-  /** 지정된 상태에 해당하는 태스크 목록을 반환한다. */
+  /** Returns the list of tasks for the specified status. */
   const getTasksByStatus = (status: TaskStatus): readonly Task[] =>
     filteredTasks.filter((t) => t.status === status);
 
@@ -195,23 +195,23 @@ export function TaskBoard(): ReactNode {
             Task Board
           </h1>
           <p style={{ color: '#8b949e', margin: '4px 0 0 0', fontSize: '14px' }}>
-            칸반 보드 — 상태 칩 클릭으로 태스크 이동, 카드 클릭으로 상세 보기
+            Kanban board — click status chips to move tasks, click cards for details
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {filterMemberId && (
             <Button variant="ghost" size="sm" onClick={() => setFilterMemberId(null)}>
-              필터 해제
+              Clear Filter
             </Button>
           )}
           <span style={{ fontSize: '13px', color: '#8b949e' }}>
-            {filteredTasks.length}개 태스크
+            {filteredTasks.length} tasks
           </span>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: '16px' }}>
-        {/* 칸반 컬럼 영역 */}
+        {/* Kanban column area */}
         <div
           style={{
             display: 'grid',
@@ -233,7 +233,7 @@ export function TaskBoard(): ReactNode {
           ))}
         </div>
 
-        {/* 태스크 상세 패널 */}
+        {/* Task detail panel */}
         {selectedTask && (
           <div style={{ flex: '0 0 35%', minWidth: '320px' }}>
             <TaskDetail task={selectedTask} onClose={handleCloseDetail} />
@@ -244,7 +244,7 @@ export function TaskBoard(): ReactNode {
   );
 }
 
-/** KanbanColumn 컴포넌트의 props */
+/** KanbanColumn component props */
 interface KanbanColumnProps {
   readonly column: ColumnConfig;
   readonly tasks: readonly Task[];
@@ -254,8 +254,8 @@ interface KanbanColumnProps {
 }
 
 /**
- * 칸반 컬럼을 렌더링한다.
- * 컬럼 헤더에 태스크 수를 표시하고, 포함된 태스크 카드를 나열한다.
+ * Renders a kanban column.
+ * Displays the task count in the column header and lists the contained task cards.
  */
 function KanbanColumn({ column, tasks, selectedTaskId, onTaskClick, onStatusChange }: KanbanColumnProps): ReactNode {
   return (
@@ -267,7 +267,7 @@ function KanbanColumn({ column, tasks, selectedTaskId, onTaskClick, onStatusChan
         minHeight: '200px',
       }}
     >
-      {/* 컬럼 헤더 */}
+      {/* Column header */}
       <div
         style={{
           display: 'flex',
@@ -305,7 +305,7 @@ function KanbanColumn({ column, tasks, selectedTaskId, onTaskClick, onStatusChan
         </span>
       </div>
 
-      {/* 태스크 카드 목록 */}
+      {/* Task card list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {tasks.map((task) => (
           <TaskCard
@@ -327,7 +327,7 @@ function KanbanColumn({ column, tasks, selectedTaskId, onTaskClick, onStatusChan
               borderRadius: '8px',
             }}
           >
-            태스크 없음
+            No tasks
           </div>
         )}
       </div>
@@ -335,7 +335,7 @@ function KanbanColumn({ column, tasks, selectedTaskId, onTaskClick, onStatusChan
   );
 }
 
-/** TaskCard 컴포넌트의 props */
+/** TaskCard component props */
 interface TaskCardProps {
   readonly task: Task;
   readonly isSelected: boolean;
@@ -344,8 +344,8 @@ interface TaskCardProps {
 }
 
 /**
- * 개별 태스크 카드를 렌더링한다.
- * 카드 클릭으로 상세 보기, 상태 칩 클릭으로 다음 상태로 이동한다.
+ * Renders an individual task card.
+ * Click the card for detail view, click the status chip to move to the next status.
  */
 function TaskCard({ task, isSelected, onTaskClick, onStatusChange }: TaskCardProps): ReactNode {
   const nextStatus = getNextStatus(task.status);
@@ -363,7 +363,7 @@ function TaskCard({ task, isSelected, onTaskClick, onStatusChange }: TaskCardPro
           outlineOffset: '4px',
         }}
       >
-        {/* 우선순위 뱃지 + 태스크 ID */}
+        {/* Priority badge + task ID */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
           <span
             style={{
@@ -381,7 +381,7 @@ function TaskCard({ task, isSelected, onTaskClick, onStatusChange }: TaskCardPro
           <span style={{ fontSize: '11px', color: '#484f58' }}>{task.id}</span>
         </div>
 
-        {/* 태스크 제목 */}
+        {/* Task title */}
         <div
           style={{
             fontSize: '14px',
@@ -394,7 +394,7 @@ function TaskCard({ task, isSelected, onTaskClick, onStatusChange }: TaskCardPro
           {task.title}
         </div>
 
-        {/* 담당자 + 상태 이동 칩 */}
+        {/* Assignee + status transition chip */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span
@@ -417,7 +417,7 @@ function TaskCard({ task, isSelected, onTaskClick, onStatusChange }: TaskCardPro
             <span style={{ fontSize: '12px', color: '#8b949e' }}>{task.assigneeName}</span>
           </div>
 
-          {/* 상태 이동 칩 — 클릭으로 다음 상태로 전환 */}
+          {/* Status transition chip — click to move to next status */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -433,7 +433,7 @@ function TaskCard({ task, isSelected, onTaskClick, onStatusChange }: TaskCardPro
               cursor: 'pointer',
               whiteSpace: 'nowrap',
             }}
-            title={`"${nextLabel}"(으)로 이동`}
+            title={`Move to "${nextLabel}"`}
           >
             → {nextLabel}
           </button>

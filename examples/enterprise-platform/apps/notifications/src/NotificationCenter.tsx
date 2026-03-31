@@ -1,51 +1,51 @@
 import { useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 
-/** 알림 항목의 출처 타입 */
+/** Notification item source type */
 type NotificationType = 'task' | 'member' | 'activity';
 
-/** 단일 알림 항목 */
+/** Single notification item */
 interface NotificationItem {
   readonly id: string;
   readonly type: NotificationType;
   readonly message: string;
   readonly time: string;
   readonly read: boolean;
-  /** 클릭 시 전파할 대상 ID */
+  /** Target ID to propagate on click */
   readonly targetId: string;
-  /** 슬라이드-인 애니메이션 활성 여부 */
+  /** Whether slide-in animation is active */
   readonly isNew: boolean;
 }
 
-/** 알림 클릭 이벤트의 detail 타입 */
+/** Detail type for notification click events */
 interface NotificationClickDetail {
   readonly type: 'task' | 'member';
   readonly targetId: string;
 }
 
-/** 최대 알림 보관 개수 */
+/** Maximum number of notifications to retain */
 const MAX_NOTIFICATIONS = 20;
 
-/** 타입별 아이콘 문자 */
+/** Icon character per type */
 const TYPE_ICONS: Record<NotificationType, string> = {
   task: '\u2714',
   member: '\u263A',
   activity: '\u2605',
 } as const;
 
-/** 타입별 라벨 */
+/** Label per type */
 const TYPE_LABELS: Record<NotificationType, string> = {
   task: 'Task',
   member: 'Team',
   activity: 'Activity',
 } as const;
 
-/** 시드 알림 데이터 (초기 데모용) */
+/** Seed notification data (for initial demo) */
 const SEED_NOTIFICATIONS: readonly NotificationItem[] = [
   {
     id: 'seed-1',
     type: 'task',
-    message: '"API 설계 검토" 상태가 In Progress로 변경되었습니다',
-    time: '5분 전',
+    message: 'Status of "API Design Review" changed to In Progress',
+    time: '5m ago',
     read: false,
     targetId: 'task-101',
     isNew: false,
@@ -53,8 +53,8 @@ const SEED_NOTIFICATIONS: readonly NotificationItem[] = [
   {
     id: 'seed-2',
     type: 'member',
-    message: '이서연님이 Backend 팀에 배정되었습니다',
-    time: '12분 전',
+    message: 'Seoyeon Lee has been assigned to the Backend team',
+    time: '12m ago',
     read: false,
     targetId: 'member-202',
     isNew: false,
@@ -62,15 +62,15 @@ const SEED_NOTIFICATIONS: readonly NotificationItem[] = [
   {
     id: 'seed-3',
     type: 'activity',
-    message: '박지훈님이 "주간 회고" 문서에 댓글을 남겼습니다',
-    time: '30분 전',
+    message: 'Jihoon Park commented on "Weekly Retrospective" document',
+    time: '30m ago',
     read: true,
     targetId: 'activity-303',
     isNew: false,
   },
 ] as const;
 
-/** 고유 ID 생성용 카운터 참조값 */
+/** Counter reference for unique ID generation */
 const createIdGenerator = (): (() => string) => {
   const counter = { value: 0 };
   return () => {
@@ -80,28 +80,28 @@ const createIdGenerator = (): (() => string) => {
 };
 
 /**
- * CustomEvent에서 알림 메시지를 추출한다.
- * @param eventName - 수신된 이벤트 이름
- * @param detail - 이벤트 detail 객체
- * @returns 알림에 표시할 메시지 문자열
+ * Extracts a notification message from a CustomEvent.
+ * @param eventName - the received event name
+ * @param detail - the event detail object
+ * @returns the message string to display in the notification
  */
 function buildMessage(eventName: string, detail: Record<string, unknown>): string {
   switch (eventName) {
     case 'esmap:task:status-change':
-      return `태스크 "${String(detail['taskName'] ?? detail['taskId'] ?? 'unknown')}" 상태가 ${String(detail['status'] ?? 'unknown')}(으)로 변경되었습니다`;
+      return `Task "${String(detail['taskName'] ?? detail['taskId'] ?? 'unknown')}" status changed to ${String(detail['status'] ?? 'unknown')}`;
     case 'esmap:team:member-select':
-      return `${String(detail['memberName'] ?? detail['memberId'] ?? 'unknown')}님이 선택되었습니다`;
+      return `${String(detail['memberName'] ?? detail['memberId'] ?? 'unknown')} has been selected`;
     case 'esmap:activity:new':
-      return `새로운 활동: ${String(detail['message'] ?? 'unknown')}`;
+      return `New activity: ${String(detail['message'] ?? 'unknown')}`;
     default:
-      return `알 수 없는 이벤트: ${eventName}`;
+      return `Unknown event: ${eventName}`;
   }
 }
 
 /**
- * 이벤트 이름을 알림 타입으로 매핑한다.
- * @param eventName - 수신된 이벤트 이름
- * @returns 대응하는 NotificationType
+ * Maps an event name to a notification type.
+ * @param eventName - the received event name
+ * @returns the corresponding NotificationType
  */
 function resolveType(eventName: string): NotificationType {
   switch (eventName) {
@@ -117,10 +117,10 @@ function resolveType(eventName: string): NotificationType {
 }
 
 /**
- * 이벤트 detail에서 targetId를 추출한다.
- * @param eventType - 알림 타입
- * @param detail - 이벤트 detail 객체
- * @returns 대상 식별자 문자열
+ * Extracts the targetId from an event detail.
+ * @param eventType - the notification type
+ * @param detail - the event detail object
+ * @returns the target identifier string
  */
 function resolveTargetId(eventType: NotificationType, detail: Record<string, unknown>): string {
   switch (eventType) {
@@ -134,21 +134,21 @@ function resolveTargetId(eventType: NotificationType, detail: Record<string, unk
 }
 
 /**
- * Notification Center 위젯.
- * 다른 MFE에서 발생하는 CustomEvent를 구독하여 알림 목록으로 집계하고,
- * 읽지 않은 알림 수 배지와 토스트 애니메이션을 제공한다.
+ * Notification Center widget.
+ * Subscribes to CustomEvents from other MFEs and aggregates them into a notification list,
+ * providing an unread count badge and toast animations.
  */
 export function NotificationCenter(): ReactNode {
   const [notifications, setNotifications] = useState<readonly NotificationItem[]>(SEED_NOTIFICATIONS);
   const [isOpen, setIsOpen] = useState(false);
   const generateId = useRef(createIdGenerator()).current;
 
-  /** 읽지 않은 알림 개수 */
+  /** Unread notification count */
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   /**
-   * 수신된 CustomEvent를 알림 항목으로 변환하여 목록에 추가한다.
-   * 최대 개수를 초과하면 오래된 항목부터 제거한다.
+   * Converts a received CustomEvent into a notification item and adds it to the list.
+   * Removes the oldest items when the maximum count is exceeded.
    */
   const handleEvent = useCallback(
     (eventName: string) => (event: Event) => {
@@ -158,7 +158,7 @@ export function NotificationCenter(): ReactNode {
         id: generateId(),
         type,
         message: buildMessage(eventName, detail),
-        time: '방금',
+        time: 'Just now',
         read: false,
         targetId: resolveTargetId(type, detail),
         isNew: true,
@@ -166,7 +166,7 @@ export function NotificationCenter(): ReactNode {
 
       setNotifications((prev) => [newNotification, ...prev].slice(0, MAX_NOTIFICATIONS));
 
-      // 3초 후 슬라이드-인 애니메이션 플래그 제거
+      // Remove slide-in animation flag after 3 seconds
       setTimeout(() => {
         setNotifications((prev) =>
           prev.map((n) => (n.id === newNotification.id ? { ...n, isNew: false } : n)),
@@ -176,7 +176,7 @@ export function NotificationCenter(): ReactNode {
     [generateId],
   );
 
-  /** CustomEvent 리스너 등록 및 해제 */
+  /** Register and unregister CustomEvent listeners */
   useEffect(() => {
     const eventNames = [
       'esmap:task:status-change',
@@ -201,16 +201,16 @@ export function NotificationCenter(): ReactNode {
   }, [handleEvent]);
 
   /**
-   * 알림 클릭 시 읽음 처리하고, esmap:notification:click 이벤트를 발행한다.
-   * @param notification - 클릭된 알림 항목
+   * Marks a notification as read on click and dispatches an esmap:notification:click event.
+   * @param notification - the clicked notification item
    */
   const handleNotificationClick = useCallback((notification: NotificationItem): void => {
-    // 읽음 처리
+    // Mark as read
     setNotifications((prev) =>
       prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
     );
 
-    // 클릭 이벤트 발행 (activity 타입은 task로 매핑)
+    // Dispatch click event (activity type is mapped to task)
     const clickDetail: NotificationClickDetail = {
       type: notification.type === 'activity' ? 'task' : notification.type,
       targetId: notification.targetId,
@@ -221,19 +221,19 @@ export function NotificationCenter(): ReactNode {
     );
   }, []);
 
-  /** 모든 알림을 읽음 처리한다. */
+  /** Marks all notifications as read. */
   const handleMarkAllRead = useCallback((): void => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
 
-  /** 드롭다운 열기/닫기를 토글한다. */
+  /** Toggles the dropdown open/closed. */
   const handleToggle = useCallback((): void => {
     setIsOpen((prev) => !prev);
   }, []);
 
   return (
     <div style={{ position: 'relative', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
-      {/* 토글 버튼 + 배지 */}
+      {/* Toggle button + badge */}
       <button
         type="button"
         onClick={handleToggle}
@@ -277,7 +277,7 @@ export function NotificationCenter(): ReactNode {
         )}
       </button>
 
-      {/* 드롭다운 패널 */}
+      {/* Dropdown panel */}
       {isOpen && (
         <div
           style={{
@@ -295,7 +295,7 @@ export function NotificationCenter(): ReactNode {
             zIndex: 1000,
           }}
         >
-          {/* 헤더 */}
+          {/* Header */}
           <div
             style={{
               display: 'flex',
@@ -306,7 +306,7 @@ export function NotificationCenter(): ReactNode {
             }}
           >
             <span style={{ fontSize: '14px', fontWeight: '600', color: '#e6edf3' }}>
-              알림 ({notifications.length})
+              Notifications ({notifications.length})
             </span>
             {unreadCount > 0 && (
               <button
@@ -321,12 +321,12 @@ export function NotificationCenter(): ReactNode {
                   padding: 0,
                 }}
               >
-                모두 읽음
+                Mark all read
               </button>
             )}
           </div>
 
-          {/* 알림 목록 */}
+          {/* Notification list */}
           {notifications.length === 0 ? (
             <div
               style={{
@@ -336,7 +336,7 @@ export function NotificationCenter(): ReactNode {
                 fontSize: '13px',
               }}
             >
-              알림이 없습니다
+              No notifications
             </div>
           ) : (
             <div>
@@ -368,7 +368,7 @@ export function NotificationCenter(): ReactNode {
                       : 'rgba(56, 139, 253, 0.06)';
                   }}
                 >
-                  {/* 읽지 않은 알림 도트 */}
+                  {/* Unread notification dot */}
                   {!notification.read && (
                     <span
                       style={{
@@ -382,7 +382,7 @@ export function NotificationCenter(): ReactNode {
                     />
                   )}
 
-                  {/* 타입 아이콘 */}
+                  {/* Type icon */}
                   <span
                     style={{
                       width: '28px',
@@ -400,7 +400,7 @@ export function NotificationCenter(): ReactNode {
                     {TYPE_ICONS[notification.type]}
                   </span>
 
-                  {/* 내용 */}
+                  {/* Content */}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
                       style={{
@@ -444,7 +444,7 @@ export function NotificationCenter(): ReactNode {
         </div>
       )}
 
-      {/* 토스트 애니메이션용 CSS keyframes */}
+      {/* CSS keyframes for toast animation */}
       <style>{`
         @keyframes slideInFromTop {
           from {

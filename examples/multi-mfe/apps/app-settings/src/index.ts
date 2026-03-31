@@ -1,6 +1,6 @@
 /**
- * 설정 MFE — "/settings" 경로에서 활성화되는 설정 페이지.
- * 샌드박스 격리 검증을 위해 sandbox proxy에 __SETTINGS_APP_DATA__ 를 설정한다.
+ * Settings MFE — settings page activated at the "/settings" route.
+ * Sets __SETTINGS_APP_DATA__ on the sandbox proxy for sandbox isolation verification.
  */
 
 declare global {
@@ -9,53 +9,53 @@ declare global {
   }
 }
 
-/** 앱의 샌드박스 프록시를 가져온다. 없으면 window를 반환한다. */
+/** Gets the app's sandbox proxy. Returns window if not available. */
 function getSandboxProxy(): Record<string, unknown> {
   const sandbox = window.__ESMAP_SANDBOXES__?.get('app-settings');
   return sandbox?.proxy ?? (window as unknown as Record<string, unknown>);
 }
 
-/** 앱 부트스트랩 — 초기화 단계 */
+/** App bootstrap — initialization phase */
 export function bootstrap(): Promise<void> {
   console.log('[app-settings] bootstrap');
   return Promise.resolve();
 }
 
-/** 앱 마운트 — 전역 변수 설정 및 설정 UI 렌더링 */
+/** App mount — set global variables and render settings UI */
 export function mount(container: HTMLElement): Promise<void> {
   console.log('[app-settings] mount');
 
-  // 샌드박스 프록시를 통해 전역 변수 설정 (실제 window 오염 방지)
+  // Set global variable via sandbox proxy (prevents actual window pollution)
   const proxy = getSandboxProxy();
   proxy['__SETTINGS_APP_DATA__'] = 'settings-active';
   console.log('[app-settings] sandbox.__SETTINGS_APP_DATA__ = "settings-active"');
 
-  // home 앱의 전역 변수가 누출되는지 확인
-  const homeLeak = String(proxy['__HOME_APP_DATA__'] ?? 'undefined (격리됨)');
+  // Check if home app's global variable leaks
+  const homeLeak = String(proxy['__HOME_APP_DATA__'] ?? 'undefined (isolated)');
   console.log(`[app-settings] sandbox.__HOME_APP_DATA__ = ${homeLeak}`);
 
   container.innerHTML = `
     <div style="padding:32px;">
       <h1>Settings</h1>
-      <p style="color:#666;">이 페이지는 <code>app-settings</code> MFE가 렌더링합니다.</p>
+      <p style="color:#666;">This page is rendered by the <code>app-settings</code> MFE.</p>
       <div style="margin-top:24px;max-width:480px;">
         <div style="padding:16px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:12px;">
           <label style="display:flex;justify-content:space-between;align-items:center;">
-            <span>다크 모드</span>
+            <span>Dark Mode</span>
             <input type="checkbox" />
           </label>
         </div>
         <div style="padding:16px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:12px;">
           <label style="display:flex;justify-content:space-between;align-items:center;">
-            <span>알림 활성화</span>
+            <span>Enable Notifications</span>
             <input type="checkbox" checked />
           </label>
         </div>
         <div style="padding:16px;border:1px solid #e0e0e0;border-radius:8px;">
           <label style="display:flex;justify-content:space-between;align-items:center;">
-            <span>언어</span>
+            <span>Language</span>
             <select>
-              <option>한국어</option>
+              <option>Korean</option>
               <option>English</option>
               <option>日本語</option>
             </select>
@@ -72,7 +72,7 @@ export function mount(container: HTMLElement): Promise<void> {
   return Promise.resolve();
 }
 
-/** 앱 언마운트 — 전역 변수 정리 및 DOM 초기화 */
+/** App unmount — clean up global variables and reset DOM */
 export function unmount(container: HTMLElement): Promise<void> {
   console.log('[app-settings] unmount');
   const proxy = getSandboxProxy();

@@ -1,14 +1,14 @@
 import { useState, type ReactNode, type FormEvent } from 'react';
 
-/** 데모용 사용자 계정 */
+/** Demo user accounts */
 const DEMO_USERS = [
-  { id: 'user-1', name: '김민혁', email: 'minhyeok@enterprise.dev' },
-  { id: 'user-2', name: '이서연', email: 'seoyeon@enterprise.dev' },
+  { id: 'user-1', name: 'Minhyeok Kim', email: 'minhyeok@enterprise.dev' },
+  { id: 'user-2', name: 'Seoyeon Lee', email: 'seoyeon@enterprise.dev' },
 ] as const;
 
 /**
- * 로그인 폼을 렌더링하고, 인증 성공 시 CustomEvent로 host에 전파한다.
- * MFE 간 느슨한 결합을 위해 window CustomEvent를 브릿지로 사용한다.
+ * Renders a login form and propagates authentication success to the host via CustomEvent.
+ * Uses window CustomEvent as a bridge for loose coupling between MFEs.
  */
 export function LoginForm(): ReactNode {
   const [selectedUser, setSelectedUser] = useState(0);
@@ -18,12 +18,12 @@ export function LoginForm(): ReactNode {
     e.preventDefault();
     setIsLoading(true);
 
-    // 인증 시뮬레이션 (500ms 지연)
+    // Authentication simulation (500ms delay)
     setTimeout(() => {
       const user = DEMO_USERS[selectedUser];
 
-      // host의 eventBus로 인증 완료 이벤트 전파
-      // CustomEvent 브릿지: MFE → host 간 느슨한 결합
+      // Propagate authentication completion event to host's eventBus
+      // CustomEvent bridge: loose coupling between MFE and host
       window.dispatchEvent(
         new CustomEvent('esmap:auth:login', {
           detail: { userId: user.id, name: user.name },
@@ -48,14 +48,14 @@ export function LoginForm(): ReactNode {
         Enterprise Platform
       </h2>
       <p style={{ margin: '0 0 24px 0', fontSize: '14px', color: '#64748b' }}>
-        ReadyGate 인증 데모 — 로그인 전까지 보호된 라우트 차단
+        ReadyGate auth demo — protected routes are blocked until login
       </p>
 
       <form onSubmit={handleSubmit}>
         <label
           style={{ display: 'block', marginBottom: '8px', fontSize: '13px', color: '#475569' }}
         >
-          사용자 선택
+          Select user
         </label>
         <select
           value={selectedUser}
@@ -92,7 +92,7 @@ export function LoginForm(): ReactNode {
             cursor: isLoading ? 'not-allowed' : 'pointer',
           }}
         >
-          {isLoading ? '인증 중...' : '로그인'}
+          {isLoading ? 'Authenticating...' : 'Log in'}
         </button>
       </form>
 
@@ -104,7 +104,7 @@ export function LoginForm(): ReactNode {
           textAlign: 'center',
         }}
       >
-        이 MFE는 ReadyGate에 의해 인증 완료 전까지 표시됩니다
+        This MFE is displayed by ReadyGate until authentication is complete
       </p>
     </div>
   );

@@ -8,14 +8,14 @@ import {
 import { ImportMapError, ImportMapConflictError } from '../errors.js';
 
 describe('createEmptyImportMap', () => {
-  it('빈 imports 객체를 가진 import map을 반환한다', () => {
+  it('returns an import map with an empty imports object', () => {
     const result = createEmptyImportMap();
     expect(result).toStrictEqual({ imports: {} });
   });
 });
 
 describe('parseImportMap', () => {
-  it('유효한 import map JSON을 파싱한다', () => {
+  it('parses a valid import map JSON', () => {
     const json = JSON.stringify({
       imports: { react: 'https://cdn.example.com/react.js' },
     });
@@ -27,7 +27,7 @@ describe('parseImportMap', () => {
     });
   });
 
-  it('scopes가 포함된 import map을 파싱한다', () => {
+  it('parses an import map with scopes', () => {
     const json = JSON.stringify({
       imports: { react: 'https://cdn.example.com/react@18.js' },
       scopes: {
@@ -46,7 +46,7 @@ describe('parseImportMap', () => {
     });
   });
 
-  it('integrity가 포함된 import map을 파싱한다', () => {
+  it('parses an import map with integrity', () => {
     const json = JSON.stringify({
       imports: { react: 'https://cdn.example.com/react.js' },
       integrity: { 'https://cdn.example.com/react.js': 'sha384-abc123' },
@@ -59,22 +59,22 @@ describe('parseImportMap', () => {
     });
   });
 
-  it('imports가 없으면 ImportMapError를 던진다', () => {
+  it('throws ImportMapError when imports is missing', () => {
     expect(() => parseImportMap('{}')).toThrow(ImportMapError);
     expect(() => parseImportMap('{}')).toThrow('"imports" object');
   });
 
-  it('JSON이 아닌 값이면 ImportMapError를 던진다', () => {
+  it('throws ImportMapError when the value is not JSON', () => {
     expect(() => parseImportMap('"string"')).toThrow(ImportMapError);
   });
 
-  it('imports 값이 string이 아니면 ImportMapError를 던진다', () => {
+  it('throws ImportMapError when imports value is not a string', () => {
     const json = JSON.stringify({ imports: { react: 123 } });
     expect(() => parseImportMap(json)).toThrow(ImportMapError);
     expect(() => parseImportMap(json)).toThrow('must be a string');
   });
 
-  it('scopes 값이 객체가 아니면 ImportMapError를 던진다', () => {
+  it('throws ImportMapError when scopes value is not an object', () => {
     const json = JSON.stringify({
       imports: { react: 'https://cdn.example.com/react.js' },
       scopes: 'invalid',
@@ -82,7 +82,7 @@ describe('parseImportMap', () => {
     expect(() => parseImportMap(json)).toThrow(ImportMapError);
   });
 
-  it('integrity 값이 객체가 아니면 ImportMapError를 던진다', () => {
+  it('throws ImportMapError when integrity value is not an object', () => {
     const json = JSON.stringify({
       imports: { react: 'https://cdn.example.com/react.js' },
       integrity: 'invalid',
@@ -90,13 +90,13 @@ describe('parseImportMap', () => {
     expect(() => parseImportMap(json)).toThrow(ImportMapError);
   });
 
-  it('잘못된 JSON 문자열이면 SyntaxError를 던진다', () => {
+  it('throws SyntaxError for invalid JSON strings', () => {
     expect(() => parseImportMap('not-json')).toThrow(SyntaxError);
   });
 });
 
 describe('mergeImportMaps', () => {
-  it('override 전략으로 충돌 시 overlay가 이긴다', () => {
+  it('overlay wins on conflict with override strategy', () => {
     const base = { imports: { react: 'https://old.js' } };
     const overlay = { imports: { react: 'https://new.js' } };
 
@@ -105,7 +105,7 @@ describe('mergeImportMaps', () => {
     expect(result.imports.react).toBe('https://new.js');
   });
 
-  it('skip 전략으로 충돌 시 base가 유지된다', () => {
+  it('base is preserved on conflict with skip strategy', () => {
     const base = { imports: { react: 'https://old.js' } };
     const overlay = { imports: { react: 'https://new.js' } };
 
@@ -114,7 +114,7 @@ describe('mergeImportMaps', () => {
     expect(result.imports.react).toBe('https://old.js');
   });
 
-  it('error 전략으로 충돌 시 ImportMapConflictError를 던진다', () => {
+  it('throws ImportMapConflictError on conflict with error strategy', () => {
     const base = { imports: { react: 'https://old.js' } };
     const overlay = { imports: { react: 'https://new.js' } };
 
@@ -128,7 +128,7 @@ describe('mergeImportMaps', () => {
     }
   });
 
-  it('충돌 없이 두 map을 합친다', () => {
+  it('merges two maps without conflict', () => {
     const base = { imports: { react: 'https://react.js' } };
     const overlay = { imports: { vue: 'https://vue.js' } };
 
@@ -140,7 +140,7 @@ describe('mergeImportMaps', () => {
     });
   });
 
-  it('scopes를 병합한다', () => {
+  it('merges scopes', () => {
     const base = {
       imports: {},
       scopes: {
@@ -162,7 +162,7 @@ describe('mergeImportMaps', () => {
     });
   });
 
-  it('동일 scope 내 충돌을 override로 해결한다', () => {
+  it('resolves conflicts within the same scope with override', () => {
     const base = {
       imports: {},
       scopes: {
@@ -181,7 +181,7 @@ describe('mergeImportMaps', () => {
     expect(result.scopes?.['https://cdn/app-a/'].react).toBe('https://react@19.js');
   });
 
-  it('base만 scopes가 있을 때 base scopes를 유지한다', () => {
+  it('preserves base scopes when only base has scopes', () => {
     const base = {
       imports: {},
       scopes: { 'https://cdn/': { lib: 'https://lib.js' } },
@@ -193,7 +193,7 @@ describe('mergeImportMaps', () => {
     expect(result.scopes).toStrictEqual({ 'https://cdn/': { lib: 'https://lib.js' } });
   });
 
-  it('기본 전략은 override다', () => {
+  it('defaults to override strategy', () => {
     const base = { imports: { x: 'https://a.js' } };
     const overlay = { imports: { x: 'https://b.js' } };
 
@@ -202,7 +202,7 @@ describe('mergeImportMaps', () => {
     expect(result.imports.x).toBe('https://b.js');
   });
 
-  it('integrity를 병합한다', () => {
+  it('merges integrity', () => {
     const base = {
       imports: {},
       integrity: { 'https://a.js': 'sha384-aaa' },
@@ -222,7 +222,7 @@ describe('mergeImportMaps', () => {
 });
 
 describe('serializeImportMap', () => {
-  it('키를 알파벳 순으로 정렬한다', () => {
+  it('sorts keys alphabetically', () => {
     const importMap = {
       imports: {
         vue: 'https://vue.js',
@@ -238,7 +238,7 @@ describe('serializeImportMap', () => {
     expect(keys).toStrictEqual(['angular', 'react', 'vue']);
   });
 
-  it('scopes 내부 키도 정렬한다', () => {
+  it('sorts keys inside scopes as well', () => {
     const importMap = {
       imports: {},
       scopes: {
@@ -256,7 +256,7 @@ describe('serializeImportMap', () => {
     expect(innerKeys).toStrictEqual(['a', 'z']);
   });
 
-  it('indent를 지정할 수 있다', () => {
+  it('supports custom indent', () => {
     const importMap = { imports: { react: 'https://react.js' } };
 
     const result4 = serializeImportMap(importMap, 4);
@@ -264,7 +264,7 @@ describe('serializeImportMap', () => {
     expect(result4).toContain('    "react"');
   });
 
-  it('scopes가 없으면 출력에 포함하지 않는다', () => {
+  it('excludes scopes from output when absent', () => {
     const importMap = { imports: { react: 'https://react.js' } };
 
     const result = serializeImportMap(importMap);

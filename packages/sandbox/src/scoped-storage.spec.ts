@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createScopedStorage } from './scoped-storage.js';
 
 /**
- * 테스트용 인메모리 Storage 구현.
- * localStorage 의존 없이 ScopedStorage를 테스트한다.
+ * In-memory Storage implementation for testing.
+ * Tests ScopedStorage without depending on localStorage.
  */
 function createMockStorage(): Storage {
   const store = new Map<string, string>();
@@ -32,26 +32,26 @@ function createMockStorage(): Storage {
 }
 
 describe('createScopedStorage', () => {
-  describe('기본 CRUD', () => {
-    it('setItem/getItem이 스코프된 키로 동작한다', () => {
+  describe('basic CRUD', () => {
+    it('setItem/getItem operates with scoped keys', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'checkout', storage });
 
       scoped.setItem('cart', '[]');
 
       expect(scoped.getItem('cart')).toBe('[]');
-      // 실제 스토리지에는 prefix가 붙어 있다
+      // The actual storage has the prefix applied
       expect(storage.getItem('checkout:cart')).toBe('[]');
     });
 
-    it('존재하지 않는 키에 대해 null을 반환한다', () => {
+    it('returns null for nonexistent keys', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'app', storage });
 
       expect(scoped.getItem('nonexistent')).toBeNull();
     });
 
-    it('removeItem이 스코프된 키를 삭제한다', () => {
+    it('removeItem deletes the scoped key', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'app', storage });
 
@@ -63,8 +63,8 @@ describe('createScopedStorage', () => {
     });
   });
 
-  describe('키 격리', () => {
-    it('같은 키를 가진 다른 스코프가 서로 간섭하지 않는다', () => {
+  describe('key isolation', () => {
+    it('different scopes with the same key do not interfere with each other', () => {
       const storage = createMockStorage();
       const scopeA = createScopedStorage({ scope: 'a', storage });
       const scopeB = createScopedStorage({ scope: 'b', storage });
@@ -76,7 +76,7 @@ describe('createScopedStorage', () => {
       expect(scopeB.getItem('theme')).toBe('light');
     });
 
-    it('스코프 없는 키와도 충돌하지 않는다', () => {
+    it('does not conflict with unscoped keys', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'app', storage });
 
@@ -89,7 +89,7 @@ describe('createScopedStorage', () => {
   });
 
   describe('keys()', () => {
-    it('이 스코프에 속하는 키만 반환한다', () => {
+    it('returns only keys belonging to this scope', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'checkout', storage });
 
@@ -102,7 +102,7 @@ describe('createScopedStorage', () => {
       expect(keys).toStrictEqual(['cart', 'total']);
     });
 
-    it('빈 스코프면 빈 배열을 반환한다', () => {
+    it('returns an empty array for an empty scope', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'empty', storage });
 
@@ -111,7 +111,7 @@ describe('createScopedStorage', () => {
   });
 
   describe('clear()', () => {
-    it('이 스코프의 키만 삭제하고 다른 키는 유지한다', () => {
+    it('deletes only keys in this scope and preserves other keys', () => {
       const storage = createMockStorage();
       const scopeA = createScopedStorage({ scope: 'a', storage });
       const scopeB = createScopedStorage({ scope: 'b', storage });
@@ -129,8 +129,8 @@ describe('createScopedStorage', () => {
     });
   });
 
-  describe('커스텀 구분자', () => {
-    it('separator를 변경할 수 있다', () => {
+  describe('custom separator', () => {
+    it('allows changing the separator', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'app', storage, separator: '/' });
 
@@ -140,8 +140,8 @@ describe('createScopedStorage', () => {
     });
   });
 
-  describe('scope 속성', () => {
-    it('scope 이름을 반환한다', () => {
+  describe('scope property', () => {
+    it('returns the scope name', () => {
       const storage = createMockStorage();
       const scoped = createScopedStorage({ scope: 'my-app', storage });
 

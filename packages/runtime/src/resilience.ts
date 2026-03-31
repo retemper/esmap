@@ -1,35 +1,35 @@
-/** 타임아웃 발생 시 던져지는 에러 */
+/** Error thrown when a timeout occurs */
 export class TimeoutError extends Error {
-  /** 타임아웃 시간(ms) */
+  /** Timeout duration (ms) */
   readonly timeout: number;
 
   constructor(timeout: number) {
-    super(`${timeout}ms 내에 작업이 완료되지 않았습니다`);
+    super(`Operation did not complete within ${timeout}ms`);
     this.name = 'TimeoutError';
     this.timeout = timeout;
   }
 }
 
-/** 재시도 옵션 */
+/** Retry options */
 export interface RetryOptions {
-  /** 최대 재시도 횟수 */
+  /** Maximum number of retries */
   readonly retries: number;
-  /** 재시도 간 지연 시간(ms) */
+  /** Delay between retries (ms) */
   readonly delay: number;
 }
 
-/** 복원력 옵션 (타임아웃 + 재시도 결합) */
+/** Resilience options (timeout + retry combined) */
 export interface ResilienceOptions extends RetryOptions {
-  /** 각 시도의 타임아웃(ms) */
+  /** Timeout per attempt (ms) */
   readonly timeout: number;
 }
 
 /**
- * 비동기 함수에 타임아웃을 적용한다.
- * 지정 시간 내에 완료되지 않으면 TimeoutError를 던진다.
- * @param fn - 실행할 비동기 함수
- * @param ms - 타임아웃(ms)
- * @returns 함수 실행 결과
+ * Applies a timeout to an async function.
+ * Throws TimeoutError if not completed within the specified time.
+ * @param fn - async function to execute
+ * @param ms - timeout (ms)
+ * @returns function execution result
  */
 export function withTimeout<T>(fn: () => Promise<T>, ms: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -51,11 +51,11 @@ export function withTimeout<T>(fn: () => Promise<T>, ms: number): Promise<T> {
 }
 
 /**
- * 비동기 함수를 재시도 가능하게 래핑한다.
- * 지정 횟수만큼 실패 시 재시도하며, 각 시도 사이에 지연을 둔다.
- * @param fn - 실행할 비동기 함수
- * @param options - 재시도 옵션
- * @returns 함수 실행 결과
+ * Wraps an async function with retry capability.
+ * Retries on failure up to the specified count with a delay between each attempt.
+ * @param fn - async function to execute
+ * @param options - retry options
+ * @returns function execution result
  */
 export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): Promise<T> {
   const { retries, delay } = options;
@@ -63,7 +63,7 @@ export async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions):
   return attempt(fn, retries, delay);
 }
 
-/** 재귀적으로 함수 실행을 시도한다 */
+/** Recursively attempts to execute the function */
 async function attempt<T>(fn: () => Promise<T>, remaining: number, delay: number): Promise<T> {
   try {
     return await fn();
@@ -77,11 +77,11 @@ async function attempt<T>(fn: () => Promise<T>, remaining: number, delay: number
 }
 
 /**
- * 비동기 함수에 타임아웃과 재시도를 모두 적용한다.
- * 각 시도마다 타임아웃이 독립적으로 적용된다.
- * @param fn - 실행할 비동기 함수
- * @param options - 복원력 옵션
- * @returns 함수 실행 결과
+ * Applies both timeout and retry to an async function.
+ * Each attempt has an independent timeout.
+ * @param fn - async function to execute
+ * @param options - resilience options
+ * @returns function execution result
  */
 export function withResilience<T>(fn: () => Promise<T>, options: ResilienceOptions): Promise<T> {
   return withRetry(() => withTimeout(fn, options.timeout), {
@@ -90,52 +90,52 @@ export function withResilience<T>(fn: () => Promise<T>, options: ResilienceOptio
   });
 }
 
-/** 지정 시간만큼 대기한다 */
+/** Waits for the specified duration */
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-/** 서킷 브레이커 상태 */
+/** Circuit breaker state */
 export type CircuitState = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
 
-/** 서킷 브레이커 설정 */
+/** Circuit breaker options */
 export interface CircuitBreakerOptions {
-  /** 서킷을 OPEN으로 전환하기 위한 연속 실패 횟수 */
+  /** Number of consecutive failures to transition to OPEN */
   readonly failureThreshold: number;
-  /** OPEN에서 HALF_OPEN으로 전환하기까지 대기 시간(ms) */
+  /** Wait time (ms) before transitioning from OPEN to HALF_OPEN */
   readonly cooldownMs: number;
-  /** 상태 전환 시 호출되는 콜백 */
+  /** Callback invoked on state transitions */
   readonly onStateChange?: (from: CircuitState, to: CircuitState) => void;
 }
 
-/** 서킷이 열려 있어 요청이 차단될 때 던져지는 에러 */
+/** Error thrown when the circuit is open and requests are blocked */
 export class CircuitOpenError extends Error {
   constructor() {
-    super('서킷이 열려 있어 요청이 차단되었습니다');
+    super('Request blocked: circuit is open');
     this.name = 'CircuitOpenError';
   }
 }
 
-/** 서킷 브레이커 인스턴스 */
+/** Circuit breaker instance */
 export interface CircuitBreaker {
-  /** 서킷 브레이커를 통해 비동기 함수를 실행한다 */
+  /** Executes an async function through the circuit breaker */
   execute<T>(fn: () => Promise<T>): Promise<T>;
-  /** 현재 서킷 상태 */
+  /** Current circuit state */
   readonly state: CircuitState;
-  /** 서킷을 CLOSED 상태로 초기화한다 */
+  /** Resets the circuit to CLOSED state */
   reset(): void;
-  /** 연속 실패 횟수 */
+  /** Consecutive failure count */
   readonly failureCount: number;
 }
 
 /**
- * 서킷 브레이커를 생성한다.
- * 연속 실패가 임계값에 도달하면 서킷을 열어 후속 요청을 즉시 차단하고,
- * 쿨다운 후 단일 요청을 허용하여 복구를 확인한다.
- * @param options - 서킷 브레이커 설정
- * @returns 서킷 브레이커 인스턴스
+ * Creates a circuit breaker.
+ * Opens the circuit to immediately block subsequent requests when consecutive failures
+ * reach the threshold, then allows a single request after cooldown to verify recovery.
+ * @param options - circuit breaker options
+ * @returns circuit breaker instance
  */
 export function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker {
   const ref: { state: CircuitState; failures: number; lastFailureTime: number } = {
@@ -144,14 +144,14 @@ export function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBre
     lastFailureTime: 0,
   };
 
-  /** 상태를 전환하고 콜백을 호출한다 */
+  /** Transitions state and invokes callback */
   const transition = (to: CircuitState): void => {
     const from = ref.state;
     ref.state = to;
     options.onStateChange?.(from, to);
   };
 
-  /** 성공 시 상태를 리셋한다 */
+  /** Resets state on success */
   const onSuccess = (): void => {
     ref.failures = 0;
     if (ref.state === 'HALF_OPEN') {
@@ -159,7 +159,7 @@ export function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBre
     }
   };
 
-  /** 실패 시 카운터를 증가시키고 필요하면 서킷을 연다 */
+  /** Increments the failure counter and opens the circuit if needed */
   const onFailure = (): void => {
     ref.failures += 1;
     ref.lastFailureTime = Date.now();

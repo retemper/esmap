@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createEventStream } from './event-stream.js';
 
-/** ReadableStream에서 하나의 청크를 읽어 문자열로 반환한다 */
+/** Reads a single chunk from a ReadableStream and returns it as a string */
 async function readChunk(stream: ReadableStream<Uint8Array>): Promise<string> {
   const reader = stream.getReader();
   const { value } = await reader.read();
@@ -10,7 +10,7 @@ async function readChunk(stream: ReadableStream<Uint8Array>): Promise<string> {
 }
 
 describe('EventStream', () => {
-  it('connect()가 ReadableStream을 반환한다', () => {
+  it('connect() returns a ReadableStream', () => {
     const eventStream = createEventStream();
     const stream = eventStream.connect();
 
@@ -18,7 +18,7 @@ describe('EventStream', () => {
     eventStream.close();
   });
 
-  it('broadcast()가 연결된 클라이언트에 이벤트를 전달한다', async () => {
+  it('broadcast() delivers events to connected clients', async () => {
     const eventStream = createEventStream();
     const stream = eventStream.connect();
 
@@ -30,7 +30,7 @@ describe('EventStream', () => {
     eventStream.close();
   });
 
-  it('클라이언트 연결 해제 시 clientCount가 감소한다', async () => {
+  it('clientCount decreases when a client disconnects', async () => {
     const eventStream = createEventStream();
     const stream = eventStream.connect();
 
@@ -42,7 +42,7 @@ describe('EventStream', () => {
     eventStream.close();
   });
 
-  it('close()가 모든 연결을 종료한다', () => {
+  it('close() terminates all connections', () => {
     const eventStream = createEventStream();
     eventStream.connect();
     eventStream.connect();
@@ -54,7 +54,7 @@ describe('EventStream', () => {
     expect(eventStream.clientCount).toBe(0);
   });
 
-  it('연결이 없으면 broadcast가 에러 없이 완료된다', () => {
+  it('broadcast completes without error when there are no connections', () => {
     const eventStream = createEventStream();
 
     expect(() => {

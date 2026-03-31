@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { status, parseStatusFlags, formatStatus } from './status.js';
 import type { StatusResult } from './status.js';
 
-/** 성공하는 fetch 모킹을 생성한다. */
+/** Creates a mock fetch that returns a successful response. */
 function createMockFetch(responseBody: unknown, statusCode = 200): typeof globalThis.fetch {
   return vi.fn().mockResolvedValue({
     ok: statusCode >= 200 && statusCode < 300,
@@ -12,21 +12,21 @@ function createMockFetch(responseBody: unknown, statusCode = 200): typeof global
   });
 }
 
-describe('status 커맨드', () => {
+describe('status command', () => {
   describe('parseStatusFlags', () => {
-    it('server 플래그를 파싱한다', () => {
+    it('parses the server flag', () => {
       const result = parseStatusFlags({ server: 'http://localhost:3000' });
 
       expect(result).toStrictEqual({ server: 'http://localhost:3000' });
     });
 
-    it('server 플래그가 없으면 에러를 던진다', () => {
+    it('throws an error when server flag is missing', () => {
       expect(() => parseStatusFlags({})).toThrow('Missing required flag --server');
     });
   });
 
   describe('status', () => {
-    it('GET / 으로 올바른 요청을 보낸다', async () => {
+    it('sends the correct request to GET /', async () => {
       const mockFetch = createMockFetch({ imports: {} });
 
       await status({ server: 'http://localhost:3000' }, mockFetch);
@@ -37,7 +37,7 @@ describe('status 커맨드', () => {
       });
     });
 
-    it('서버 응답의 import map을 반환한다', async () => {
+    it('returns the import map from the server response', async () => {
       const importMap = {
         imports: {
           '@flex/checkout': 'https://cdn/checkout.js',
@@ -51,7 +51,7 @@ describe('status 커맨드', () => {
       expect(result).toStrictEqual(importMap);
     });
 
-    it('scopes가 포함된 import map도 반환한다', async () => {
+    it('also returns import maps that include scopes', async () => {
       const importMap = {
         imports: { react: 'https://esm.sh/react@18' },
         scopes: { '/app/': { lodash: 'https://esm.sh/lodash@4' } },
@@ -63,7 +63,7 @@ describe('status 커맨드', () => {
       expect(result.scopes).toStrictEqual({ '/app/': { lodash: 'https://esm.sh/lodash@4' } });
     });
 
-    it('서버가 에러를 반환하면 예외를 던진다', async () => {
+    it('throws an exception when the server returns an error', async () => {
       const mockFetch = createMockFetch('Internal error', 500);
 
       await expect(status({ server: 'http://localhost:3000' }, mockFetch)).rejects.toThrow(
@@ -71,7 +71,7 @@ describe('status 커맨드', () => {
       );
     });
 
-    it('유효하지 않은 응답이면 예외를 던진다', async () => {
+    it('throws an exception for an invalid response', async () => {
       const mockFetch = createMockFetch({ notAnImportMap: true });
 
       await expect(status({ server: 'http://localhost:3000' }, mockFetch)).rejects.toThrow(
@@ -79,7 +79,7 @@ describe('status 커맨드', () => {
       );
     });
 
-    it('서버 URL 끝의 슬래시를 제거한다', async () => {
+    it('strips trailing slash from the server URL', async () => {
       const mockFetch = createMockFetch({ imports: {} });
 
       await status({ server: 'http://localhost:3000/' }, mockFetch);
@@ -90,7 +90,7 @@ describe('status 커맨드', () => {
   });
 
   describe('formatStatus', () => {
-    it('imports 항목을 정렬하여 표시한다', () => {
+    it('displays imports entries sorted', () => {
       const result: StatusResult = {
         imports: {
           react: 'https://esm.sh/react@18',
@@ -107,7 +107,7 @@ describe('status 커맨드', () => {
       expect(output).toContain('https://esm.sh/react@18');
     });
 
-    it('imports가 비어있으면 안내 메시지를 표시한다', () => {
+    it('shows a notice message when imports is empty', () => {
       const result: StatusResult = { imports: {} };
 
       const output = formatStatus(result);
@@ -115,7 +115,7 @@ describe('status 커맨드', () => {
       expect(output).toContain('(no imports registered)');
     });
 
-    it('scopes가 있으면 함께 표시한다', () => {
+    it('displays scopes when present', () => {
       const result: StatusResult = {
         imports: { react: 'https://esm.sh/react@18' },
         scopes: { '/app/': { lodash: 'https://esm.sh/lodash@4' } },
@@ -128,7 +128,7 @@ describe('status 커맨드', () => {
       expect(output).toContain('lodash');
     });
 
-    it('specifier를 알파벳 순으로 정렬한다', () => {
+    it('sorts specifiers alphabetically', () => {
       const result: StatusResult = {
         imports: {
           'z-lib': 'https://cdn/z.js',

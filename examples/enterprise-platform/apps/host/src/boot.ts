@@ -1,12 +1,12 @@
 /**
- * Enterprise Platform Host — 통합 부트스트랩.
+ * Enterprise Platform Host — unified bootstrap.
  *
- * 시연 포인트:
- * 1. createEsmap 전체 플러그인 조합 (guard, sandbox, keepAlive, domIsolation, prefetch, communication)
- * 2. ReadyGate로 인증 완료 전까지 보호된 라우트 차단
- * 3. SSE로 import map 서버 변경사항 실시간 반영
- * 4. 공유 의존성 버전 협상 (SharedModuleRegistry)
- * 5. DevTools 패널 + 성능 추적
+ * Demo points:
+ * 1. Full plugin composition with createEsmap (guard, sandbox, keepAlive, domIsolation, prefetch, communication)
+ * 2. ReadyGate blocks protected routes until authentication is complete
+ * 3. Real-time import map server updates via SSE
+ * 4. Shared dependency version negotiation (SharedModuleRegistry)
+ * 5. DevTools panel + performance tracking
  */
 
 import {
@@ -25,10 +25,10 @@ import { auditLogPlugin } from './plugins/audit-log-plugin.js';
 import { createDevtoolsPanel } from './devtools-panel.js';
 import { createDevtoolsBridge } from './devtools-bridge.js';
 
-// ─── DevTools 패널 참조 (boot 완료 전에는 콘솔로 폴백) ───
+// ─── DevTools panel reference (falls back to console before boot completes) ───
 const devtoolsRef: { panel: { log: (msg: string) => void } | null } = { panel: null };
 
-/** DevTools 패널 또는 콘솔에 로그를 출력한다 */
+/** Outputs a log message to the DevTools panel or console */
 function log(message: string): void {
   if (devtoolsRef.panel) {
     devtoolsRef.panel.log(message);
@@ -37,7 +37,7 @@ function log(message: string): void {
   }
 }
 
-/** 플랫폼 전체에서 사용하는 이벤트 맵. 인증, 활동, 라이프사이클, 워크스페이스 이벤트를 정의한다 */
+/** Platform-wide event map. Defines auth, activity, lifecycle, and workspace events */
 type PlatformEvents = {
   'auth:login': { userId: string; name: string };
   'auth:logout': Record<string, never>;
@@ -52,7 +52,7 @@ type PlatformEvents = {
   'notification:click': { type: string; targetId: string };
 };
 
-/** 워크스페이스 영역의 상태. 프로젝트, 멤버, 태스크 선택 및 알림 카운트를 추적한다 */
+/** Workspace area state. Tracks project, member, task selection and notification count */
 type WorkspaceState = {
   selectedProject: string | null;
   selectedMemberId: string | null;
@@ -60,7 +60,7 @@ type WorkspaceState = {
   unreadNotifications: number;
 };
 
-/** 글로벌 상태 스키마. 모든 MFE가 communication 플러그인을 통해 공유한다 */
+/** Global state schema. Shared by all MFEs through the communication plugin */
 type PlatformState = {
   theme: 'light' | 'dark';
   locale: string;
@@ -70,27 +70,27 @@ type PlatformState = {
   workspace: WorkspaceState;
 };
 
-// ─── Import map: 서버에서 fetch하고, 실패 시 로컬 fallback 사용 ───
+// ─── Import map: fetch from server, use local fallback on failure ───
 const IMPORT_MAP_SERVER = 'http://localhost:3200';
 
-/** import map 서버에서 현재 import map을 가져온다. pnpm dev가 서버를 자동으로 시작한다 */
+/** Fetches the current import map from the import map server. pnpm dev starts the server automatically */
 async function fetchImportMap(): Promise<ImportMap> {
   const res = await fetch(IMPORT_MAP_SERVER);
   if (!res.ok) {
-    throw new Error(`import map 서버 응답 실패: ${res.status}`);
+    throw new Error(`Import map server response failed: ${res.status}`);
   }
   const data: ImportMap = await res.json();
-  log('[import map] 서버에서 로드');
+  log('[import map] Loaded from server');
   return data;
 }
 
-// ─── ReadyGate: 인증 완료 전 앱 마운트 차단 ───
+// ─── ReadyGate: block app mounting until authentication is complete ───
 const gate = createReadyGate({ timeout: 30000 });
 gate.register('auth');
 
-// ─── 플러그인 초기화 ───
+// ─── Plugin initialization ───
 
-// 커스텀 플러그인: 감사 로그 (플러그인 작성법 시연)
+// Custom plugin: audit log (demonstrates plugin authoring)
 const audit = auditLogPlugin({
   maxEntries: 100,
   onLog: (entry) => {
@@ -120,15 +120,15 @@ const comm = communicationPlugin<PlatformEvents, PlatformState>({
   },
 });
 
-// Auth MFE → Host 브릿지: CustomEvent를 eventBus로 전달
-// MFE 간 느슨한 결합을 위해 window CustomEvent를 브릿지로 사용한다.
+// Auth MFE -> Host bridge: forwards CustomEvents to eventBus
+// Uses window CustomEvent as a bridge for loose coupling between MFEs.
 window.addEventListener('esmap:auth:login', (e: Event) => {
   if (e instanceof CustomEvent) {
     comm.resources.eventBus.emit('auth:login', e.detail);
   }
 });
 
-// Workspace 이벤트 브릿지: MFE의 CustomEvent를 eventBus + globalState로 전달
+// Workspace event bridge: forwards MFE CustomEvents to eventBus + globalState
 window.addEventListener('esmap:team:member-select', (e: Event) => {
   if (e instanceof CustomEvent) {
     comm.resources.eventBus.emit('team:member-select', e.detail);
@@ -189,25 +189,25 @@ window.addEventListener('esmap:notification:click', (e: Event) => {
   }
 });
 
-// 인증 이벤트 구독 → ReadyGate 연동
+// Subscribe to auth events -> ReadyGate integration
 comm.resources.eventBus.on('auth:login', (payload) => {
-  log(`인증 완료: ${payload.name} (${payload.userId})`);
+  log(`Authentication complete: ${payload.name} (${payload.userId})`);
   comm.resources.globalState.setState({
     user: { id: payload.userId, name: payload.name },
     isAuthenticated: true,
   });
   gate.markReady('auth');
 
-  // 인증 완료 후 auth 컨테이너 숨김
+  // Hide auth container after authentication completes
   const authContainer = document.getElementById('app-auth');
   if (authContainer) authContainer.style.display = 'none';
 
-  // 라우터 재평가 트리거 — activeWhen 조건이 변경되었으므로 현재 URL에 맞는 앱을 마운트한다
+  // Trigger router re-evaluation — activeWhen conditions changed, mount app matching current URL
   window.dispatchEvent(new PopStateEvent('popstate'));
 });
 
 comm.resources.eventBus.on('auth:logout', () => {
-  log('로그아웃');
+  log('Logged out');
   comm.resources.globalState.setState({
     user: null,
     isAuthenticated: false,
@@ -216,20 +216,20 @@ comm.resources.eventBus.on('auth:logout', () => {
 
 comm.resources.globalState.subscribe((state, prev) => {
   if (state.currentApp !== prev.currentApp) {
-    log(`현재 앱: ${state.currentApp}`);
+    log(`Current app: ${state.currentApp}`);
   }
 });
 
-/** 전체 프레임워크를 초기화하고 라우터를 시작한다 */
+/** Initializes the entire framework and starts the router */
 async function boot(): Promise<void> {
-  log('Enterprise Platform 부팅 시작');
+  log('Enterprise Platform boot starting');
 
-  // 1. Import map 로드 (서버 → 로컬 fallback)
+  // 1. Load import map (server -> local fallback)
   const importMap = await fetchImportMap();
   await loadImportMap({ inlineImportMap: importMap, injectPreload: true });
-  log('import map 주입 완료');
+  log('Import map injection complete');
 
-  // 2. createEsmap — 전체 플러그인 조합
+  // 2. createEsmap — full plugin composition
   const esmap = createEsmap({
     router: {
       onNoMatch: (ctx) => {
@@ -238,52 +238,52 @@ async function boot(): Promise<void> {
     },
     config: {
       apps: {
-        // Auth: 루트 경로에서 활성 (오버레이 모달, ReadyGate 연동)
+        // Auth: active at root path (overlay modal, ReadyGate integration)
         '@enterprise/auth': {
           path: '/',
           activeWhen: '/',
           container: '#app-auth',
         },
-        // Navigation bar: 인증 후 항상 표시
-        // (nav는 별도 MFE 없이 host가 직접 렌더링)
+        // Navigation bar: always visible after authentication
+        // (nav is rendered directly by host, not a separate MFE)
 
-        // Dashboard: 메인 페이지 + 중첩 Parcel 데모 (keepAlive → 별도 컨테이너)
+        // Dashboard: main page + nested Parcel demo (keepAlive -> dedicated container)
         '@enterprise/dashboard': {
           path: '/',
           activeWhen: (loc: Location) => loc.pathname === '/' || loc.pathname === '/dashboard' || loc.pathname === '/index.html',
           container: '#app-dashboard',
         },
-        // Team Directory: keepAlive 상태 보존 데모 (keepAlive → 별도 컨테이너)
+        // Team Directory: keepAlive state preservation demo (keepAlive -> dedicated container)
         '@enterprise/team-directory': {
           path: '/team',
           activeWhen: '/team',
           container: '#app-team',
         },
-        // Activity Feed: 독립 라우트 + Parcel 듀얼 모드 데모
+        // Activity Feed: standalone route + Parcel dual mode demo
         '@enterprise/activity-feed': {
           path: '/activity',
           activeWhen: '/activity',
           container: '#app-main',
         },
-        // Legacy Settings: MF→import map 마이그레이션 데모
+        // Legacy Settings: MF->import map migration demo
         '@enterprise/legacy-settings': {
           path: '/settings',
           activeWhen: '/settings',
           container: '#app-main',
         },
-        // Task Board: 워크스페이스 메인 영역에서 태스크 관리
+        // Task Board: task management in the workspace main area
         '@enterprise/task-board': {
           path: '/workspace',
           activeWhen: '/workspace',
           container: '#workspace-main',
         },
-        // Notifications: 워크스페이스 헤더에 알림 표시
+        // Notifications: displays notifications in the workspace header
         '@enterprise/notifications': {
           path: '/workspace',
           activeWhen: '/workspace',
           container: '#workspace-header',
         },
-        // Team Sidebar: 워크스페이스 사이드바에서 팀 디렉토리 표시 (team-directory의 사이드바 모드)
+        // Team Sidebar: displays team directory in the workspace sidebar (sidebar mode of team-directory)
         '@enterprise/team-sidebar': {
           path: '/workspace',
           activeWhen: '/workspace',
@@ -314,11 +314,11 @@ async function boot(): Promise<void> {
         cssStrategy: 'attribute',
         observeDynamic: true,
         onGlobalViolation: (appName, prop) => {
-          log(`전역 오염: ${appName} → ${prop}`);
+          log(`Global pollution: ${appName} → ${prop}`);
         },
       }),
       sandboxPlugin({
-        exclude: ['@enterprise/auth'], // auth는 글로벌 접근 필요
+        exclude: ['@enterprise/auth'], // auth needs global access
       }),
       keepAlivePlugin({
         apps: ['@enterprise/team-directory', '@enterprise/dashboard'],
@@ -334,8 +334,8 @@ async function boot(): Promise<void> {
     ],
   });
 
-  // ─── DevTools 패널 생성 (인페이지 위젯) ───
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- DevTools는 넓은 타입을 받으므로 any 캐스트 허용
+  // ─── Create DevTools panel (in-page widget) ───
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- DevTools accepts wide types, so any cast is allowed
   const panel = createDevtoolsPanel({
     registry: esmap.registry,
     eventBus: comm.resources.eventBus as any,
@@ -349,7 +349,7 @@ async function boot(): Promise<void> {
   devtoolsRef.panel = panel;
 
   // ─── Chrome DevTools Extension Bridge ───
-  // Extension이 없어도 postMessage는 무해하게 무시된다.
+  // postMessage is harmlessly ignored when no extension is present.
   createDevtoolsBridge({
     registry: esmap.registry,
     eventBus: comm.resources.eventBus as any,
@@ -361,24 +361,24 @@ async function boot(): Promise<void> {
     importMap,
   });
 
-  // ─── 라이프사이클 훅 ───
+  // ─── Lifecycle hooks ───
   esmap.hooks.beforeEach('mount', (ctx) => {
-    log(`마운트: ${ctx.appName}`);
+    log(`Mount: ${ctx.appName}`);
     comm.resources.globalState.setState({ currentApp: ctx.appName });
   });
 
   esmap.hooks.afterEach('unmount', (ctx) => {
-    log(`정리: ${ctx.appName}`);
+    log(`Cleanup: ${ctx.appName}`);
   });
 
   esmap.registry.onStatusChange((event) => {
     log(`${event.appName}: ${event.from} → ${event.to}`);
   });
 
-  // ─── 라우트 가드: 인증 전 보호 ───
+  // ─── Route guard: protect before authentication ───
   esmap.router.beforeRouteChange((_from, to) => {
     if (!gate.isAllReady() && to.pathname !== '/' && to.pathname !== '/dashboard') {
-      log(`라우트 차단: 인증 필요 (${to.pathname}) → / 으로 리다이렉트`);
+      log(`Route blocked: authentication required (${to.pathname}) → redirecting to /`);
       history.replaceState(null, '', '/');
       return false;
     }
@@ -386,27 +386,27 @@ async function boot(): Promise<void> {
   });
 
   esmap.router.afterRouteChange((_from, to) => {
-    log(`라우트: ${to.pathname}`);
+    log(`Route: ${to.pathname}`);
     updateNavHighlight(to.pathname);
     toggleWorkspaceContainer(to.pathname);
   });
 
-  log(`${esmap.registry.getApps().length}개 앱 등록`);
+  log(`${esmap.registry.getApps().length} apps registered`);
 
-  // ─── Host 자체 네비게이션 바 렌더링 ───
+  // ─── Render host's own navigation bar ───
   renderNav();
 
-  // ─── 시작 ───
+  // ─── Start ───
   await esmap.start();
-  log('라우터 시작');
+  log('Router started');
 
-  // 초기 라우트에 맞게 워크스페이스 컨테이너 표시
+  // Display workspace container matching the initial route
   toggleWorkspaceContainer(window.location.pathname);
 
-  // ─── SSE: import map 실시간 업데이트 ───
+  // ─── SSE: real-time import map updates ───
   connectSSE();
 
-  // 성능 요약
+  // Performance summary
   setTimeout(() => {
     const summary = esmap.perf.summarize();
     for (const [appName, data] of summary) {
@@ -415,7 +415,7 @@ async function boot(): Promise<void> {
   }, 1000);
 }
 
-/** Host 자체 네비게이션 바를 DOM에 렌더링한다 (MFE가 아닌 host 직접 관리) */
+/** Renders the host's own navigation bar in the DOM (managed directly by host, not an MFE) */
 function renderNav(): void {
   const nav = document.getElementById('app-nav');
   if (!nav) return;
@@ -454,7 +454,7 @@ function renderNav(): void {
   });
 }
 
-/** 현재 경로에 맞는 네비게이션 링크를 하이라이트한다 */
+/** Highlights the navigation link matching the current path */
 function updateNavHighlight(pathname: string): void {
   const links = document.querySelectorAll<HTMLAnchorElement>('#app-nav [data-path]');
   for (const link of links) {
@@ -465,39 +465,39 @@ function updateNavHighlight(pathname: string): void {
   }
 }
 
-/** /workspace 라우트일 때 워크스페이스 컨테이너를 표시하고, 그 외에는 숨긴다 */
+/** Shows the workspace container on the /workspace route, hides it otherwise */
 function toggleWorkspaceContainer(pathname: string): void {
   const workspace = document.getElementById('app-workspace');
   if (!workspace) return;
   workspace.style.display = pathname === '/workspace' ? 'grid' : 'none';
 }
 
-/** SSE로 import map 서버의 배포/롤백 이벤트를 실시간 수신한다 */
+/** Receives deploy/rollback events from the import map server in real-time via SSE */
 function connectSSE(): void {
   try {
     const eventSource = new EventSource('http://localhost:3200/events');
 
     eventSource.addEventListener('import-map-update', (event) => {
       const data = JSON.parse(event.data);
-      log(`[SSE] 배포: ${data.service} → ${data.url}`);
+      log(`[SSE] Deploy: ${data.service} → ${data.url}`);
     });
 
     eventSource.addEventListener('import-map-rollback', (event) => {
       const data = JSON.parse(event.data);
-      log(`[SSE] 롤백: ${data.service} → ${data.rolledBackTo}`);
+      log(`[SSE] Rollback: ${data.service} → ${data.rolledBackTo}`);
     });
 
     eventSource.onerror = () => {
-      log('[SSE] 서버 연결 끊김 (재연결 시도 중)');
+      log('[SSE] Server disconnected (reconnecting)');
     };
 
-    log('[SSE] import map 서버 연결');
+    log('[SSE] Connected to import map server');
   } catch {
-    log('[SSE] 서버 미실행 (오프라인 모드)');
+    log('[SSE] Server not running (offline mode)');
   }
 }
 
 boot().catch((error) => {
-  log(`부팅 실패: ${error instanceof Error ? error.message : String(error)}`);
+  log(`Boot failed: ${error instanceof Error ? error.message : String(error)}`);
   console.error(error);
 });

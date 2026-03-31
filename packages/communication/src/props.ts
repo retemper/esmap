@@ -1,27 +1,27 @@
-/** 앱 프로퍼티 변경 리스너 */
+/** App property change listener */
 type PropsListener<T> = (newProps: T, prevProps: T) => void;
 
-/** 앱 프로퍼티 관리 인터페이스 */
+/** App property management interface */
 interface AppProps<T extends Record<string, unknown>> {
-  /** 현재 프로퍼티의 동결된 복사본을 반환한다 */
+  /** Returns a frozen copy of the current properties */
   getProps: () => Readonly<T>;
-  /** 부분 프로퍼티를 병합하고, 구독자에게 알린다 */
+  /** Merges partial properties and notifies subscribers */
   setProps: (partial: Partial<T>) => void;
-  /** 프로퍼티 변경을 구독하고, 구독 해제 함수를 반환한다 */
+  /** Subscribes to property changes and returns an unsubscribe function */
   onPropsChange: (listener: PropsListener<T>) => () => void;
 }
 
 /**
- * 호스트에서 리모트 앱으로 전달하는 프로퍼티를 관리한다.
- * @param initial - 초기 프로퍼티 객체
- * @returns 앱 프로퍼티 인스턴스
+ * Manages properties passed from host to remote apps.
+ * @param initial - initial property object
+ * @returns app property instance
  */
 function createAppProps<T extends Record<string, unknown>>(initial: T): AppProps<T> {
   const props: { current: T } = { current: { ...initial } };
   const listeners: Array<PropsListener<T>> = [];
 
   /**
-   * 현재 프로퍼티의 동결된 복사본을 만든다.
+   * Creates a frozen copy of the current properties.
    */
   function frozenCopy(): Readonly<T> {
     return Object.freeze({ ...props.current });

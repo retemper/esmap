@@ -8,61 +8,61 @@ import {
 } from '@esmap/shared';
 import { createDefaultFallback, renderFallback } from './error-boundary.js';
 
-/** 에러 바운더리 옵션. 앱 로드/마운트 실패 시 폴백 UI를 제어한다. */
+/** Error boundary options. Controls fallback UI when app load/mount fails. */
 export interface ErrorBoundaryOptions {
-  /** 폴백 UI를 생성하는 함수. 미지정 시 기본 폴백을 사용한다. */
+  /** Function to create fallback UI. Uses the default fallback when not specified. */
   readonly fallback?: (appName: string, error: Error) => HTMLElement | string;
-  /** 자동 재시도 최대 횟수. 기본값 3. */
+  /** Maximum number of automatic retries. Defaults to 3. */
   readonly retryLimit?: number;
-  /** 재시도 간 딜레이(ms). 기본값 1000. */
+  /** Delay between retries (ms). Defaults to 1000. */
   readonly retryDelay?: number;
-  /** 에러 발생 시 호출되는 콜백 */
+  /** Callback invoked when an error occurs */
   readonly onError?: (appName: string, error: Error) => void;
 }
 
-/** 앱 등록 시 필요한 정보 */
+/** Information required for app registration */
 export interface RegisterAppOptions {
-  /** 앱 이름 (import map specifier, 예: "@flex/checkout") */
+  /** App name (import map specifier, e.g. "@flex/checkout") */
   readonly name: string;
-  /** 활성 라우트 매칭 함수 또는 패턴 */
+  /** Active route matching function or pattern */
   readonly activeWhen: string | readonly string[] | ((location: Location) => boolean);
-  /** 마운트 대상 DOM 셀렉터 */
+  /** DOM selector for the mount target */
   readonly container?: string;
-  /** 앱별 에러 바운더리 옵션. 레지스트리 기본 옵션을 오버라이드한다. */
+  /** Per-app error boundary options. Overrides registry default options. */
   readonly errorBoundary?: ErrorBoundaryOptions;
 }
 
-/** AppRegistry 생성 옵션 */
+/** AppRegistry creation options */
 export interface AppRegistryOptions {
   /**
-   * import map. bare specifier를 URL로 해석할 때 사용한다.
-   * 제공하면 dynamic import 시 URL로 직접 로드하므로
-   * 네이티브 import map 타이밍 제약을 우회한다.
+   * Import map. Used to resolve bare specifiers to URLs.
+   * When provided, loads directly via URL during dynamic import,
+   * bypassing native import map timing constraints.
    */
   readonly importMap?: ImportMap;
-  /** 전역 에러 바운더리 옵션. 모든 앱에 기본 적용된다. */
+  /** Global error boundary options. Applied to all apps by default. */
   readonly errorBoundary?: ErrorBoundaryOptions;
 }
 
-/** 앱 상태 변경 이벤트 */
+/** App status change event */
 export interface AppStatusChangeEvent {
   readonly appName: string;
   readonly from: MfeAppStatus;
   readonly to: MfeAppStatus;
 }
 
-/** 상태 변경 리스너 */
+/** Status change listener */
 type StatusChangeListener = (event: AppStatusChangeEvent) => void;
 
-/** 기본 재시도 최대 횟수 */
+/** Default maximum retry count */
 const DEFAULT_RETRY_LIMIT = 3;
 
-/** 기본 재시도 딜레이(ms) */
+/** Default retry delay (ms) */
 const DEFAULT_RETRY_DELAY = 1000;
 
 /**
- * MFE 앱을 관리하는 레지스트리.
- * 앱 등록, 상태 관리, 라이프사이클 실행을 담당한다.
+ * Registry that manages MFE apps.
+ * Handles app registration, status management, and lifecycle execution.
  */
 export class AppRegistry {
   private readonly apps = new Map<string, RegisteredApp>();
@@ -71,9 +71,9 @@ export class AppRegistry {
   private readonly globalErrorBoundary: ErrorBoundaryOptions | undefined;
   private readonly appErrorBoundaries = new Map<string, ErrorBoundaryOptions>();
   private readonly retryCounts = new Map<string, number>();
-  /** 진행 중인 loadApp Promise — 동일 앱의 중복 로드를 방지한다 */
+  /** In-flight loadApp Promise — prevents duplicate loading of the same app */
   private readonly loadPromises = new Map<string, Promise<void>>();
-  /** keep-alive 대상 앱 이름 */
+  /** Names of apps targeted for keep-alive */
   private readonly keepAliveApps = new Set<string>();
 
   constructor(options?: AppRegistryOptions) {
@@ -81,19 +81,19 @@ export class AppRegistry {
     this.globalErrorBoundary = options?.errorBoundary;
   }
 
-  /** 등록된 앱 목록을 반환한다. */
+  /** Returns the list of registered apps. */
   getApps(): readonly RegisteredApp[] {
     return Array.from(this.apps.values());
   }
 
-  /** 이름으로 앱을 조회한다. */
+  /** Looks up an app by name. */
   getApp(name: string): RegisteredApp | undefined {
     return this.apps.get(name);
   }
 
   /**
-   * 새 MFE 앱을 레지스트리에 등록한다.
-   * @param options - 등록 옵션
+   * Registers a new MFE app in the registry.
+   * @param options - registration options
    */
   registerApp(options: RegisterAppOptions): void {
     if (this.apps.has(options.name)) {
@@ -116,7 +116,7 @@ export class AppRegistry {
     this.apps.set(options.name, registered);
   }
 
-  /** 앱을 레지스트리에서 제거한다. 마운트 상태면 먼저 언마운트한다. */
+  /** Removes an app from the registry. Unmounts first if currently mounted. */
   async unregisterApp(name: string): Promise<void> {
     const app = this.apps.get(name);
     if (!app) return;
@@ -131,16 +131,16 @@ export class AppRegistry {
   }
 
   /**
-   * 앱 모듈을 로드하고 bootstrap한다.
+   * Loads and bootstraps the app module.
    * NOT_LOADED -> LOADING -> BOOTSTRAPPING -> NOT_MOUNTED
-   * 에러 바운더리가 설정되면 실패 시 폴백 UI를 표시한다.
-   * 동일 앱에 대한 동시 호출은 하나의 Promise를 공유하여 중복 로드를 방지한다.
+   * Shows fallback UI on failure when error boundary is configured.
+   * Concurrent calls for the same app share a single Promise to prevent duplicate loading.
    */
   async loadApp(name: string): Promise<void> {
     const registered = this.requireApp(name);
     if (registered.status !== 'NOT_LOADED' && registered.status !== 'LOAD_ERROR') return;
 
-    // 이미 진행 중인 로드가 있으면 같은 Promise를 반환한다
+    // Return the same Promise if a load is already in progress
     const existing = this.loadPromises.get(name);
     if (existing) return existing;
 
@@ -155,9 +155,9 @@ export class AppRegistry {
   }
 
   /**
-   * 실제 앱 로드 로직을 실행한다.
-   * @param name - 앱 이름
-   * @param registered - 등록된 앱 정보
+   * Executes the actual app loading logic.
+   * @param name - app name
+   * @param registered - registered app info
    */
   private async executeLoadApp(name: string, registered: RegisteredApp): Promise<void> {
     const errorBoundaryOptions = this.getErrorBoundaryOptions(name);
@@ -190,9 +190,9 @@ export class AppRegistry {
   }
 
   /**
-   * 앱을 마운트한다.
+   * Mounts the app.
    * NOT_MOUNTED -> MOUNTED
-   * 에러 바운더리가 설정되면 실패 시 폴백 UI를 표시한다.
+   * Shows fallback UI on failure when error boundary is configured.
    */
   async mountApp(name: string): Promise<void> {
     const registered = this.requireApp(name);
@@ -236,9 +236,9 @@ export class AppRegistry {
   }
 
   /**
-   * 앱을 언마운트한다.
-   * keep-alive 앱은 MOUNTED -> FROZEN (DOM 보존, 컨테이너 숨김)
-   * 일반 앱은 MOUNTED -> UNMOUNTING -> NOT_MOUNTED
+   * Unmounts the app.
+   * Keep-alive apps: MOUNTED -> FROZEN (DOM preserved, container hidden)
+   * Regular apps: MOUNTED -> UNMOUNTING -> NOT_MOUNTED
    */
   async unmountApp(name: string): Promise<void> {
     const registered = this.requireApp(name);
@@ -260,10 +260,10 @@ export class AppRegistry {
   }
 
   /**
-   * 앱의 keep-alive 상태를 설정한다.
-   * keep-alive 앱은 언마운트 시 DOM이 보존되고 컨테이너가 숨겨진다.
-   * @param name - 앱 이름
-   * @param enabled - keep-alive 활성화 여부
+   * Configures the keep-alive state of an app.
+   * Keep-alive apps preserve DOM and hide the container on unmount.
+   * @param name - app name
+   * @param enabled - whether to enable keep-alive
    */
   setKeepAlive(name: string, enabled: boolean): void {
     if (enabled) {
@@ -273,12 +273,12 @@ export class AppRegistry {
     }
   }
 
-  /** 앱이 keep-alive 상태인지 반환한다. */
+  /** Returns whether the app is in keep-alive mode. */
   isKeepAlive(name: string): boolean {
     return this.keepAliveApps.has(name);
   }
 
-  /** 상태 변경 리스너를 등록한다. 해제 함수를 반환한다. */
+  /** Registers a status change listener. Returns an unsubscribe function. */
   onStatusChange(listener: StatusChangeListener): () => void {
     this.listeners.push(listener);
     return () => {
@@ -287,13 +287,13 @@ export class AppRegistry {
     };
   }
 
-  /** 모든 마운트된/FROZEN 앱을 언마운트하고 레지스트리를 완전히 정리한다. */
+  /** Unmounts all mounted/FROZEN apps and fully cleans up the registry. */
   async destroy(): Promise<void> {
     const activeApps = this.getApps().filter(
       (app) => app.status === 'MOUNTED' || app.status === 'FROZEN',
     );
 
-    // FROZEN 앱은 먼저 keep-alive를 해제하여 실제 unmount가 실행되도록 한다
+    // Disable keep-alive for FROZEN apps first so actual unmount runs
     for (const app of activeApps) {
       this.keepAliveApps.delete(app.name);
       if (app.status === 'FROZEN') {
@@ -311,14 +311,14 @@ export class AppRegistry {
     this.keepAliveApps.clear();
   }
 
-  /** 앱의 현재 재시도 횟수를 반환한다. */
+  /** Returns the current retry count for an app. */
   getRetryCount(name: string): number {
     return this.retryCounts.get(name) ?? 0;
   }
 
   /**
-   * 마운트된 앱을 FROZEN 상태로 전환한다.
-   * DOM을 보존한 채 컨테이너를 숨겨 빠른 재활성화를 가능하게 한다.
+   * Transitions a mounted app to FROZEN state.
+   * Hides the container while preserving DOM for fast reactivation.
    */
   private freezeApp(registered: RegisteredApp): void {
     const container = document.querySelector<HTMLElement>(registered.container);
@@ -329,8 +329,8 @@ export class AppRegistry {
   }
 
   /**
-   * FROZEN 상태의 앱을 MOUNTED로 복원한다.
-   * 숨겨진 컨테이너를 다시 표시하여 DOM 상태를 즉시 복원한다.
+   * Restores a FROZEN app to MOUNTED state.
+   * Shows the hidden container to instantly restore DOM state.
    */
   private thawApp(registered: RegisteredApp): void {
     const container = document.querySelector<HTMLElement>(registered.container);
@@ -340,7 +340,7 @@ export class AppRegistry {
     this.setStatus(registered, 'MOUNTED');
   }
 
-  /** 이름으로 앱을 조회하며, 없으면 에러를 던진다. */
+  /** Looks up an app by name and throws if not found. */
   private requireApp(name: string): RegisteredApp {
     const app = this.apps.get(name);
     if (!app) {
@@ -349,7 +349,7 @@ export class AppRegistry {
     return app;
   }
 
-  /** 앱 상태를 변경하고 리스너에 알린다. */
+  /** Changes app status and notifies listeners. */
   private setStatus(app: RegisteredApp, status: MfeAppStatus): void {
     const from = app.status;
     app.status = status;
@@ -359,14 +359,14 @@ export class AppRegistry {
     }
   }
 
-  /** 앱별 또는 전역 에러 바운더리 옵션을 가져온다. */
+  /** Retrieves per-app or global error boundary options. */
   private getErrorBoundaryOptions(name: string): ErrorBoundaryOptions | undefined {
     return this.appErrorBoundaries.get(name) ?? this.globalErrorBoundary;
   }
 
   /**
-   * 에러 바운더리로 에러를 처리하고 폴백 UI를 표시한다.
-   * 재시도 횟수가 제한에 도달하면 재시도 버튼 없이 영구 폴백을 표시한다.
+   * Handles errors via the error boundary and displays fallback UI.
+   * Shows permanent fallback without retry button when retry limit is reached.
    */
   private handleErrorWithBoundary(
     registered: RegisteredApp,
@@ -392,7 +392,7 @@ export class AppRegistry {
 
     if (isRetryLimitReached) {
       const permanentFallback = createDefaultFallback(registered.name, error, () => {
-        /* 재시도 불가 — noop */
+        /* Retry not possible — noop */
       });
       const retryButton = permanentFallback.querySelector('button');
       if (retryButton) {
@@ -418,7 +418,7 @@ export class AppRegistry {
   }
 }
 
-/** activeWhen 옵션을 함수로 변환한다. */
+/** Converts activeWhen options to a function. */
 function createActiveWhenFn(
   activeWhen: string | readonly string[] | ((location: Location) => boolean),
 ): (location: Location) => boolean {
@@ -429,7 +429,7 @@ function createActiveWhenFn(
   return (location: Location) => patterns.some((pattern) => location.pathname.startsWith(pattern));
 }
 
-/** MFE 모듈을 동적 import한다. URL 또는 bare specifier를 받는다. */
+/** Dynamically imports an MFE module. Accepts a URL or bare specifier. */
 async function importMfeApp(specifierOrUrl: string): Promise<MfeApp> {
   const module: unknown = await import(/* @vite-ignore */ specifierOrUrl);
 
@@ -438,8 +438,8 @@ async function importMfeApp(specifierOrUrl: string): Promise<MfeApp> {
       specifierOrUrl,
       'load',
       new Error(
-        `모듈이 객체를 export하지 않습니다. ` +
-          `MFE 모듈은 bootstrap(), mount(), unmount()를 export해야 합니다.`,
+        `Module does not export an object. ` +
+          `MFE modules must export bootstrap(), mount(), and unmount().`,
       ),
     );
   }
@@ -447,7 +447,7 @@ async function importMfeApp(specifierOrUrl: string): Promise<MfeApp> {
   if (isValidMfeApp(module.default)) return module.default;
   if (isValidMfeApp(module)) return module;
 
-  const exportedKeys = Object.keys(module).join(', ') || '(없음)';
+  const exportedKeys = Object.keys(module).join(', ') || '(none)';
   const missingMethods = ['bootstrap', 'mount', 'unmount']
     .filter((m) => typeof module[m] !== 'function')
     .join(', ');
@@ -456,14 +456,14 @@ async function importMfeApp(specifierOrUrl: string): Promise<MfeApp> {
     specifierOrUrl,
     'load',
     new Error(
-      `MFE 라이프사이클 메서드가 누락되었습니다: ${missingMethods}. ` +
-        `현재 export: [${exportedKeys}]. ` +
-        `모듈은 bootstrap(), mount(), unmount()를 export하거나 default export해야 합니다.`,
+      `Missing MFE lifecycle methods: ${missingMethods}. ` +
+        `Current exports: [${exportedKeys}]. ` +
+        `Module must export or default-export bootstrap(), mount(), and unmount().`,
     ),
   );
 }
 
-/** MfeApp 인터페이스를 구현하는지 검사한다. */
+/** Checks whether the value implements the MfeApp interface. */
 function isValidMfeApp(value: unknown): value is MfeApp {
   if (!isRecord(value)) return false;
   return (

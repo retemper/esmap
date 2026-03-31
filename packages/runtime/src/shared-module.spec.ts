@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { createSharedModuleRegistry, SharedVersionConflictError } from './shared-module.js';
 import type { SharedModuleConfig } from './shared-module.js';
 
-/** 테스트용 공유 모듈 설정을 생성한다. */
+/** Creates a mock shared module config for testing. */
 function createMockConfig(
   overrides: Partial<SharedModuleConfig> & { name: string; version: string },
 ): SharedModuleConfig {
@@ -14,7 +14,7 @@ function createMockConfig(
 
 describe('SharedModuleRegistry', () => {
   describe('register', () => {
-    it('모듈을 등록한다', () => {
+    it('registers a module', () => {
       const registry = createSharedModuleRegistry();
       const config = createMockConfig({ name: 'react', version: '18.3.1' });
 
@@ -24,7 +24,7 @@ describe('SharedModuleRegistry', () => {
       expect(registered.get('react')).toStrictEqual([config]);
     });
 
-    it('같은 이름으로 여러 버전을 등록한다', () => {
+    it('registers multiple versions under the same name', () => {
       const registry = createSharedModuleRegistry();
       const config1 = createMockConfig({ name: 'react', version: '18.2.0' });
       const config2 = createMockConfig({ name: 'react', version: '18.3.1' });
@@ -36,7 +36,7 @@ describe('SharedModuleRegistry', () => {
       expect(registered.get('react')).toStrictEqual([config1, config2]);
     });
 
-    it('서로 다른 이름의 모듈을 독립적으로 등록한다', () => {
+    it('registers modules with different names independently', () => {
       const registry = createSharedModuleRegistry();
       const reactConfig = createMockConfig({ name: 'react', version: '18.3.1' });
       const vueConfig = createMockConfig({ name: 'vue', version: '3.4.0' });
@@ -50,7 +50,7 @@ describe('SharedModuleRegistry', () => {
   });
 
   describe('resolve', () => {
-    it('등록된 모듈을 로드하여 반환한다', async () => {
+    it('loads and returns a registered module', async () => {
       const registry = createSharedModuleRegistry();
       const mockModule = { default: 'react-module' };
       const config = createMockConfig({ name: 'react', version: '18.3.1' });
@@ -62,13 +62,13 @@ describe('SharedModuleRegistry', () => {
       expect(result).toStrictEqual(mockModule);
     });
 
-    it('등록되지 않은 모듈을 resolve하면 에러를 던진다', async () => {
+    it('throws an error when resolving an unregistered module', async () => {
       const registry = createSharedModuleRegistry();
 
       await expect(registry.resolve('unknown')).rejects.toThrow(SharedVersionConflictError);
     });
 
-    it('이미 로드된 모듈은 캐시에서 반환한다', async () => {
+    it('returns an already loaded module from cache', async () => {
       const registry = createSharedModuleRegistry();
       const config = createMockConfig({ name: 'react', version: '18.3.1' });
 
@@ -79,7 +79,7 @@ describe('SharedModuleRegistry', () => {
       expect(config.factory).toHaveBeenCalledTimes(1);
     });
 
-    it('여러 버전 중 가장 높은 호환 버전을 선택한다', async () => {
+    it('selects the highest compatible version among multiple versions', async () => {
       const registry = createSharedModuleRegistry();
       const oldModule = { version: 'old' };
       const newModule = { version: 'new' };
@@ -105,7 +105,7 @@ describe('SharedModuleRegistry', () => {
       expect(result).toStrictEqual(newModule);
     });
 
-    it('requiredVersion 제약을 만족하는 버전만 선택한다', async () => {
+    it('selects only versions that satisfy the requiredVersion constraint', async () => {
       const registry = createSharedModuleRegistry();
       const v17Module = { version: '17' };
       const v18Module = { version: '18' };
@@ -131,8 +131,8 @@ describe('SharedModuleRegistry', () => {
     });
   });
 
-  describe('inflight dedup — 동시 resolve 중복 방지', () => {
-    it('동시에 같은 모듈을 resolve하면 factory를 한 번만 호출한다', async () => {
+  describe('inflight dedup — concurrent resolve deduplication', () => {
+    it('calls factory only once when resolving the same module concurrently', async () => {
       const registry = createSharedModuleRegistry();
       const factory = vi.fn().mockResolvedValue({ shared: true });
       registry.register(createMockConfig({ name: 'react', version: '18.3.1', factory }));
@@ -148,7 +148,7 @@ describe('SharedModuleRegistry', () => {
   });
 
   describe('singleton', () => {
-    it('singleton 모드에서 첫 번째 resolve 결과를 재사용한다', async () => {
+    it('reuses the first resolve result in singleton mode', async () => {
       const registry = createSharedModuleRegistry();
       const sharedModule = { shared: true };
 
@@ -175,7 +175,7 @@ describe('SharedModuleRegistry', () => {
       expect(first).toStrictEqual(second);
     });
 
-    it('singleton에서 로드된 모듈 정보를 getLoaded로 확인한다', async () => {
+    it('verifies loaded module info via getLoaded in singleton mode', async () => {
       const registry = createSharedModuleRegistry();
 
       registry.register(
@@ -193,8 +193,8 @@ describe('SharedModuleRegistry', () => {
     });
   });
 
-  describe('버전 충돌', () => {
-    it('strictVersion이면 호환 버전이 없을 때 에러를 던진다', async () => {
+  describe('version conflict', () => {
+    it('throws an error when no compatible version exists with strictVersion', async () => {
       const registry = createSharedModuleRegistry();
 
       registry.register(
@@ -209,7 +209,7 @@ describe('SharedModuleRegistry', () => {
       await expect(registry.resolve('react')).rejects.toThrow(SharedVersionConflictError);
     });
 
-    it('strictVersion이 아니면 경고 후 최고 버전을 사용한다', async () => {
+    it('warns and uses the highest version without strictVersion', async () => {
       const registry = createSharedModuleRegistry();
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const fallbackModule = { fallback: true };
@@ -231,7 +231,7 @@ describe('SharedModuleRegistry', () => {
       warnSpy.mockRestore();
     });
 
-    it('여러 requiredVersion이 동시에 만족되는 버전을 선택한다', async () => {
+    it('selects a version that satisfies multiple requiredVersions simultaneously', async () => {
       const registry = createSharedModuleRegistry();
       const targetModule = { target: true };
 
@@ -252,12 +252,12 @@ describe('SharedModuleRegistry', () => {
         }),
       );
 
-      // ^18.0.0과 ~18.3.0을 모두 만족하는 18.3.1이 선택되어야 함
+      // 18.3.1 should be selected as it satisfies both ^18.0.0 and ~18.3.0
       const result = await registry.resolve('react');
       expect(result).toStrictEqual(targetModule);
     });
 
-    it('strictVersion 에러에 모듈 이름이 포함된다', async () => {
+    it('includes the module name in strictVersion errors', async () => {
       const registry = createSharedModuleRegistry();
 
       registry.register(
@@ -271,7 +271,7 @@ describe('SharedModuleRegistry', () => {
 
       try {
         await registry.resolve('react-dom');
-        expect.fail('에러가 발생해야 합니다');
+        expect.fail('should have thrown an error');
       } catch (error) {
         expect(error).toBeInstanceOf(SharedVersionConflictError);
         const conflictError = error instanceof SharedVersionConflictError ? error : undefined;
@@ -281,7 +281,7 @@ describe('SharedModuleRegistry', () => {
   });
 
   describe('fallback factory', () => {
-    it('호환 버전이 없고 fallback이 있으면 fallback을 사용한다', async () => {
+    it('uses fallback when no compatible version exists and fallback is available', async () => {
       const registry = createSharedModuleRegistry();
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
       const fallbackModule = { from: 'fallback' };
@@ -296,7 +296,7 @@ describe('SharedModuleRegistry', () => {
         }),
       );
 
-      // strictVersion이지만 fallback이 우선
+      // strictVersion but fallback takes priority
       const result = await registry.resolve('react');
       expect(result).toStrictEqual(fallbackModule);
       expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('fallback'));
@@ -305,8 +305,8 @@ describe('SharedModuleRegistry', () => {
     });
   });
 
-  describe('eager 로딩', () => {
-    it('eager: true면 register 시점에 즉시 로드를 시작한다', async () => {
+  describe('eager loading', () => {
+    it('starts loading immediately at register time when eager is true', async () => {
       const registry = createSharedModuleRegistry();
       const factory = vi.fn().mockResolvedValue({ eager: true });
 
@@ -321,15 +321,15 @@ describe('SharedModuleRegistry', () => {
 
       await registry.waitForEager();
 
-      // factory가 register 시점에 호출되었어야 함
+      // factory should have been called at register time
       expect(factory).toHaveBeenCalledTimes(1);
-      // 이후 resolve는 캐시에서 반환
+      // Subsequent resolve returns from cache
       const result = await registry.resolve('react');
       expect(result).toStrictEqual({ eager: true });
       expect(factory).toHaveBeenCalledTimes(1);
     });
 
-    it('waitForEager는 모든 eager 모듈이 로드될 때까지 기다린다', async () => {
+    it('waitForEager waits until all eager modules are loaded', async () => {
       const registry = createSharedModuleRegistry();
 
       registry.register(
@@ -354,7 +354,7 @@ describe('SharedModuleRegistry', () => {
       expect(registry.getLoaded().size).toBe(2);
     });
 
-    it('eager 로드 실패해도 waitForEager는 reject하지 않는다', async () => {
+    it('waitForEager does not reject even when eager load fails', async () => {
       const registry = createSharedModuleRegistry();
 
       registry.register(
@@ -362,17 +362,17 @@ describe('SharedModuleRegistry', () => {
           name: 'broken',
           version: '1.0.0',
           eager: true,
-          factory: vi.fn().mockRejectedValue(new Error('로드 실패')),
+          factory: vi.fn().mockRejectedValue(new Error('load failed')),
         }),
       );
 
-      // waitForEager는 에러를 삼킨다
+      // waitForEager swallows errors
       await expect(registry.waitForEager()).resolves.toBeUndefined();
     });
   });
 
   describe('resolveSubpath — subpath exports', () => {
-    it('subpath 팩토리를 통해 하위 모듈을 로드한다', async () => {
+    it('loads a sub-module via subpath factory', async () => {
       const registry = createSharedModuleRegistry();
       const clientModule = { createRoot: vi.fn() };
 
@@ -390,7 +390,7 @@ describe('SharedModuleRegistry', () => {
       expect(result).toStrictEqual(clientModule);
     });
 
-    it('subpath 결과를 캐시한다', async () => {
+    it('caches subpath results', async () => {
       const registry = createSharedModuleRegistry();
       const factory = vi.fn().mockResolvedValue({ cached: true });
 
@@ -408,7 +408,7 @@ describe('SharedModuleRegistry', () => {
       expect(factory).toHaveBeenCalledTimes(1);
     });
 
-    it('등록되지 않은 subpath를 요청하면 에러를 던진다', async () => {
+    it('throws an error when requesting an unregistered subpath', async () => {
       const registry = createSharedModuleRegistry();
 
       registry.register(
@@ -420,10 +420,10 @@ describe('SharedModuleRegistry', () => {
 
       await expect(
         registry.resolveSubpath('react-dom', './nonexistent'),
-      ).rejects.toThrow('subpath "./nonexistent"가 등록되지 않았습니다');
+      ).rejects.toThrow('subpath "./nonexistent"');
     });
 
-    it('미등록 모듈의 subpath를 요청하면 에러를 던진다', async () => {
+    it('throws an error when requesting a subpath of an unregistered module', async () => {
       const registry = createSharedModuleRegistry();
 
       await expect(
@@ -432,8 +432,8 @@ describe('SharedModuleRegistry', () => {
     });
   });
 
-  describe('from — 등록자 추적', () => {
-    it('로드된 모듈에 등록자 정보가 포함된다', async () => {
+  describe('from — registrant tracking', () => {
+    it('includes registrant info in loaded modules', async () => {
       const registry = createSharedModuleRegistry();
 
       registry.register(
@@ -452,19 +452,19 @@ describe('SharedModuleRegistry', () => {
   });
 
   describe('getRegistered', () => {
-    it('빈 레지스트리에서 빈 Map을 반환한다', () => {
+    it('returns an empty Map for an empty registry', () => {
       const registry = createSharedModuleRegistry();
       expect(registry.getRegistered().size).toStrictEqual(0);
     });
   });
 
   describe('getLoaded', () => {
-    it('아무것도 로드하지 않았으면 빈 Map을 반환한다', () => {
+    it('returns an empty Map when nothing has been loaded', () => {
       const registry = createSharedModuleRegistry();
       expect(registry.getLoaded().size).toStrictEqual(0);
     });
 
-    it('로드 후 버전과 모듈 인스턴스를 포함한다', async () => {
+    it('includes version and module instance after loading', async () => {
       const registry = createSharedModuleRegistry();
       const mockModule = { loaded: true };
 

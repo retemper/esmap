@@ -5,20 +5,20 @@ import { createWebVitalsTracker, findAppScope } from './web-vitals.js';
 import type { WebVitalsTracker } from './web-vitals.js';
 
 /**
- * PerformanceObserver 모킹을 위한 콜백 저장소.
- * observe() 호출 시 type별로 콜백을 저장하여 테스트에서 엔트리를 수동 주입할 수 있게 한다.
+ * Callback storage for mocking PerformanceObserver.
+ * Stores callbacks by type on observe() calls so entries can be manually injected in tests.
  */
 const observerCallbacks = new Map<string, (list: { getEntries: () => PerformanceEntry[] }) => void>();
 
-/** disconnect 호출 추적용 spy */
+/** Spy to track disconnect calls */
 const disconnectSpy = vi.fn();
 
-/** 원본 PerformanceObserver 참조 */
+/** Reference to the original PerformanceObserver */
 const OriginalPerformanceObserver = globalThis.PerformanceObserver;
 
 /**
- * 모킹된 PerformanceObserver 클래스.
- * observe() 시 type에 따라 콜백을 저장한다.
+ * Mocked PerformanceObserver class.
+ * Stores callbacks by type on observe().
  */
 class MockPerformanceObserver {
   private readonly callback: (list: { getEntries: () => PerformanceEntry[] }) => void;
@@ -27,21 +27,21 @@ class MockPerformanceObserver {
     this.callback = callback;
   }
 
-  /** observe 호출 시 type별로 콜백을 등록한다 */
+  /** Registers callbacks by type on observe call */
   observe(options: { type: string; buffered?: boolean }): void {
     observerCallbacks.set(options.type, this.callback);
   }
 
-  /** 옵저버를 해제한다 */
+  /** Disconnects the observer */
   disconnect(): void {
     disconnectSpy();
   }
 }
 
 /**
- * 특정 타입의 PerformanceObserver 콜백에 엔트리를 주입한다.
- * @param type - 엔트리 타입 (layout-shift, largest-contentful-paint, event)
- * @param entries - 주입할 엔트리 목록
+ * Injects entries into the PerformanceObserver callback of a specific type.
+ * @param type - entry type (layout-shift, largest-contentful-paint, event)
+ * @param entries - list of entries to inject
  */
 function emitEntries(type: string, entries: PerformanceEntry[]): void {
   const callback = observerCallbacks.get(type);
@@ -51,9 +51,9 @@ function emitEntries(type: string, entries: PerformanceEntry[]): void {
 }
 
 /**
- * MFE 스코프가 있는 DOM 구조를 생성한다.
- * @param appName - MFE 앱 이름
- * @returns 스코프 컨테이너 내부의 자식 요소
+ * Creates a DOM structure with an MFE scope.
+ * @param appName - MFE app name
+ * @returns child element inside the scoped container
  */
 function createScopedElement(appName: string): Element {
   const container = document.createElement('div');
@@ -69,24 +69,24 @@ describe('findAppScope', () => {
     document.body.innerHTML = '';
   });
 
-  it('가장 가까운 MFE 스코프를 찾는다', () => {
+  it('finds the closest MFE scope', () => {
     const child = createScopedElement('checkout-app');
 
     expect(findAppScope(child, 'data-esmap-scope')).toBe('checkout-app');
   });
 
-  it('MFE 컨테이너 밖이면 null을 반환한다', () => {
+  it('returns null when outside an MFE container', () => {
     const orphan = document.createElement('div');
     document.body.appendChild(orphan);
 
     expect(findAppScope(orphan, 'data-esmap-scope')).toBeNull();
   });
 
-  it('element가 null이면 null을 반환한다', () => {
+  it('returns null when element is null', () => {
     expect(findAppScope(null, 'data-esmap-scope')).toBeNull();
   });
 
-  it('중첩된 스코프에서 가장 가까운 것을 반환한다', () => {
+  it('returns the closest scope in nested scopes', () => {
     const outer = document.createElement('div');
     outer.setAttribute('data-esmap-scope', 'outer-app');
     const inner = document.createElement('div');
@@ -113,7 +113,7 @@ describe('createWebVitalsTracker', () => {
     globalThis.PerformanceObserver = OriginalPerformanceObserver;
   });
 
-  it('PerformanceObserver가 없는 환경에서 graceful하게 동작한다', () => {
+  it('works gracefully in environments without PerformanceObserver', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (globalThis as any).PerformanceObserver;
 
@@ -132,7 +132,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('getMetric이 앱별 CLS 값을 반환한다', () => {
+  it('getMetric returns per-app CLS values', () => {
     const child = createScopedElement('app-a');
     const tracker = createWebVitalsTracker();
 
@@ -147,7 +147,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('CLS가 MFE 밖이면 __host__로 어트리뷰트한다', () => {
+  it('attributes CLS to __host__ when outside an MFE', () => {
     const orphan = document.createElement('div');
     document.body.appendChild(orphan);
     const tracker = createWebVitalsTracker();
@@ -162,7 +162,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('CLS 세션 윈도우가 gap >= 1000ms에서 리셋된다', () => {
+  it('resets CLS session window when gap >= 1000ms', () => {
     const child = createScopedElement('app-a');
     const tracker = createWebVitalsTracker();
 
@@ -174,13 +174,13 @@ describe('createWebVitalsTracker', () => {
     ]);
 
     const clsMap = tracker.getMetric('CLS');
-    // 0.3 > 0.1 이므로 최대 세션은 0.3
+    // 0.3 > 0.1 so the max session is 0.3
     expect(clsMap.get('app-a')).toBe(0.3);
 
     tracker.destroy();
   });
 
-  it('getMetric이 앱별 LCP 값을 반환한다', () => {
+  it('getMetric returns per-app LCP values', () => {
     const child = createScopedElement('app-b');
     const tracker = createWebVitalsTracker();
 
@@ -190,13 +190,13 @@ describe('createWebVitalsTracker', () => {
     ]);
 
     const lcpMap = tracker.getMetric('LCP');
-    // LCP는 가장 마지막 값
+    // LCP takes the last value
     expect(lcpMap.get('app-b')).toBe(800);
 
     tracker.destroy();
   });
 
-  it('getMetric이 앱별 INP 값을 반환한다', () => {
+  it('getMetric returns per-app INP values', () => {
     const child = createScopedElement('app-c');
     const tracker = createWebVitalsTracker();
 
@@ -213,7 +213,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('summarize가 모든 메트릭을 앱별로 요약한다', () => {
+  it('summarize aggregates all metrics per app', () => {
     const child = createScopedElement('app-x');
     const tracker = createWebVitalsTracker();
 
@@ -239,7 +239,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('summarize가 메트릭이 없는 앱은 0으로 채운다', () => {
+  it('summarize fills 0 for apps with no metrics', () => {
     const childA = createScopedElement('app-a');
     const childB = createScopedElement('app-b');
     const tracker = createWebVitalsTracker();
@@ -259,16 +259,16 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('destroy가 옵저버를 해제한다', () => {
+  it('destroy disconnects the observers', () => {
     const tracker = createWebVitalsTracker();
 
     tracker.destroy();
 
-    // 3개 옵저버(CLS, LCP, INP)가 disconnect 호출됨
+    // 3 observers (CLS, LCP, INP) should have called disconnect
     expect(disconnectSpy).toHaveBeenCalledTimes(3);
   });
 
-  it('onVital 리스너가 메트릭 이벤트를 수신한다', () => {
+  it('onVital listener receives metric events', () => {
     const child = createScopedElement('app-a');
     const tracker = createWebVitalsTracker();
     const listener = vi.fn();
@@ -291,7 +291,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('onVital 리스너 해제 후에는 호출되지 않는다', () => {
+  it('is not called after the onVital listener is unsubscribed', () => {
     const child = createScopedElement('app-a');
     const tracker = createWebVitalsTracker();
     const listener = vi.fn();
@@ -308,7 +308,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('INP가 interactionId 0인 이벤트를 무시한다', () => {
+  it('INP ignores events with interactionId 0', () => {
     const child = createScopedElement('app-a');
     const tracker = createWebVitalsTracker();
 
@@ -322,7 +322,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('커스텀 scopeAttribute를 사용할 수 있다', () => {
+  it('can use a custom scopeAttribute', () => {
     const container = document.createElement('div');
     container.setAttribute('data-custom-scope', 'custom-app');
     const child = document.createElement('div');
@@ -343,11 +343,11 @@ describe('createWebVitalsTracker', () => {
 });
 
 /**
- * layout-shift 엔트리를 모킹 생성한다.
- * @param value - CLS 값
- * @param startTime - 시작 시각
- * @param sources - shift source 목록
- * @returns 모킹된 PerformanceEntry
+ * Creates a mock layout-shift entry.
+ * @param value - CLS value
+ * @param startTime - start time
+ * @param sources - list of shift sources
+ * @returns mocked PerformanceEntry
  */
 function createLayoutShiftEntry(
   value: number,
@@ -366,10 +366,10 @@ function createLayoutShiftEntry(
 }
 
 /**
- * largest-contentful-paint 엔트리를 모킹 생성한다.
- * @param startTime - LCP 시각
- * @param element - LCP 대상 요소
- * @returns 모킹된 PerformanceEntry
+ * Creates a mock largest-contentful-paint entry.
+ * @param startTime - LCP time
+ * @param element - LCP target element
+ * @returns mocked PerformanceEntry
  */
 function createLcpEntry(startTime: number, element: Element | null): PerformanceEntry {
   return {
@@ -383,11 +383,11 @@ function createLcpEntry(startTime: number, element: Element | null): Performance
 }
 
 /**
- * event 엔트리를 모킹 생성한다.
- * @param target - 이벤트 대상 요소
- * @param interactionId - 인터랙션 ID
- * @param duration - 이벤트 지속 시간
- * @returns 모킹된 PerformanceEntry
+ * Creates a mock event entry.
+ * @param target - event target element
+ * @param interactionId - interaction ID
+ * @param duration - event duration
+ * @returns mocked PerformanceEntry
  */
 function createEventEntry(target: Element | null, interactionId: number, duration: number): PerformanceEntry {
   return {

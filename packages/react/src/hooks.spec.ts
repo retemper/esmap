@@ -5,7 +5,7 @@ import { createGlobalState } from '@esmap/communication';
 import type { MfeAppStatus } from '@esmap/shared';
 
 describe('useGlobalState', () => {
-  it('현재 글로벌 상태를 반환한다', () => {
+  it('returns the current global state', () => {
     const store = createGlobalState({ count: 0, name: 'test' });
 
     const { result } = renderHook(() => useGlobalState(store));
@@ -13,7 +13,7 @@ describe('useGlobalState', () => {
     expect(result.current).toStrictEqual({ count: 0, name: 'test' });
   });
 
-  it('상태 변경 시 리렌더링된다', () => {
+  it('re-renders on state change', () => {
     const store = createGlobalState({ count: 0 });
 
     const { result } = renderHook(() => useGlobalState(store));
@@ -25,7 +25,7 @@ describe('useGlobalState', () => {
     expect(result.current).toStrictEqual({ count: 42 });
   });
 
-  it('selector로 특정 값만 추출한다', () => {
+  it('extracts a specific value using a selector', () => {
     const store = createGlobalState({ count: 0, name: 'test' });
 
     const { result } = renderHook(() => useGlobalState(store, (s) => s.count));
@@ -33,7 +33,7 @@ describe('useGlobalState', () => {
     expect(result.current).toStrictEqual(0);
   });
 
-  it('selector 사용 시 관련 없는 키 변경으로 리렌더링되지 않는다', () => {
+  it('does not re-render on unrelated key changes when using a selector', () => {
     const store = createGlobalState({ count: 0, name: 'test' });
     const renderCount = { value: 0 };
 
@@ -48,15 +48,15 @@ describe('useGlobalState', () => {
       store.setState({ name: 'changed' });
     });
 
-    // count가 변하지 않았으므로 리렌더링 없음 (useSyncExternalStore는 snapshot 비교)
-    // 단, 상태 객체 자체는 새로 만들어지므로 selector 없이는 항상 리렌더링
-    // selector가 원시값을 반환하면 === 비교로 리렌더링을 건너뜀
+    // No re-render since count did not change (useSyncExternalStore compares snapshots)
+    // Note: the state object itself is newly created, so without a selector it always re-renders
+    // When the selector returns a primitive, === comparison skips re-render
     expect(renderCount.value).toStrictEqual(initialRenders);
   });
 });
 
 describe('useAppStatus', () => {
-  /** 테스트용 mock registry 생성 */
+  /** Creates a mock registry for testing */
   function createMockRegistry(initialStatus: MfeAppStatus = 'NOT_LOADED') {
     const listeners: Array<(event: { appName: string; to: MfeAppStatus }) => void> = [];
     const apps = new Map<string, { status: MfeAppStatus }>();
@@ -71,7 +71,7 @@ describe('useAppStatus', () => {
         };
       }),
       getApp: vi.fn((name: string) => apps.get(name)),
-      /** 상태 변경을 시뮬레이션한다 */
+      /** Simulates a status change */
       simulateChange(appName: string, to: MfeAppStatus) {
         const app = apps.get(appName);
         if (app) app.status = to;
@@ -82,7 +82,7 @@ describe('useAppStatus', () => {
     };
   }
 
-  it('앱의 현재 상태를 반환한다', () => {
+  it('returns the current status of an app', () => {
     const registry = createMockRegistry('MOUNTED');
 
     const { result } = renderHook(() => useAppStatus(registry, 'test-app'));
@@ -90,7 +90,7 @@ describe('useAppStatus', () => {
     expect(result.current).toStrictEqual('MOUNTED');
   });
 
-  it('상태 변경 시 리렌더링된다', () => {
+  it('re-renders on status change', () => {
     const registry = createMockRegistry('NOT_LOADED');
 
     const { result } = renderHook(() => useAppStatus(registry, 'test-app'));
@@ -104,7 +104,7 @@ describe('useAppStatus', () => {
     expect(result.current).toStrictEqual('MOUNTED');
   });
 
-  it('다른 앱의 상태 변경은 무시한다', () => {
+  it('ignores status changes from other apps', () => {
     const registry = createMockRegistry('NOT_LOADED');
     const renderCount = { value: 0 };
 
@@ -122,7 +122,7 @@ describe('useAppStatus', () => {
     expect(renderCount.value).toStrictEqual(initialRenders);
   });
 
-  it('등록되지 않은 앱은 NOT_LOADED를 반환한다', () => {
+  it('returns NOT_LOADED for an unregistered app', () => {
     const registry = createMockRegistry();
 
     const { result } = renderHook(() => useAppStatus(registry, 'nonexistent'));

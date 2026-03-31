@@ -3,8 +3,8 @@ import { EsmapParcel } from '@esmap/react';
 import type { MfeApp } from '@esmap/shared';
 
 /**
- * Activity Feed MFE를 비동기 로드하여 MfeApp을 반환한다.
- * default export를 추출하여 EsmapParcel이 기대하는 타입에 맞춘다.
+ * Asynchronously loads the Activity Feed MFE and returns its MfeApp.
+ * Extracts the default export to match the type expected by EsmapParcel.
  */
 async function loadActivityFeed(): Promise<MfeApp> {
   const mod = await import(/* @vite-ignore */ '@enterprise/activity-feed');
@@ -12,14 +12,14 @@ async function loadActivityFeed(): Promise<MfeApp> {
 }
 
 /**
- * 최근 활동 위젯.
- * EsmapParcel을 사용하여 activity-feed MFE를 중첩 Parcel로 마운트한다.
+ * Recent activity widget.
+ * Mounts the activity-feed MFE as a nested Parcel using EsmapParcel.
  *
- * 시연 포인트:
- * - MFE-in-MFE: Dashboard 안에 activity-feed를 Parcel로 삽입
- * - 비동기 로더: () => import('@enterprise/activity-feed') 패턴
- * - loading/error 바운더리 선언적 처리
- * - appProps를 통한 부모→자식 Parcel 데이터 전달
+ * Demo points:
+ * - MFE-in-MFE: embeds activity-feed as a Parcel inside Dashboard
+ * - Async loader: () => import('@enterprise/activity-feed') pattern
+ * - Declarative loading/error boundary handling
+ * - Parent-to-child Parcel data passing via appProps
  */
 export function RecentActivity(): ReactNode {
   return (
@@ -28,12 +28,12 @@ export function RecentActivity(): ReactNode {
       appProps={{ mode: 'widget', maxItems: 5 }}
       loading={
         <div style={{ padding: '16px', color: '#94a3b8', fontSize: '13px' }}>
-          Activity Feed 로드 중...
+          Loading Activity Feed...
         </div>
       }
       errorFallback={(error) => (
         <div style={{ padding: '16px', color: '#dc2626', fontSize: '13px' }}>
-          Activity Feed 로드 실패: {error.message}
+          Failed to load Activity Feed: {error.message}
         </div>
       )}
       className="activity-widget"

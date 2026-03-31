@@ -3,15 +3,15 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { createDevtoolsOverlay } from './overlay.js';
 import type { DevtoolsOverlay, OverlayAppInfo } from './overlay.js';
 
-/** 테스트용 오버레이 인스턴스를 관리한다. */
+/** Manages the overlay instance for testing. */
 const refs: { overlay: DevtoolsOverlay | null } = { overlay: null };
 
-/** data-esmap-devtools 속성으로 오버레이 루트 요소를 조회한다. */
+/** Queries the overlay root element by the data-esmap-devtools attribute. */
 function getOverlayElement(): HTMLElement | null {
   return document.querySelector('[data-esmap-devtools="overlay"]');
 }
 
-/** 테스트용 앱 정보 목록을 생성한다. */
+/** Creates a sample app info list for testing. */
 function createSampleApps(): readonly OverlayAppInfo[] {
   return [
     { name: 'app-a', status: 'MOUNTED', container: '#root-a', perfDuration: 120 },
@@ -20,7 +20,7 @@ function createSampleApps(): readonly OverlayAppInfo[] {
   ];
 }
 
-/** KeyboardEvent를 생성하여 dispatch한다. */
+/** Creates and dispatches a KeyboardEvent. */
 function dispatchKeydown(options: KeyboardEventInit): void {
   const event = new KeyboardEvent('keydown', options);
   document.dispatchEvent(event);
@@ -32,7 +32,7 @@ describe('createDevtoolsOverlay', () => {
     refs.overlay = null;
   });
 
-  it('오버레이가 document.body에 추가된다', () => {
+  it('appends the overlay to document.body', () => {
     refs.overlay = createDevtoolsOverlay();
 
     const el = getOverlayElement();
@@ -40,7 +40,7 @@ describe('createDevtoolsOverlay', () => {
     expect(document.body.contains(el)).toBe(true);
   });
 
-  it('초기 상태에서 숨겨져 있다', () => {
+  it('is hidden in the initial state', () => {
     refs.overlay = createDevtoolsOverlay();
 
     const el = getOverlayElement();
@@ -48,7 +48,7 @@ describe('createDevtoolsOverlay', () => {
     expect(refs.overlay.visible).toBe(false);
   });
 
-  it('show()가 오버레이를 표시한다', () => {
+  it('show() displays the overlay', () => {
     refs.overlay = createDevtoolsOverlay();
 
     refs.overlay.show();
@@ -58,7 +58,7 @@ describe('createDevtoolsOverlay', () => {
     expect(refs.overlay.visible).toBe(true);
   });
 
-  it('hide()가 오버레이를 숨긴다', () => {
+  it('hide() hides the overlay', () => {
     refs.overlay = createDevtoolsOverlay();
     refs.overlay.show();
 
@@ -69,7 +69,7 @@ describe('createDevtoolsOverlay', () => {
     expect(refs.overlay.visible).toBe(false);
   });
 
-  it('toggle()이 표시/숨김을 전환한다', () => {
+  it('toggle() switches between show and hide', () => {
     refs.overlay = createDevtoolsOverlay();
 
     refs.overlay.toggle();
@@ -82,7 +82,7 @@ describe('createDevtoolsOverlay', () => {
     expect(refs.overlay.visible).toBe(true);
   });
 
-  it('update()가 앱 목록을 렌더링한다', () => {
+  it('update() renders the app list', () => {
     refs.overlay = createDevtoolsOverlay();
     const apps = createSampleApps();
 
@@ -103,7 +103,7 @@ describe('createDevtoolsOverlay', () => {
     expect(thirdRowCells[3]?.textContent).toBe('0ms');
   });
 
-  it('상태별 배지 색상이 올바르다', () => {
+  it('badge colors are correct per status', () => {
     refs.overlay = createDevtoolsOverlay();
     const apps: readonly OverlayAppInfo[] = [
       { name: 'mounted-app', status: 'MOUNTED', container: '#a' },
@@ -134,7 +134,7 @@ describe('createDevtoolsOverlay', () => {
     expect(unknownBadge?.getAttribute('data-color')).toBe('#666');
   });
 
-  it('destroy()가 오버레이를 DOM에서 제거한다', () => {
+  it('destroy() removes the overlay from the DOM', () => {
     refs.overlay = createDevtoolsOverlay();
     expect(getOverlayElement()).not.toBeNull();
 
@@ -144,7 +144,7 @@ describe('createDevtoolsOverlay', () => {
     expect(getOverlayElement()).toBeNull();
   });
 
-  it('키보드 단축키가 toggle을 트리거한다', () => {
+  it('keyboard shortcut triggers toggle', () => {
     refs.overlay = createDevtoolsOverlay();
     expect(refs.overlay.visible).toBe(false);
 
@@ -155,7 +155,7 @@ describe('createDevtoolsOverlay', () => {
     expect(refs.overlay.visible).toBe(false);
   });
 
-  it('커스텀 position이 적용된다', () => {
+  it('applies custom position', () => {
     refs.overlay = createDevtoolsOverlay({ position: 'top-left' });
 
     const el = getOverlayElement();
@@ -165,7 +165,7 @@ describe('createDevtoolsOverlay', () => {
     expect(el?.style.right).toBe('');
   });
 
-  it('update()를 다시 호출하면 이전 행이 제거된다', () => {
+  it('calling update() again removes previous rows', () => {
     refs.overlay = createDevtoolsOverlay();
     refs.overlay.update(createSampleApps());
 
@@ -176,7 +176,7 @@ describe('createDevtoolsOverlay', () => {
     expect(el?.querySelectorAll('tbody tr').length).toBe(1);
   });
 
-  it('destroy() 이후 키보드 단축키가 동작하지 않는다', () => {
+  it('keyboard shortcut does not work after destroy()', () => {
     refs.overlay = createDevtoolsOverlay();
     refs.overlay.destroy();
 

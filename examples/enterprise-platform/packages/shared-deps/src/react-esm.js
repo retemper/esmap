@@ -1,7 +1,7 @@
 /**
- * React CJS → ESM 래퍼.
- * React는 CJS 패키지이므로 import map용 ESM 번들로 변환할 때
- * named export를 명시적으로 재공개해야 한다.
+ * React CJS → ESM wrapper.
+ * Since React is a CJS package, named exports must be explicitly
+ * re-exported when converting to an ESM bundle for import maps.
  */
 import React from 'react';
 

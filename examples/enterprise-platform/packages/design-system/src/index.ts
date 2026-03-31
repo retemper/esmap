@@ -1,6 +1,6 @@
 /**
- * 디자인 시스템 public API.
- * MFE들이 import map을 통해 '@enterprise/design-system'으로 접근한다.
+ * Design system public API.
+ * MFEs access this via import map as '@enterprise/design-system'.
  */
 export { Button } from './Button.js';
 export { Card } from './Card.js';

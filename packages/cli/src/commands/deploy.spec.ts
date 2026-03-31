@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { deploy, parseDeployFlags, resolveUrlFromManifest } from './deploy.js';
 import type { DeployOptions } from './deploy.js';
 
-/** 성공하는 fetch 모킹을 생성한다. */
+/** Creates a mock fetch that returns a successful response. */
 function createMockFetch(responseBody: unknown, status = 200): typeof globalThis.fetch {
   return vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
@@ -12,9 +12,9 @@ function createMockFetch(responseBody: unknown, status = 200): typeof globalThis
   });
 }
 
-describe('deploy 커맨드', () => {
+describe('deploy command', () => {
   describe('parseDeployFlags', () => {
-    it('필수 플래그를 정상적으로 파싱한다', () => {
+    it('parses required flags correctly', () => {
       const flags = {
         server: 'http://localhost:3000',
         name: '@flex/checkout',
@@ -33,7 +33,7 @@ describe('deploy 커맨드', () => {
       });
     });
 
-    it('선택적 플래그도 파싱한다', () => {
+    it('parses optional flags as well', () => {
       const flags = {
         server: 'http://localhost:3000',
         name: '@flex/checkout',
@@ -50,7 +50,7 @@ describe('deploy 커맨드', () => {
       expect(result.cdnBase).toBe('https://cdn.flex.team');
     });
 
-    it('필수 플래그가 없으면 에러를 던진다', () => {
+    it('throws an error when required flags are missing', () => {
       expect(() => parseDeployFlags({ service: 'app', url: 'http://x' })).toThrow(
         'Missing required flag --server',
       );
@@ -64,7 +64,7 @@ describe('deploy 커맨드', () => {
   });
 
   describe('deploy', () => {
-    it('PATCH /services/:name 으로 올바른 요청을 보낸다', async () => {
+    it('sends the correct request to PATCH /services/:name', async () => {
       const mockFetch = createMockFetch({ service: '@flex/checkout', url: 'https://cdn/app.js' });
 
       const options: DeployOptions = {
@@ -82,7 +82,7 @@ describe('deploy 커맨드', () => {
       });
     });
 
-    it('deployedBy가 있으면 요청 본문에 포함한다', async () => {
+    it('includes deployedBy in the request body when provided', async () => {
       const mockFetch = createMockFetch({ service: 'app', url: 'http://x' });
 
       await deploy(
@@ -95,7 +95,7 @@ describe('deploy 커맨드', () => {
       expect(body.deployedBy).toBe('ci');
     });
 
-    it('서버 응답에서 name과 url을 추출하여 결과를 반환한다', async () => {
+    it('extracts name and url from the server response and returns the result', async () => {
       const mockFetch = createMockFetch({
         service: '@flex/checkout',
         url: 'https://cdn/checkout-abc.js',
@@ -117,7 +117,7 @@ describe('deploy 커맨드', () => {
       });
     });
 
-    it('서버가 에러를 반환하면 예외를 던진다', async () => {
+    it('throws an exception when the server returns an error', async () => {
       const mockFetch = createMockFetch('Not found', 404);
 
       await expect(
@@ -125,7 +125,7 @@ describe('deploy 커맨드', () => {
       ).rejects.toThrow('Deploy failed (404)');
     });
 
-    it('서버 URL 끝의 슬래시를 제거한다', async () => {
+    it('strips trailing slash from the server URL', async () => {
       const mockFetch = createMockFetch({ service: 'app', url: 'http://x' });
 
       await deploy({ server: 'http://localhost:3000/', name: 'app', url: 'http://x' }, mockFetch);
@@ -134,7 +134,7 @@ describe('deploy 커맨드', () => {
       expect(callArgs[0]).toBe('http://localhost:3000/services/app');
     });
 
-    it('응답 본문이 기대 형태가 아니면 옵션 값으로 결과를 구성한다', async () => {
+    it('falls back to option values when the response body has an unexpected shape', async () => {
       const mockFetch = createMockFetch({ ok: true });
 
       const result = await deploy(
@@ -151,7 +151,7 @@ describe('deploy 커맨드', () => {
   });
 
   describe('resolveUrlFromManifest', () => {
-    it('함수가 정의되어 있다', () => {
+    it('is defined as a function', () => {
       expect(typeof resolveUrlFromManifest).toBe('function');
     });
   });

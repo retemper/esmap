@@ -5,7 +5,7 @@ import type { ImportMap } from '@esmap/shared';
 import { createEmptyImportMap } from '@esmap/shared';
 import type { ImportMapStorage, DeploymentHistoryEntry } from '../storage/types.js';
 
-/** 인메모리 테스트용 저장소 */
+/** In-memory storage for testing */
 class InMemoryStorage implements ImportMapStorage {
   private importMap: ImportMap | null = null;
   private history: DeploymentHistoryEntry[] = [];
@@ -28,7 +28,7 @@ class InMemoryStorage implements ImportMapStorage {
     return this.history.slice(0, limit);
   }
 
-  /** 저장소 상태를 리셋한다. */
+  /** Resets the storage state. */
   reset(): void {
     this.importMap = null;
     this.history = [];
@@ -40,7 +40,7 @@ describe('import-map-routes', () => {
   const routes = createImportMapRoutes(storage);
   const app = new Hono().route('/api', routes);
 
-  /** scoped 서비스 이름 (URL에서 / 포함) */
+  /** Scoped service name (includes / in URL) */
   const SERVICE = '@flex/checkout';
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('import-map-routes', () => {
   });
 
   describe('GET /api/', () => {
-    it('빈 import map을 반환한다', async () => {
+    it('returns an empty import map', async () => {
       const res = await app.request('/api');
       expect(res.status).toBe(200);
 
@@ -56,19 +56,19 @@ describe('import-map-routes', () => {
       expect(body.imports).toStrictEqual({});
     });
 
-    it('Content-Type이 application/importmap+json이다', async () => {
+    it('returns Content-Type as application/importmap+json', async () => {
       const res = await app.request('/api');
       expect(res.headers.get('Content-Type')).toContain('application/importmap+json');
     });
 
-    it('Cache-Control이 no-cache다', async () => {
+    it('returns Cache-Control as no-cache', async () => {
       const res = await app.request('/api');
       expect(res.headers.get('Cache-Control')).toContain('no-cache');
     });
   });
 
   describe('PATCH /api/services/:name', () => {
-    it('MFE URL을 등록한다', async () => {
+    it('registers an MFE URL', async () => {
       const res = await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -82,7 +82,7 @@ describe('import-map-routes', () => {
       expect(body.importMap.imports[SERVICE]).toBe('https://cdn.example.com/checkout-abc.js');
     });
 
-    it('기존 URL을 갱신한다', async () => {
+    it('updates an existing URL', async () => {
       await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -99,7 +99,7 @@ describe('import-map-routes', () => {
       expect(body.importMap.imports[SERVICE]).toBe('https://cdn.example.com/checkout-v2.js');
     });
 
-    it('url이 없으면 400을 반환한다', async () => {
+    it('returns 400 when url is missing', async () => {
       const res = await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -109,7 +109,7 @@ describe('import-map-routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('javascript: 프로토콜 URL을 거부한다', async () => {
+    it('rejects javascript: protocol URLs', async () => {
       const res = await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +119,7 @@ describe('import-map-routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('data: 프로토콜 URL을 거부한다', async () => {
+    it('rejects data: protocol URLs', async () => {
       const res = await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -129,7 +129,7 @@ describe('import-map-routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('잘못된 URL 형식을 거부한다', async () => {
+    it('rejects malformed URLs', async () => {
       const res = await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -139,7 +139,7 @@ describe('import-map-routes', () => {
       expect(res.status).toBe(400);
     });
 
-    it('슬래시 없는 단순 이름도 동작한다', async () => {
+    it('works with simple names without slashes', async () => {
       const res = await app.request('/api/services/react', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -153,7 +153,7 @@ describe('import-map-routes', () => {
   });
 
   describe('DELETE /api/services/:name', () => {
-    it('MFE를 import map에서 제거한다', async () => {
+    it('removes an MFE from the import map', async () => {
       await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -170,7 +170,7 @@ describe('import-map-routes', () => {
   });
 
   describe('GET /api/history', () => {
-    it('배포 이력을 반환한다', async () => {
+    it('returns deployment history', async () => {
       await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -187,7 +187,7 @@ describe('import-map-routes', () => {
   });
 
   describe('POST /api/rollback/:name', () => {
-    it('이전 버전으로 롤백한다', async () => {
+    it('rolls back to the previous version', async () => {
       await app.request(`/api/services/${SERVICE}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -208,14 +208,14 @@ describe('import-map-routes', () => {
       expect(body.importMap.imports[SERVICE]).toBe('https://cdn.example.com/checkout-v1.js');
     });
 
-    it('이력이 없으면 404를 반환한다', async () => {
+    it('returns 404 when there is no history', async () => {
       const res = await app.request('/api/rollback/nonexistent', { method: 'POST' });
       expect(res.status).toBe(404);
     });
   });
 
   describe('GET /api/events', () => {
-    it('SSE 응답을 반환한다', async () => {
+    it('returns an SSE response', async () => {
       const res = await app.request('/api/events');
 
       expect(res.status).toBe(200);
@@ -224,7 +224,7 @@ describe('import-map-routes', () => {
       expect(res.headers.get('Connection')).toBe('keep-alive');
     });
 
-    it('PATCH 후 SSE 이벤트가 브로드캐스트된다', async () => {
+    it('broadcasts SSE event after PATCH', async () => {
       const sseRes = await app.request('/api/events');
       const reader = sseRes.body!.getReader();
 
@@ -245,11 +245,11 @@ describe('import-map-routes', () => {
     });
   });
 
-  describe('프로토타입 오염 방어', () => {
+  describe('prototype pollution defense', () => {
     const DANGEROUS_NAMES = ['__proto__', 'constructor', 'prototype'];
 
     DANGEROUS_NAMES.forEach((name) => {
-      it(`PATCH에서 "${name}" 서비스 이름을 거부한다`, async () => {
+      it(`rejects "${name}" service name in PATCH`, async () => {
         const res = await app.request(`/api/services/${name}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -259,13 +259,13 @@ describe('import-map-routes', () => {
         expect(res.status).toBe(400);
       });
 
-      it(`DELETE에서 "${name}" 서비스 이름을 거부한다`, async () => {
+      it(`rejects "${name}" service name in DELETE`, async () => {
         const res = await app.request(`/api/services/${name}`, { method: 'DELETE' });
 
         expect(res.status).toBe(400);
       });
 
-      it(`rollback에서 "${name}" 서비스 이름을 거부한다`, async () => {
+      it(`rejects "${name}" service name in rollback`, async () => {
         const res = await app.request(`/api/rollback/${name}`, { method: 'POST' });
 
         expect(res.status).toBe(400);

@@ -1,14 +1,14 @@
 /**
- * Import map 배포 서버.
- * @esmap/server의 Hono 라우트를 사용하여 import map을 제공하고,
- * SSE를 통해 실시간 배포 이벤트를 브로드캐스트한다.
+ * Import map deployment server.
+ * Uses @esmap/server's Hono routes to serve the import map and
+ * broadcasts real-time deployment events via SSE.
  *
  * API:
- *   GET  /          — 현재 import map
- *   GET  /events    — SSE 스트림 (import-map-update, import-map-rollback)
- *   PATCH /services/:name — MFE 배포 (URL 갱신)
- *   POST /rollback/:name  — 이전 버전으로 롤백
- *   GET  /history   — 배포 이력
+ *   GET  /          — current import map
+ *   GET  /events    — SSE stream (import-map-update, import-map-rollback)
+ *   PATCH /services/:name — MFE deployment (URL update)
+ *   POST /rollback/:name  — rollback to previous version
+ *   GET  /history   — deployment history
  */
 import { serve } from '@hono/node-server';
 import { execSync } from 'node:child_process';
@@ -32,9 +32,9 @@ app.route('/', importMapRoutes);
 const PORT = 3200;
 
 /**
- * 지정된 포트를 점유 중인 프로세스를 종료한다.
- * 이전 dev 세션의 좀비 프로세스를 정리하여 EADDRINUSE를 방지한다.
- * @param port - 정리할 포트 번호
+ * Kills processes occupying the specified port.
+ * Cleans up zombie processes from previous dev sessions to prevent EADDRINUSE.
+ * @param port - the port number to clean up
  */
 function killPortProcess(port: number): void {
   try {

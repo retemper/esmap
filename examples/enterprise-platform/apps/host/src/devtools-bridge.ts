@@ -1,12 +1,12 @@
 /**
  * esmap DevTools Bridge.
  *
- * esmap 런타임의 이벤트를 window.postMessage로 브로드캐스트하여
- * Chrome DevTools Extension이 수신할 수 있게 한다.
- * Extension이 없어도 postMessage는 무해하게 무시된다.
+ * Broadcasts esmap runtime events via window.postMessage so that
+ * the Chrome DevTools Extension can receive them.
+ * postMessage is harmlessly ignored when no extension is present.
  */
 
-/** DevTools bridge가 구독하는 esmap 데이터 소스 옵션 */
+/** esmap data source options subscribed to by the DevTools bridge */
 interface DevtoolsBridgeOptions {
   readonly registry: {
     readonly getApps: () => ReadonlyArray<{ name: string; status: string; container: string }>;
@@ -39,21 +39,21 @@ interface DevtoolsBridgeOptions {
   };
 }
 
-/** DevTools extension으로 메시지를 브로드캐스트한다 */
+/** Broadcasts a message to the DevTools extension */
 function send(payload: Record<string, unknown>): void {
   try {
     window.postMessage({ source: 'esmap-devtools', payload }, window.location.origin);
   } catch {
-    // 직렬화 불가능한 데이터가 포함된 경우 무시한다
+    // Ignore if the data contains non-serializable values
   }
 }
 
-/** 앱 객체에서 직렬화 가능한 필드만 추출한다 */
+/** Extracts only serializable fields from an app object */
 function serializeApp(app: { name: string; status: string; container: string }): { name: string; status: string; container: string } {
   return { name: app.name, status: app.status, container: app.container };
 }
 
-/** 공유 모듈 레지스트리를 직렬화 가능한 형태로 변환한다 */
+/** Converts the shared module registry into a serializable format */
 function serializeSharedModules(
   sm: NonNullable<DevtoolsBridgeOptions['sharedModules']>,
 ): { registered: Record<string, Array<Record<string, unknown>>>; loaded: Record<string, Record<string, unknown>> } {
@@ -71,7 +71,7 @@ function serializeSharedModules(
   return { registered, loaded };
 }
 
-/** 이벤트 이름에서 카테고리를 판별한다 */
+/** Determines the category from the event name */
 function classifyEvent(eventName: string): string {
   if (eventName.includes('auth')) return 'auth';
   if (eventName.includes('route')) return 'route';
@@ -82,11 +82,11 @@ function classifyEvent(eventName: string): string {
   return 'lifecycle';
 }
 
-/** DevTools bridge를 설정한다. Extension이 없어도 안전하게 동작한다 */
+/** Sets up the DevTools bridge. Works safely even without an extension */
 export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
   const { registry, eventBus, globalState, router, perf, prefetch, sharedModules, importMap } = options;
 
-  /** 스냅샷 캡처용 상태 */
+  /** State for snapshot capture */
   interface BridgeSnapshot {
     apps: Array<{ name: string; status: string; container: string }>;
     currentState: Record<string, unknown>;
@@ -103,7 +103,7 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     try { snapshot.prefetchStats = [...prefetch.getStats()]; } catch { /* empty */ }
   }
 
-  // 초기 INIT 메시지 전송
+  // Send initial INIT message
   send({
     type: 'ESMAP_INIT',
     apps: snapshot.apps,
@@ -113,7 +113,7 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     ...(importMap ? { importMap } : {}),
   });
 
-  // Extension → Page 방향 메시지 수신 (스냅샷 요청 등)
+  // Receive Extension -> Page direction messages (snapshot requests, etc.)
   window.addEventListener('message', (event) => {
     if (event.origin !== window.location.origin) return;
     if (event.data?.source !== 'esmap-devtools-panel') return;
@@ -130,9 +130,9 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     }
   });
 
-  // 레지스트리 상태 변경
+  // Registry status changes
   registry.onStatusChange((event) => {
-    // 스냅샷 갱신
+    // Update snapshot
     const idx = snapshot.apps.findIndex((a) => a.name === event.appName);
     if (idx >= 0) {
       snapshot.apps[idx] = { ...snapshot.apps[idx], status: event.to };
@@ -147,7 +147,7 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     });
   });
 
-  // 이벤트 버스 — 알려진 이벤트 구독
+  // Event bus — subscribe to known events
   const knownEvents = [
     'auth:login', 'auth:logout', 'activity:new', 'lifecycle',
     'team:member-select', 'team:member-deselect',
@@ -168,7 +168,7 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     } catch { /* unsupported event */ }
   }
 
-  // 글로벌 상태 구독
+  // Subscribe to global state
   globalState.subscribe((newState, prevState) => {
     snapshot.currentState = { ...newState };
     send({
@@ -190,7 +190,7 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     }
   });
 
-  // 라우터 이벤트
+  // Router events
   router.afterRouteChange((from, to) => {
     send({
       type: 'ESMAP_ROUTE_CHANGE',
@@ -200,7 +200,7 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     });
   });
 
-  // 성능 측정 구독
+  // Subscribe to performance measurements
   if (perf.onMeasurement) {
     try {
       perf.onMeasurement((measurement) => {
@@ -216,7 +216,7 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
     } catch { /* empty */ }
   }
 
-  // 기존 이벤트 히스토리 전송
+  // Send existing event history
   try {
     const history = eventBus.getHistory();
     for (const item of history) {

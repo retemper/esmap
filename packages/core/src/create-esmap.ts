@@ -9,10 +9,10 @@ import type { PluginCleanup } from './plugin.js';
 import { installPlugins, runCleanups } from './plugin.js';
 
 /**
- * EsmapConfig.apps에서 프리페치용 앱 목록을 추출한다.
- * @param apps - 앱 설정 맵
- * @param importMap - import map (URL 해석용)
- * @returns 프리페치 대상 앱 목록
+ * Extracts the prefetch app list from EsmapConfig.apps.
+ * @param apps - app configuration map
+ * @param importMap - import map (for URL resolution)
+ * @returns list of apps eligible for prefetching
  */
 function extractPrefetchApps(
   apps: Readonly<Record<string, AppConfig>>,
@@ -26,10 +26,10 @@ function extractPrefetchApps(
 }
 
 /**
- * esmap 프레임워크의 통합 커널 인스턴스를 생성한다.
- * AppRegistry, Router, LifecycleHooks, PerfTracker, PrefetchController를 생성하고 연결한다.
- * @param options - 커널 생성 옵션
- * @returns 완전히 연결된 EsmapInstance
+ * Creates the integrated kernel instance of the esmap framework.
+ * Creates and connects AppRegistry, Router, LifecycleHooks, PerfTracker, and PrefetchController.
+ * @param options - kernel creation options
+ * @returns fully connected EsmapInstance
  */
 export function createEsmap(options: EsmapOptions): EsmapInstance {
   const { config, importMap, router: routerOptions, disablePerf = false, disableDevtools = false, plugins = [] } = options;
@@ -50,7 +50,7 @@ export function createEsmap(options: EsmapOptions): EsmapInstance {
     importMap,
   });
 
-  // 공유 모듈 레지스트리 — config.shared에서 설정된 의존성을 등록한다
+  // Shared module registry — registers dependencies configured in config.shared
   const sharedModules = createSharedModuleRegistry();
   registerSharedModules(sharedModules, config.shared, config.cdnBase);
 
@@ -82,14 +82,14 @@ export function createEsmap(options: EsmapOptions): EsmapInstance {
     prefetch,
     sharedModules,
 
-    /** 프레임워크를 시작한다 (eager 모듈 로드 대기 + 라우터 리스닝 + 초기 라우트 처리) */
+    /** Starts the framework (waits for eager module loads + starts router listening + handles initial route) */
     async start(): Promise<void> {
       await sharedModules.waitForEager();
       prefetch.start();
       await router.start();
     },
 
-    /** 프레임워크를 완전히 정리한다 (모든 앱 언마운트 + 라우터 중지 + 플러그인 정리) */
+    /** Fully cleans up the framework (unmounts all apps + stops router + cleans up plugins) */
     async destroy(): Promise<void> {
       router.stop();
       prefetch.stop();
@@ -101,12 +101,12 @@ export function createEsmap(options: EsmapOptions): EsmapInstance {
 }
 
 /**
- * config.shared의 공유 의존성 설정을 SharedModuleRegistry에 등록한다.
- * URL이 있으면 dynamic import factory를, 없으면 bare specifier import factory를 생성한다.
- * subpaths가 정의되어 있으면 각 subpath에 대한 팩토리도 함께 등록한다.
- * @param registry - 공유 모듈 레지스트리
- * @param shared - 공유 의존성 설정 맵
- * @param cdnBase - CDN 기본 URL (URL 생성용)
+ * Registers shared dependency configurations from config.shared into SharedModuleRegistry.
+ * Creates a dynamic import factory if a URL is provided, otherwise creates a bare specifier import factory.
+ * If subpaths are defined, registers factories for each subpath as well.
+ * @param registry - shared module registry
+ * @param shared - shared dependency configuration map
+ * @param cdnBase - CDN base URL (for URL generation)
  */
 function registerSharedModules(
   registry: SharedModuleRegistry,
@@ -116,7 +116,7 @@ function registerSharedModules(
   for (const [name, sharedConfig] of Object.entries(shared)) {
     const url = sharedConfig.url ?? (cdnBase ? `${cdnBase}/${name}` : undefined);
 
-    // subpath exports 매핑 → 팩토리 맵으로 변환
+    // Convert subpath exports mapping to factory map
     const subpathFactories = sharedConfig.subpaths
       ? Object.fromEntries(
           Object.entries(sharedConfig.subpaths).map(([subpath, specifier]) => [

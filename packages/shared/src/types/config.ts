@@ -1,76 +1,76 @@
 /**
- * esmap.config.ts의 최상위 설정 스키마.
- * defineConfig() 헬퍼를 통해 타입 안전하게 작성한다.
+ * Top-level configuration schema for esmap.config.ts.
+ * Use the defineConfig() helper for type-safe authoring.
  */
 export interface EsmapConfig {
-  /** MFE 앱 목록 */
+  /** List of MFE apps */
   readonly apps: Readonly<Record<string, AppConfig>>;
-  /** 공유 의존성 목록 */
+  /** Shared dependency list */
   readonly shared: Readonly<Record<string, SharedConfig>>;
-  /** Import map 서버 설정 */
+  /** Import map server configuration */
   readonly server?: ServerConfig;
-  /** 개발자 도구 설정 */
+  /** Developer tools configuration */
   readonly devtools?: DevtoolsConfig;
-  /** CDN 기본 URL */
+  /** CDN base URL */
   readonly cdnBase?: string;
 }
 
-/** 단일 MFE 앱 설정 */
+/** Configuration for a single MFE app */
 export interface AppConfig {
-  /** CDN 상의 앱 경로 prefix (예: "apps/checkout") */
+  /** App path prefix on CDN (e.g., "apps/checkout") */
   readonly path: string;
-  /** 매니페스트 파일 경로 (로컬 빌드 기준) */
+  /** Manifest file path (relative to local build) */
   readonly manifestPath?: string;
-  /** 활성 라우트 패턴 (예: "/checkout", ["/checkout", "/cart"]) 또는 커스텀 매칭 함수 */
+  /** Active route pattern (e.g., "/checkout", ["/checkout", "/cart"]) or custom matching function */
   readonly activeWhen?: string | readonly string[] | ((location: Location) => boolean);
-  /** 마운트될 DOM 컨테이너 셀렉터 */
+  /** DOM container selector for mounting */
   readonly container?: string;
 }
 
-/** 공유 의존성 설정 */
+/** Shared dependency configuration */
 export interface SharedConfig {
-  /** 전역 공유 여부 (모든 MFE에서 동일 인스턴스 사용) */
+  /** Whether to share globally (same instance across all MFEs) */
   readonly global?: boolean;
-  /** CDN 상의 URL (자동 생성되지만 수동 오버라이드 가능) */
+  /** URL on CDN (auto-generated but can be manually overridden) */
   readonly url?: string;
-  /** subpath exports 매핑 (예: { "./client": "react-dom/client" }) */
+  /** Subpath exports mapping (e.g., { "./client": "react-dom/client" }) */
   readonly subpaths?: Readonly<Record<string, string>>;
-  /** 요구 버전 범위 (semver, 예: "^18.0.0") */
+  /** Required version range (semver, e.g., "^18.0.0") */
   readonly requiredVersion?: string;
-  /** 모든 MFE에서 단일 인스턴스만 사용하도록 강제 */
+  /** Enforce a single instance across all MFEs */
   readonly singleton?: boolean;
-  /** 지연 로딩 대신 즉시 로딩 */
+  /** Load eagerly instead of lazily */
   readonly eager?: boolean;
-  /** 버전 불일치 시 엄격 모드 (true: 에러 throw, false: 경고만 출력) */
+  /** Strict mode on version mismatch (true: throw error, false: warn only) */
   readonly strictVersion?: boolean;
 }
 
-/** Import map 서버 설정 */
+/** Import map server configuration */
 export interface ServerConfig {
-  /** 서버 포트 */
+  /** Server port */
   readonly port?: number;
-  /** 저장소 타입 */
+  /** Storage type */
   readonly storage?: 'filesystem' | 's3' | 'redis';
-  /** 저장소별 추가 옵션 */
+  /** Additional options per storage type */
   readonly storageOptions?: Readonly<Record<string, unknown>>;
-  /** 인증 설정 */
+  /** Authentication configuration */
   readonly auth?: AuthConfig;
 }
 
-/** 인증 설정 */
+/** Authentication configuration */
 export interface AuthConfig {
-  /** 인증 방식 */
+  /** Authentication method */
   readonly type: 'api-key' | 'none';
-  /** API 키 목록 (환경변수 참조 가능, 예: "$ESMAP_API_KEY") */
+  /** List of API keys (can reference environment variables, e.g., "$ESMAP_API_KEY") */
   readonly keys?: readonly string[];
 }
 
-/** 개발자 도구 설정 */
+/** Developer tools configuration */
 export interface DevtoolsConfig {
-  /** devtools 활성화 여부 */
+  /** Whether devtools is enabled */
   readonly enabled?: boolean;
-  /** 오버라이드 적용 방식 */
+  /** Override application mode */
   readonly overrideMode?: 'native-merge' | 'shim';
-  /** devtools 트리거 단축키 */
+  /** Devtools trigger keyboard shortcut */
   readonly trigger?: string;
 }

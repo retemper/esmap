@@ -5,8 +5,8 @@ import type { RouterRegistry, BeforeRouteChangeGuard, AfterRouteChangeGuard } fr
 import type { MfeAppStatus, RegisteredApp } from '@esmap/shared';
 
 /**
- * 테스트용 RegisteredApp stub을 생성한다.
- * @param overrides - 앱 이름, 상태, 활성 조건
+ * Creates a RegisteredApp stub for testing.
+ * @param overrides - app name, status, and active condition
  */
 function createStubApp(overrides: {
   name: string;
@@ -21,8 +21,8 @@ function createStubApp(overrides: {
 }
 
 /**
- * 테스트용 RouterRegistry 목을 생성한다.
- * @param apps - 등록할 앱 옵션 목록
+ * Creates a mock RouterRegistry for testing.
+ * @param apps - list of app options to register
  */
 function createMockRegistry(
   apps: Array<{
@@ -39,21 +39,21 @@ function createMockRegistry(
   };
 }
 
-/** esmap:navigate 이벤트를 발생시키고 마이크로태스크가 처리될 때까지 대기한다. */
+/** Dispatches an esmap:navigate event and waits for microtasks to be processed. */
 async function triggerNavigation(): Promise<void> {
   window.dispatchEvent(new CustomEvent('esmap:navigate'));
-  // 마이크로태스크 큐가 처리될 때까지 대기
+  // Wait for the microtask queue to be processed
   await new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
 }
 
-describe('Router 라우트 가드', () => {
+describe('Router route guards', () => {
   const nativePushState = history.pushState.bind(history);
   const nativeReplaceState = history.replaceState.bind(history);
   const routers: Router[] = [];
 
-  /** Router를 생성하고 정리 목록에 등록한다. */
+  /** Creates a Router and adds it to the cleanup list. */
   function createRouter(registry: RouterRegistry, options?: {
     mode?: 'history' | 'hash';
     baseUrl?: string;
@@ -73,8 +73,8 @@ describe('Router 라우트 가드', () => {
     history.replaceState = nativeReplaceState;
   });
 
-  describe('beforeRouteChange 가드', () => {
-    it('가드가 true를 반환하면 네비게이션이 진행된다', async () => {
+  describe('beforeRouteChange guard', () => {
+    it('proceeds with navigation when guard returns true', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -88,7 +88,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.mountApp)).toHaveBeenCalledWith('app1');
     });
 
-    it('가드가 false를 반환하면 네비게이션이 취소된다', async () => {
+    it('cancels navigation when guard returns false', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -102,7 +102,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.mountApp)).not.toHaveBeenCalled();
     });
 
-    it('비동기 가드가 false를 반환하면 네비게이션이 취소된다', async () => {
+    it('cancels navigation when async guard returns false', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -116,7 +116,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.mountApp)).not.toHaveBeenCalled();
     });
 
-    it('여러 가드 중 하나라도 false를 반환하면 네비게이션이 취소된다', async () => {
+    it('cancels navigation if any guard returns false', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -136,20 +136,20 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.mountApp)).not.toHaveBeenCalled();
     });
 
-    it('가드가 에러를 throw하면 start()에서 에러가 전파된다', async () => {
+    it('propagates the error from start() when a guard throws', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
       const router = createRouter(registry);
 
       router.beforeRouteChange(() => {
-        throw new Error('가드 에러');
+        throw new Error('guard error');
       });
 
-      await expect(router.start()).rejects.toThrow('가드 에러');
+      await expect(router.start()).rejects.toThrow('guard error');
     });
 
-    it('가드가 없으면 네비게이션이 정상 진행된다', async () => {
+    it('proceeds with navigation normally when no guards are set', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -160,7 +160,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.mountApp)).toHaveBeenCalledWith('app1');
     });
 
-    it('가드에 from과 to RouteContext가 전달된다', async () => {
+    it('passes from and to RouteContext to the guard', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const guard = vi.fn<BeforeRouteChangeGuard>().mockReturnValue(true);
@@ -183,8 +183,8 @@ describe('Router 라우트 가드', () => {
     });
   });
 
-  describe('afterRouteChange 가드', () => {
-    it('mount/unmount 완료 후 가드가 실행된다', async () => {
+  describe('afterRouteChange guard', () => {
+    it('executes the guard after mount/unmount completes', async () => {
       const callOrder: string[] = [];
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
@@ -205,7 +205,7 @@ describe('Router 라우트 가드', () => {
       expect(callOrder).toStrictEqual(['mount', 'afterGuard']);
     });
 
-    it('비동기 afterGuard가 올바르게 실행된다', async () => {
+    it('correctly executes an async afterGuard', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const afterGuard = vi.fn(async () => undefined);
@@ -216,7 +216,7 @@ describe('Router 라우트 가드', () => {
       expect(afterGuard).toHaveBeenCalled();
     });
 
-    it('여러 afterGuard가 순서대로 실행된다', async () => {
+    it('executes multiple afterGuards in order', async () => {
       const callOrder: number[] = [];
       const registry = createMockRegistry();
       const router = createRouter(registry);
@@ -236,7 +236,7 @@ describe('Router 라우트 가드', () => {
       expect(callOrder).toStrictEqual([1, 2, 3]);
     });
 
-    it('afterGuard에 from과 to RouteContext가 전달된다', async () => {
+    it('passes from and to RouteContext to afterGuard', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const afterGuard = vi.fn<AfterRouteChangeGuard>();
@@ -250,7 +250,7 @@ describe('Router 라우트 가드', () => {
       expect(to.pathname).toBe(window.location.pathname);
     });
 
-    it('beforeGuard가 false를 반환하면 afterGuard가 실행되지 않는다', async () => {
+    it('does not execute afterGuard when beforeGuard returns false', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const afterGuard = vi.fn();
@@ -263,8 +263,8 @@ describe('Router 라우트 가드', () => {
     });
   });
 
-  describe('previousRoute 추적', () => {
-    it('start() 시점의 location을 previousRoute로 캡처한다', async () => {
+  describe('previousRoute tracking', () => {
+    it('captures the location at start() as previousRoute', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const guard = vi.fn<BeforeRouteChangeGuard>().mockReturnValue(true);
@@ -276,7 +276,7 @@ describe('Router 라우트 가드', () => {
       expect(from.pathname).toBe(window.location.pathname);
     });
 
-    it('네비게이션 성공 후 previousRoute가 업데이트된다', async () => {
+    it('updates previousRoute after successful navigation', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const guard = vi.fn<BeforeRouteChangeGuard>().mockReturnValue(true);
@@ -286,41 +286,41 @@ describe('Router 라우트 가드', () => {
 
       const initialPathname = window.location.pathname;
 
-      // esmap:navigate 이벤트로 두 번째 라우트 변경 트리거
+      // Trigger a second route change via esmap:navigate event
       await triggerNavigation();
 
       const from = guard.mock.calls[1][0];
       expect(from.pathname).toBe(initialPathname);
     });
 
-    it('네비게이션 취소 시 previousRoute가 업데이트되지 않는다', async () => {
+    it('does not update previousRoute when navigation is cancelled', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const guard = vi
         .fn<BeforeRouteChangeGuard>()
         .mockReturnValueOnce(true) // start()
-        .mockReturnValueOnce(false) // 첫 번째 이동 취소
-        .mockReturnValueOnce(true); // 두 번째 이동
+        .mockReturnValueOnce(false) // first navigation cancelled
+        .mockReturnValueOnce(true); // second navigation
 
       router.beforeRouteChange(guard);
       await router.start();
 
       const initialPathname = window.location.pathname;
 
-      // 취소되는 네비게이션
+      // Cancelled navigation
       await triggerNavigation();
 
-      // 다시 시도
+      // Retry
       await triggerNavigation();
 
       const fromThirdCall = guard.mock.calls[2][0];
-      // 취소된 네비게이션은 previousRoute를 업데이트하지 않으므로 초기값 유지
+      // Cancelled navigation does not update previousRoute, so the initial value is retained
       expect(fromThirdCall.pathname).toBe(initialPathname);
     });
   });
 
-  describe('기존 라우터 동작 유지', () => {
-    it('활성 앱을 마운트한다', async () => {
+  describe('existing router behavior preservation', () => {
+    it('mounts active apps', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -331,7 +331,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.mountApp)).toHaveBeenCalledWith('app1');
     });
 
-    it('비활성 앱을 언마운트한다', async () => {
+    it('unmounts inactive apps', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'MOUNTED', activeWhen: () => false },
       ]);
@@ -342,7 +342,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.unmountApp)).toHaveBeenCalledWith('app1');
     });
 
-    it('stop() 후에는 이벤트를 감지하지 않는다', async () => {
+    it('does not detect events after stop()', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
 
@@ -352,7 +352,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.getApps)).toHaveBeenCalledTimes(1);
     });
 
-    it('이미 시작된 라우터에 start()를 다시 호출해도 중복 실행되지 않는다', async () => {
+    it('does not execute twice when start() is called on an already started router', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
 
@@ -362,7 +362,7 @@ describe('Router 라우트 가드', () => {
       expect(vi.mocked(registry.getApps)).toHaveBeenCalledTimes(1);
     });
 
-    it('unmount 후 mount가 실행된다', async () => {
+    it('executes mount after unmount', async () => {
       const callOrder: string[] = [];
       const registry = createMockRegistry([
         { name: 'app1', status: 'MOUNTED', activeWhen: () => false },
@@ -382,8 +382,8 @@ describe('Router 라우트 가드', () => {
     });
   });
 
-  describe('가드 해제', () => {
-    it('beforeRouteChange 가드를 해제하면 더 이상 실행되지 않는다', async () => {
+  describe('guard removal', () => {
+    it('no longer executes the beforeRouteChange guard after removal', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -401,7 +401,7 @@ describe('Router 라우트 가드', () => {
       expect(guard.mock.calls.length).toBe(callCountAfterStart);
     });
 
-    it('afterRouteChange 가드를 해제하면 더 이상 실행되지 않는다', async () => {
+    it('no longer executes the afterRouteChange guard after removal', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const guard = vi.fn();
@@ -418,14 +418,14 @@ describe('Router 라우트 가드', () => {
     });
   });
 
-  describe('빠른 연속 네비게이션 (race condition 방지)', () => {
-    it('네비게이션 중 새 네비게이션이 발생하면 이전 mount를 건너뛴다', async () => {
+  describe('rapid consecutive navigation (race condition prevention)', () => {
+    it('skips previous mount when a new navigation occurs during navigation', async () => {
       const mountCalls: string[] = [];
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
 
-      // mount에 지연을 추가하여 race condition을 시뮬레이션
+      // Add delay to mount to simulate a race condition
       vi.mocked(registry.mountApp).mockImplementation(async (name: string) => {
         mountCalls.push(name);
       });
@@ -433,11 +433,11 @@ describe('Router 라우트 가드', () => {
       const router = createRouter(registry);
       await router.start();
 
-      // start()에서 이미 mount 호출되었으므로 확인
+      // Verify mount was already called from start()
       expect(mountCalls).toContain('app1');
     });
 
-    it('연속 네비게이션 시 마지막 결과만 반영된다', async () => {
+    it('only reflects the last result on consecutive navigations', async () => {
       const afterGuardCalls: string[] = [];
       const registry = createMockRegistry();
       const router = createRouter(registry);
@@ -448,29 +448,29 @@ describe('Router 라우트 가드', () => {
 
       await router.start();
 
-      // 빠른 연속 네비게이션 — 모두 동시 발생
+      // Rapid consecutive navigation — all fired simultaneously
       void triggerNavigation();
       void triggerNavigation();
       await triggerNavigation();
 
-      // 최소 하나의 afterGuard가 실행되어야 함
+      // At least one afterGuard should have executed
       expect(afterGuardCalls.length).toBeGreaterThanOrEqual(1);
     });
   });
 
-  describe('History API 패치 복원', () => {
-    it('stop() 후 pushState가 원본으로 복원된다', async () => {
+  describe('History API patch restoration', () => {
+    it('restores pushState to original after stop()', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
       const originalPush = history.pushState;
 
       await router.start();
-      // start 후 pushState는 패치됨
+      // After start, pushState is patched
       expect(history.pushState).not.toBe(originalPush);
 
       router.stop();
-      // stop 후 pushState는 복원됨 (nativePushState 또는 이전 패치)
-      // esmap:navigate 이벤트가 발생하지 않는지 확인
+      // After stop, pushState is restored (nativePushState or previous patch)
+      // Verify that esmap:navigate event is not fired
       const navigateHandler = vi.fn();
       window.addEventListener('esmap:navigate', navigateHandler);
       history.pushState(null, '', '/test-restore');
@@ -479,7 +479,7 @@ describe('Router 라우트 가드', () => {
       expect(navigateHandler).not.toHaveBeenCalled();
     });
 
-    it('stop() 후 replaceState가 원본으로 복원된다', async () => {
+    it('restores replaceState to original after stop()', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
 
@@ -494,7 +494,7 @@ describe('Router 라우트 가드', () => {
       expect(navigateHandler).not.toHaveBeenCalled();
     });
 
-    it('두 번째 Router가 첫 번째의 패치를 덮어쓰지 않는다', async () => {
+    it('second Router does not overwrite the first Router patch', async () => {
       const registry1 = createMockRegistry();
       const registry2 = createMockRegistry();
       const router1 = createRouter(registry1);
@@ -503,25 +503,25 @@ describe('Router 라우트 가드', () => {
       await router1.start();
       await router2.start();
 
-      // router2를 stop해도 router1의 패치가 살아있으면 esmap:navigate 발생
+      // Stopping router2 still fires esmap:navigate if router1's patch is alive
       router2.stop();
 
-      // router1도 stop
+      // Also stop router1
       router1.stop();
 
-      // 모두 stop 후 패치 없는 상태
+      // All stopped, no patches remaining
       const navigateHandler = vi.fn();
       window.addEventListener('esmap:navigate', navigateHandler);
       history.pushState(null, '', '/test-no-patch');
       window.removeEventListener('esmap:navigate', navigateHandler);
 
-      // 마지막 stop이 복원하므로 이벤트 없어야 함
+      // Last stop restores, so no events should fire
       expect(navigateHandler).not.toHaveBeenCalled();
     });
   });
 
-  describe('프로그래매틱 네비게이션 API', () => {
-    it('push()로 새 URL로 이동한다', async () => {
+  describe('programmatic navigation API', () => {
+    it('navigates to a new URL with push()', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -534,7 +534,7 @@ describe('Router 라우트 가드', () => {
       expect(window.location.pathname).toBe('/new-page');
     });
 
-    it('replace()로 현재 URL을 교체한다', async () => {
+    it('replaces the current URL with replace()', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
 
@@ -545,7 +545,7 @@ describe('Router 라우트 가드', () => {
       expect(window.location.pathname).toBe('/replaced');
     });
 
-    it('push() 후 esmap:navigate 이벤트가 발생하여 라우트 변경이 트리거된다', async () => {
+    it('fires esmap:navigate event after push() to trigger route change', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
       ]);
@@ -565,7 +565,7 @@ describe('Router 라우트 가드', () => {
       expect(afterGuard.mock.calls.length).toBeGreaterThan(callCountAfterStart);
     });
 
-    it('currentRoute가 현재 위치 정보를 반환한다', async () => {
+    it('currentRoute returns the current location info', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
 
@@ -578,8 +578,8 @@ describe('Router 라우트 가드', () => {
     });
   });
 
-  describe('baseUrl 지원', () => {
-    it('baseUrl이 설정되면 push()에 prefix가 추가된다', async () => {
+  describe('baseUrl support', () => {
+    it('adds prefix to push() when baseUrl is set', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry, { baseUrl: '/my-app' });
 
@@ -590,7 +590,7 @@ describe('Router 라우트 가드', () => {
       expect(window.location.pathname).toBe('/my-app/settings');
     });
 
-    it('baseUrl이 설정되면 replace()에 prefix가 추가된다', async () => {
+    it('adds prefix to replace() when baseUrl is set', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry, { baseUrl: '/my-app' });
 
@@ -601,7 +601,7 @@ describe('Router 라우트 가드', () => {
       expect(window.location.pathname).toBe('/my-app/dashboard');
     });
 
-    it('이미 baseUrl prefix가 포함된 URL은 중복 추가하지 않는다', async () => {
+    it('does not add duplicate prefix when the URL already contains the baseUrl prefix', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry, { baseUrl: '/my-app' });
 
@@ -612,8 +612,8 @@ describe('Router 라우트 가드', () => {
       expect(window.location.pathname).toBe('/my-app/settings');
     });
 
-    it('baseUrl이 설정되면 activeWhen에 stripped pathname이 전달된다', async () => {
-      // /my-app/settings 에 접속한 상황에서 activeWhen이 /settings로 매칭하는지 확인
+    it('passes stripped pathname to activeWhen when baseUrl is set', async () => {
+      // Verify that activeWhen matches /settings when visiting /my-app/settings
       history.pushState(null, '', '/my-app/settings');
 
       const activeWhenFn = vi.fn((loc: Location) => loc.pathname.startsWith('/settings'));
@@ -624,11 +624,11 @@ describe('Router 라우트 가드', () => {
 
       await router.start();
 
-      // activeWhen이 stripped pathname (/settings)으로 호출되었는지 확인
+      // Verify activeWhen was called with the stripped pathname (/settings)
       expect(vi.mocked(registry.mountApp)).toHaveBeenCalledWith('app1');
     });
 
-    it('baseUrl 끝에 슬래시가 있어도 정규화된다', async () => {
+    it('normalizes trailing slash in baseUrl', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry, { baseUrl: '/my-app/' });
 
@@ -639,7 +639,7 @@ describe('Router 라우트 가드', () => {
       expect(window.location.pathname).toBe('/my-app/page');
     });
 
-    it('push()에 query string과 hash가 포함되어도 정상 동작한다', async () => {
+    it('works correctly when push() includes query string and hash', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry, { baseUrl: '/my-app' });
 
@@ -652,7 +652,7 @@ describe('Router 라우트 가드', () => {
       expect(window.location.hash).toBe('#section');
     });
 
-    it('baseUrl 없이 push()로 슬래시 없는 상대 경로를 사용할 수 있다', async () => {
+    it('can use push() with relative paths without baseUrl', async () => {
       const registry = createMockRegistry();
       const router = createRouter(registry);
 
@@ -663,7 +663,7 @@ describe('Router 라우트 가드', () => {
       expect(window.location.pathname).toBe('/relative-path');
     });
 
-    it('pathname이 baseUrl과 정확히 일치하면 /로 strip된다', async () => {
+    it('strips to / when pathname exactly matches baseUrl', async () => {
       history.pushState(null, '', '/my-app');
 
       const activeWhenFn = vi.fn((loc: Location) => loc.pathname === '/');
@@ -678,8 +678,8 @@ describe('Router 라우트 가드', () => {
     });
   });
 
-  describe('404 (onNoMatch) 처리', () => {
-    it('매칭되는 앱이 없으면 onNoMatch가 호출된다', async () => {
+  describe('404 (onNoMatch) handling', () => {
+    it('calls onNoMatch when no app matches', async () => {
       const onNoMatch = vi.fn();
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => false },
@@ -692,7 +692,7 @@ describe('Router 라우트 가드', () => {
       expect(onNoMatch.mock.calls[0][0].pathname).toBe(window.location.pathname);
     });
 
-    it('매칭되는 앱이 있으면 onNoMatch가 호출되지 않는다', async () => {
+    it('does not call onNoMatch when a matching app exists', async () => {
       const onNoMatch = vi.fn();
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => true },
@@ -704,7 +704,7 @@ describe('Router 라우트 가드', () => {
       expect(onNoMatch).not.toHaveBeenCalled();
     });
 
-    it('앱이 이미 마운트되어 있고 활성 상태면 onNoMatch가 호출되지 않는다', async () => {
+    it('does not call onNoMatch when an app is already mounted and active', async () => {
       const onNoMatch = vi.fn();
       const registry = createMockRegistry([
         { name: 'app1', status: 'MOUNTED', activeWhen: () => true },
@@ -716,7 +716,7 @@ describe('Router 라우트 가드', () => {
       expect(onNoMatch).not.toHaveBeenCalled();
     });
 
-    it('onNoMatch가 설정되지 않으면 매칭 실패 시에도 에러 없이 진행된다', async () => {
+    it('proceeds without error on match failure when onNoMatch is not set', async () => {
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => false },
       ]);
@@ -725,7 +725,7 @@ describe('Router 라우트 가드', () => {
       await expect(router.start()).resolves.toBeUndefined();
     });
 
-    it('onNoMatch에 RouteContext가 전달된다', async () => {
+    it('passes RouteContext to onNoMatch', async () => {
       const onNoMatch = vi.fn();
       const registry = createMockRegistry([
         { name: 'app1', status: 'NOT_LOADED', activeWhen: () => false },

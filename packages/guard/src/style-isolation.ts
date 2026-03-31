@@ -1,47 +1,47 @@
 /**
- * 자동 스타일시트 검색 및 스코핑.
- * MFE 앱이 마운트될 때 컨테이너 내부의 스타일을 자동으로 찾아 격리한다.
+ * Automatic stylesheet discovery and scoping.
+ * Automatically finds and isolates styles inside the container when an MFE app is mounted.
  */
 
 import { scopeCssText } from './css-scope.js';
 
-/** 자동 스타일 격리 옵션 */
+/** Automatic style isolation options */
 export interface StyleIsolationOptions {
-  /** 스코핑에 사용할 앱 이름 */
+  /** App name used for scoping */
   readonly appName: string;
-  /** 앱이 렌더링되는 컨테이너 요소 */
+  /** Container element where the app is rendered */
   readonly container: HTMLElement;
-  /** 전략: 'attribute' (data-attr 스코핑) 또는 'shadow' (Shadow DOM) */
+  /** Strategy: 'attribute' (data-attr scoping) or 'shadow' (Shadow DOM) */
   readonly strategy?: 'attribute' | 'shadow';
-  /** MutationObserver로 동적 추가 스타일을 감지할지 여부 */
+  /** Whether to detect dynamically added styles via MutationObserver */
   readonly observeDynamic?: boolean;
 }
 
-/** 스타일 격리를 제어하고 해제하기 위한 핸들 */
+/** Handle for controlling and releasing style isolation */
 export interface StyleIsolationHandle {
-  /** 옵저버를 중단하고 스코핑을 제거한다 */
+  /** Stops the observer and removes scoping */
   destroy(): void;
-  /** 스코핑된 스타일시트 개수를 반환한다 */
+  /** Returns the number of scoped stylesheets */
   getScopedCount(): number;
-  /** 모든 발견된 스타일을 강제로 다시 스코핑한다 */
+  /** Forcefully re-scopes all discovered styles */
   refresh(): void;
 }
 
-/** 스코핑된 스타일 요소의 원본 데이터 */
+/** Original data for a scoped style element */
 interface ScopedStyleRecord {
-  /** 스코핑된 요소 */
+  /** The scoped element */
   readonly element: HTMLStyleElement | HTMLLinkElement;
-  /** 원본 CSS 텍스트 (style 요소인 경우) */
+  /** Original CSS text (for style elements) */
   readonly originalCss: string | null;
-  /** 원본 link에 대해 생성된 scope wrapper (link 요소인 경우) */
+  /** Scope wrapper created for the original link (for link elements) */
   readonly wrapperStyle: HTMLStyleElement | null;
 }
 
 /**
- * 컨테이너 내부의 style 요소에 스코핑을 적용한다.
- * @param element - 스코핑할 style 요소
- * @param appName - 앱 이름
- * @returns 스코핑 기록
+ * Applies scoping to a style element inside the container.
+ * @param element - style element to scope
+ * @param appName - app name
+ * @returns scoping record
  */
 function scopeStyleElement(element: HTMLStyleElement, appName: string): ScopedStyleRecord {
   const originalCss = element.textContent ?? '';
@@ -56,10 +56,10 @@ function scopeStyleElement(element: HTMLStyleElement, appName: string): ScopedSt
 }
 
 /**
- * 컨테이너 내부의 link[rel="stylesheet"] 요소에 스코프 래퍼를 추가한다.
- * @param element - 스코핑할 link 요소
- * @param appName - 앱 이름
- * @returns 스코핑 기록
+ * Adds a scope wrapper to a link[rel="stylesheet"] element inside the container.
+ * @param element - link element to scope
+ * @param appName - app name
+ * @returns scoping record
  */
 function scopeLinkElement(element: HTMLLinkElement, appName: string): ScopedStyleRecord {
   const wrapper = document.createElement('style');
@@ -80,8 +80,8 @@ function scopeLinkElement(element: HTMLLinkElement, appName: string): ScopedStyl
 }
 
 /**
- * 스코핑 기록을 복원하여 원본 상태로 되돌린다.
- * @param record - 복원할 스코핑 기록
+ * Restores a scoping record back to its original state.
+ * @param record - scoping record to restore
  */
 function restoreScopedRecord(record: ScopedStyleRecord): void {
   if (record.originalCss !== null && record.element instanceof HTMLStyleElement) {
@@ -97,10 +97,10 @@ function restoreScopedRecord(record: ScopedStyleRecord): void {
 }
 
 /**
- * 컨테이너 내부의 모든 스타일 요소를 검색하여 스코핑한다.
- * @param container - 검색 대상 컨테이너
- * @param appName - 앱 이름
- * @returns 스코핑 기록 배열
+ * Discovers and scopes all style elements inside the container.
+ * @param container - container to search
+ * @param appName - app name
+ * @returns array of scoping records
  */
 function discoverAndScope(container: HTMLElement, appName: string): readonly ScopedStyleRecord[] {
   const records: ScopedStyleRecord[] = [];
@@ -123,10 +123,10 @@ function discoverAndScope(container: HTMLElement, appName: string): readonly Sco
 }
 
 /**
- * 자동 스타일 격리를 생성한다.
- * 컨테이너 내부의 기존 스타일을 스코핑하고, 옵션에 따라 동적 추가도 감시한다.
- * @param options - 스타일 격리 옵션
- * @returns 격리 제어 핸들
+ * Creates automatic style isolation.
+ * Scopes existing styles inside the container and optionally observes dynamic additions.
+ * @param options - style isolation options
+ * @returns isolation control handle
  */
 export function createStyleIsolation(options: StyleIsolationOptions): StyleIsolationHandle {
   const { appName, container, strategy = 'attribute', observeDynamic = false } = options;
@@ -162,9 +162,9 @@ export function createStyleIsolation(options: StyleIsolationOptions): StyleIsola
 }
 
 /**
- * Shadow DOM 기반 격리 핸들을 생성한다.
- * @param container - 대상 컨테이너
- * @returns 격리 제어 핸들
+ * Creates a Shadow DOM-based isolation handle.
+ * @param container - target container
+ * @returns isolation control handle
  */
 function createShadowIsolation(container: HTMLElement): StyleIsolationHandle {
   const shadowRoot = container.shadowRoot ?? container.attachShadow({ mode: 'open' });
@@ -181,17 +181,17 @@ function createShadowIsolation(container: HTMLElement): StyleIsolationHandle {
     },
 
     refresh() {
-      // Shadow DOM은 이미 격리되어 있으므로 추가 작업 불필요
+      // Shadow DOM is already isolated, no additional work needed
     },
   };
 }
 
 /**
- * 동적 스타일 추가를 감시하는 MutationObserver를 생성한다.
- * @param container - 감시 대상 컨테이너
- * @param appName - 앱 이름
- * @param records - 스코핑 기록을 축적할 배열
- * @returns 연결된 MutationObserver
+ * Creates a MutationObserver that watches for dynamically added styles.
+ * @param container - container to observe
+ * @param appName - app name
+ * @param records - array to accumulate scoping records
+ * @returns connected MutationObserver
  */
 function createStyleObserver(
   container: HTMLElement,

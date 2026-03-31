@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mountParcel } from './parcel.js';
 import type { MfeApp } from '@esmap/shared';
 
-/** 테스트용 MfeApp 목을 생성한다 */
+/** Creates a mock MfeApp for testing */
 function createMockApp(options?: { withUpdate?: boolean }): MfeApp {
   const app: MfeApp = {
     bootstrap: vi.fn().mockResolvedValue(undefined),
@@ -25,7 +25,7 @@ describe('mountParcel', () => {
     document.body.appendChild(container);
   });
 
-  it('앱을 직접 전달하면 bootstrap과 mount를 호출한다', async () => {
+  it('calls bootstrap and mount when an app is passed directly', async () => {
     const app = createMockApp();
     const parcel = await mountParcel({ app, domElement: container });
 
@@ -34,7 +34,7 @@ describe('mountParcel', () => {
     expect(parcel.status).toBe('MOUNTED');
   });
 
-  it('비동기 로더 함수를 전달하면 앱을 로드하고 마운트한다', async () => {
+  it('loads and mounts the app when an async loader function is passed', async () => {
     const app = createMockApp();
     const loader = vi.fn().mockResolvedValue(app);
     const parcel = await mountParcel({ app: loader, domElement: container });
@@ -44,7 +44,7 @@ describe('mountParcel', () => {
     expect(parcel.status).toBe('MOUNTED');
   });
 
-  it('초기 props가 있고 앱이 update를 구현하면 mount 후 update를 호출한다', async () => {
+  it('calls update after mount when initial props are provided and app implements update', async () => {
     const app = createMockApp({ withUpdate: true });
     const props = { theme: 'dark' };
     await mountParcel({ app, domElement: container, props });
@@ -52,7 +52,7 @@ describe('mountParcel', () => {
     expect(app.update).toHaveBeenCalledWith(props);
   });
 
-  it('초기 props가 있지만 앱이 update를 구현하지 않으면 update를 호출하지 않는다', async () => {
+  it('does not call update when initial props are provided but app does not implement update', async () => {
     const app = createMockApp();
     const props = { theme: 'dark' };
     const parcel = await mountParcel({ app, domElement: container, props });
@@ -60,7 +60,7 @@ describe('mountParcel', () => {
     expect(parcel.status).toBe('MOUNTED');
   });
 
-  it('unmount를 호출하면 NOT_MOUNTED 상태가 된다', async () => {
+  it('transitions to NOT_MOUNTED when unmount is called', async () => {
     const app = createMockApp();
     const parcel = await mountParcel({ app, domElement: container });
 
@@ -70,16 +70,16 @@ describe('mountParcel', () => {
     expect(parcel.status).toBe('NOT_MOUNTED');
   });
 
-  it('이미 언마운트된 parcel을 다시 언마운트하면 에러를 던진다', async () => {
+  it('throws an error when unmounting an already unmounted parcel', async () => {
     const app = createMockApp();
     const parcel = await mountParcel({ app, domElement: container });
 
     await parcel.unmount();
 
-    await expect(parcel.unmount()).rejects.toThrow('unmount할 수 없는 상태');
+    await expect(parcel.unmount()).rejects.toThrow('Cannot unmount in current state');
   });
 
-  it('update를 호출하면 앱의 update를 실행한다', async () => {
+  it('invokes the app update when update is called', async () => {
     const app = createMockApp({ withUpdate: true });
     const parcel = await mountParcel({ app, domElement: container });
 
@@ -89,51 +89,51 @@ describe('mountParcel', () => {
     expect(app.update).toHaveBeenCalledWith(newProps);
   });
 
-  it('앱이 update를 구현하지 않으면 update 호출 시 에러를 던진다', async () => {
+  it('throws an error when update is called but app does not implement update', async () => {
     const app = createMockApp();
     const parcel = await mountParcel({ app, domElement: container });
 
     await expect(parcel.update({ foo: 'bar' })).rejects.toThrow(
-      'update 라이프사이클을 구현하지 않았습니다',
+      'App does not implement the update lifecycle',
     );
   });
 
-  it('언마운트 상태에서 update를 호출하면 에러를 던진다', async () => {
+  it('throws an error when update is called in unmounted state', async () => {
     const app = createMockApp({ withUpdate: true });
     const parcel = await mountParcel({ app, domElement: container });
 
     await parcel.unmount();
 
-    await expect(parcel.update({ foo: 'bar' })).rejects.toThrow('update할 수 없는 상태');
+    await expect(parcel.update({ foo: 'bar' })).rejects.toThrow('Cannot update in current state');
   });
 
-  it('bootstrap이 실패하면 LOAD_ERROR 상태가 된다', async () => {
+  it('transitions to LOAD_ERROR when bootstrap fails', async () => {
     const app = createMockApp();
-    vi.mocked(app.bootstrap).mockRejectedValue(new Error('bootstrap 실패'));
+    vi.mocked(app.bootstrap).mockRejectedValue(new Error('bootstrap failed'));
 
-    await expect(mountParcel({ app, domElement: container })).rejects.toThrow('bootstrap 실패');
+    await expect(mountParcel({ app, domElement: container })).rejects.toThrow('bootstrap failed');
   });
 
-  it('mount가 실패하면 LOAD_ERROR 상태가 된다', async () => {
+  it('transitions to LOAD_ERROR when mount fails', async () => {
     const app = createMockApp();
-    vi.mocked(app.mount).mockRejectedValue(new Error('mount 실패'));
+    vi.mocked(app.mount).mockRejectedValue(new Error('mount failed'));
 
-    await expect(mountParcel({ app, domElement: container })).rejects.toThrow('mount 실패');
+    await expect(mountParcel({ app, domElement: container })).rejects.toThrow('mount failed');
   });
 
-  it('unmount가 실패하면 LOAD_ERROR 상태가 되고 에러를 다시 던진다', async () => {
+  it('transitions to LOAD_ERROR and re-throws when unmount fails', async () => {
     const app = createMockApp();
-    vi.mocked(app.unmount).mockRejectedValue(new Error('unmount 실패'));
+    vi.mocked(app.unmount).mockRejectedValue(new Error('unmount failed'));
 
     const parcel = await mountParcel({ app, domElement: container });
 
-    await expect(parcel.unmount()).rejects.toThrow('unmount 실패');
+    await expect(parcel.unmount()).rejects.toThrow('unmount failed');
     expect(parcel.status).toBe('LOAD_ERROR');
   });
 
-  it('비동기 로더가 실패하면 에러를 전파한다', async () => {
-    const loader = vi.fn().mockRejectedValue(new Error('로드 실패'));
+  it('propagates the error when the async loader fails', async () => {
+    const loader = vi.fn().mockRejectedValue(new Error('load failed'));
 
-    await expect(mountParcel({ app: loader, domElement: container })).rejects.toThrow('로드 실패');
+    await expect(mountParcel({ app: loader, domElement: container })).rejects.toThrow('load failed');
   });
 });

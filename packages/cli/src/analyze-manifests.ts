@@ -2,12 +2,12 @@ import { readFile } from 'node:fs/promises';
 import type { MfeManifest } from '@esmap/shared';
 import type { AppDependencyDeclaration } from './analyze-deps.js';
 
-/** 파일 읽기 함수의 타입 (테스트 주입용) */
+/** File read function type (for test injection) */
 type ReadFileFn = (path: string, encoding: BufferEncoding) => Promise<string | Buffer>;
 
 /**
- * 값이 MfeManifest 구조를 만족하는지 확인한다.
- * @param value - 검증할 값
+ * Checks whether a value satisfies the MfeManifest structure.
+ * @param value - value to validate
  */
 function isMfeManifest(value: unknown): value is MfeManifest {
   if (typeof value !== 'object' || value === null) return false;
@@ -20,9 +20,9 @@ function isMfeManifest(value: unknown): value is MfeManifest {
 }
 
 /**
- * 매니페스트 객체에서 의존성 버전 맵을 안전하게 추출한다.
- * metadata.dependencyVersions에 Record<string, string> 형태로 저장되어 있다고 가정한다.
- * @param manifest - MFE 매니페스트
+ * Safely extracts the dependency version map from a manifest object.
+ * Assumes it is stored as Record<string, string> in metadata.dependencyVersions.
+ * @param manifest - MFE manifest
  */
 function extractVersionMap(manifest: MfeManifest): ReadonlyMap<string, string> {
   const result = new Map<string, string>();
@@ -47,9 +47,9 @@ function extractVersionMap(manifest: MfeManifest): ReadonlyMap<string, string> {
 }
 
 /**
- * 매니페스트 파일 경로 목록에서 의존성 선언을 추출한다.
- * @param manifestPaths - 매니페스트 JSON 파일 경로 목록
- * @param readFn - 파일 읽기 함수 (테스트 주입용)
+ * Extracts dependency declarations from a list of manifest file paths.
+ * @param manifestPaths - list of manifest JSON file paths
+ * @param readFn - file read function (for test injection)
  */
 export async function extractDeclarationsFromManifests(
   manifestPaths: readonly string[],
@@ -73,7 +73,7 @@ export async function extractDeclarationsFromManifests(
         dependencies,
       });
     } catch {
-      /* 파일을 읽을 수 없거나 JSON 파싱에 실패하면 건너뛴다 */
+      /* Skip if the file cannot be read or JSON parsing fails */
     }
   }
 

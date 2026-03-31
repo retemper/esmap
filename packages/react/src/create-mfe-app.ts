@@ -5,19 +5,19 @@ import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 
-/** React MFE 앱 생성 옵션 */
+/** React MFE app creation options */
 export interface ReactMfeAppOptions<P extends Record<string, unknown> = Record<string, unknown>> {
-  /** 마운트할 React 컴포넌트 */
+  /** React component to mount */
   readonly rootComponent: ComponentType<P>;
-  /** 컴포넌트를 감싸는 Wrapper (Provider 등). children을 렌더링해야 한다. */
+  /** Wrapper around the component (e.g., Provider). Must render children. */
   readonly wrapWith?: ComponentType<{ children: React.ReactNode }>;
-  /** 에러 바운더리 폴백 UI */
+  /** Error boundary fallback UI */
   readonly errorBoundary?: ComponentType<{ error: Error }>;
 }
 
 /**
- * React 컴포넌트를 esmap MfeApp 라이프사이클로 변환한다.
- * defineAdapter 기반으로 구현되어 createRoot/unmount를 자동 관리하며 메모리 누수를 방지한다.
+ * Converts a React component into an esmap MfeApp lifecycle.
+ * Built on defineAdapter, it automatically manages createRoot/unmount to prevent memory leaks.
  *
  * @example
  * ```tsx
@@ -27,16 +27,16 @@ export interface ReactMfeAppOptions<P extends Record<string, unknown> = Record<s
  * export default createReactMfeApp({ rootComponent: App });
  * ```
  *
- * @param options - React MFE 앱 옵션
- * @returns MfeApp 라이프사이클 객체
+ * @param options - React MFE app options
+ * @returns MfeApp lifecycle object
  */
 export function createReactMfeApp<P extends Record<string, unknown> = Record<string, unknown>>(
   options: ReactMfeAppOptions<P>,
 ): MfeApp {
-  /** 최신 props를 보관한다. mount 시 초기값은 빈 객체 */
+  /** Holds the latest props. Initial value is an empty object at mount time */
   const propsRef: { current: Readonly<Record<string, unknown>> } = { current: {} };
 
-  /** 현재 props로 컴포넌트 트리를 동기적으로 렌더링한다 */
+  /** Synchronously renders the component tree with the current props */
   function renderToRoot(root: Root): void {
     const componentElement = createElement(
       options.rootComponent,
@@ -47,7 +47,7 @@ export function createReactMfeApp<P extends Record<string, unknown> = Record<str
       ? createElement(options.wrapWith, null, componentElement)
       : componentElement;
 
-    // flushSync로 동기 렌더링 — mount() 반환 시 DOM이 준비됨을 보장
+    // Synchronous rendering via flushSync -- guarantees DOM is ready when mount() returns
     flushSync(() => {
       root.render(rendered);
     });

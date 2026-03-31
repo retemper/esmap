@@ -8,7 +8,7 @@ const MINIMAL_CONFIG: EsmapConfig = {
 };
 
 describe('resolveConfig', () => {
-  it('서버 기본값을 채운다', () => {
+  it('fills in server defaults', () => {
     const result = resolveConfig(MINIMAL_CONFIG);
 
     expect(result.server.port).toBe(3100);
@@ -16,7 +16,7 @@ describe('resolveConfig', () => {
     expect(result.server.auth.type).toBe('none');
   });
 
-  it('devtools 기본값을 채운다', () => {
+  it('fills in devtools defaults', () => {
     const result = resolveConfig(MINIMAL_CONFIG);
 
     expect(result.devtools.enabled).toBe(true);
@@ -24,12 +24,12 @@ describe('resolveConfig', () => {
     expect(result.devtools.trigger).toBe('Alt+D');
   });
 
-  it('cdnBase 기본값은 빈 문자열이다', () => {
+  it('defaults cdnBase to an empty string', () => {
     const result = resolveConfig(MINIMAL_CONFIG);
     expect(result.cdnBase).toBe('');
   });
 
-  it('사용자 설정이 기본값을 덮어쓴다', () => {
+  it('user settings override defaults', () => {
     const config: EsmapConfig = {
       ...MINIMAL_CONFIG,
       cdnBase: 'https://cdn.flex.team',
@@ -46,7 +46,7 @@ describe('resolveConfig', () => {
     expect(result.devtools.trigger).toBe('Ctrl+Shift+D');
   });
 
-  it('apps와 shared를 그대로 전달한다', () => {
+  it('passes apps and shared through as-is', () => {
     const result = resolveConfig(MINIMAL_CONFIG);
 
     expect(result.apps).toStrictEqual(MINIMAL_CONFIG.apps);

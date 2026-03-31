@@ -6,19 +6,19 @@ import { readFile, rm, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-/** writeBundle 훅을 추출하여 실행하는 헬퍼 */
+/** Helper that extracts and calls the writeBundle hook */
 async function callWriteBundle(
   plugin: Plugin,
   outDir: string,
   bundle: OutputBundle,
 ): Promise<void> {
   const hook = plugin.writeBundle;
-  if (typeof hook !== 'function') throw new Error('writeBundle hook이 없음');
+  if (typeof hook !== 'function') throw new Error('writeBundle hook not found');
   const outputOptions = { dir: outDir } as NormalizedOutputOptions;
   await hook.call({} as never, outputOptions, bundle);
 }
 
-/** 테스트용 OutputChunk 생성 */
+/** Creates a test OutputChunk */
 function createChunk(fileName: string, isEntry: boolean, isDynamicEntry = false): OutputChunk {
   return {
     type: 'chunk',
@@ -43,7 +43,7 @@ function createChunk(fileName: string, isEntry: boolean, isDynamicEntry = false)
   };
 }
 
-/** 테스트용 OutputAsset 생성 */
+/** Creates a test OutputAsset */
 function createAsset(fileName: string): OutputAsset {
   return {
     type: 'asset',
@@ -68,24 +68,24 @@ describe('esmapManifest', () => {
     await rm(testDir, { recursive: true, force: true });
   });
 
-  it('플러그인 이름이 esmap:manifest이다', () => {
+  it('has plugin name esmap:manifest', () => {
     const plugin = esmapManifest({ name: '@flex/checkout' });
     expect(plugin.name).toBe('esmap:manifest');
   });
 
-  it('빌드 시에만 적용된다', () => {
+  it('only applies during build', () => {
     const plugin = esmapManifest({ name: '@flex/checkout' });
     expect(plugin.apply).toBe('build');
   });
 
-  it('shared 의존성을 externals로 설정한다', () => {
+  it('sets shared dependencies as externals', () => {
     const plugin = esmapManifest({
       name: '@flex/checkout',
       shared: ['react', 'react-dom'],
     });
 
     const configHook = plugin.config;
-    if (typeof configHook !== 'function') throw new Error('config hook이 없음');
+    if (typeof configHook !== 'function') throw new Error('config hook not found');
 
     const result = configHook.call({} as never, {} as never, {} as never);
     expect(result).toStrictEqual({
@@ -97,17 +97,17 @@ describe('esmapManifest', () => {
     });
   });
 
-  it('shared가 없으면 빈 config를 반환한다', () => {
+  it('returns an empty config when shared is not provided', () => {
     const plugin = esmapManifest({ name: '@flex/checkout' });
 
     const configHook = plugin.config;
-    if (typeof configHook !== 'function') throw new Error('config hook이 없음');
+    if (typeof configHook !== 'function') throw new Error('config hook not found');
 
     const result = configHook.call({} as never, {} as never, {} as never);
     expect(result).toStrictEqual({});
   });
 
-  it('빌드 결과물에서 manifest를 생성한다', async () => {
+  it('generates a manifest from the build output', async () => {
     const plugin = esmapManifest({
       name: '@flex/checkout',
       version: '1.2.3',
@@ -141,7 +141,7 @@ describe('esmapManifest', () => {
     expect(manifest.modulepreload).toContain('checkout-page-def456.js');
   });
 
-  it('커스텀 출력 파일명을 지정할 수 있다', async () => {
+  it('supports specifying a custom output file name', async () => {
     const plugin = esmapManifest({
       name: '@flex/checkout',
       version: '1.0.0',
@@ -159,7 +159,7 @@ describe('esmapManifest', () => {
     expect(manifest.name).toBe('@flex/checkout');
   });
 
-  it('엔트리 청크가 없으면 첫 번째 JS 파일을 entry로 사용한다', async () => {
+  it('uses the first JS file as entry when no entry chunk exists', async () => {
     const plugin = esmapManifest({
       name: '@flex/checkout',
       version: '1.0.0',

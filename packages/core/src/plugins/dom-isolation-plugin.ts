@@ -1,34 +1,34 @@
 /**
- * DOM 쿼리 격리 플러그인.
- * 앱 mount 시 document의 쿼리 메서드를 앱 컨테이너로 스코핑하고,
- * unmount 시 원본으로 복원한다.
- * micro-app(JD.com)의 Element Isolation 패턴에서 영감을 받았다.
+ * DOM query isolation plugin.
+ * Scopes document query methods to app containers on mount,
+ * and restores originals on unmount.
+ * Inspired by micro-app (JD.com)'s Element Isolation pattern.
  */
 
 import { createDomIsolation } from '@esmap/sandbox';
 import type { DomIsolationHandle } from '@esmap/sandbox';
 import type { EsmapPlugin, PluginContext, PluginCleanup } from '../plugin.js';
 
-/** DOM 격리 플러그인 옵션 */
+/** DOM isolation plugin options */
 export interface DomIsolationPluginOptions {
   /**
-   * DOM 격리를 적용하지 않을 앱 이름 목록.
-   * 글로벌 네비게이션 등 document 전체 접근이 필요한 앱에 사용한다.
+   * List of app names to exclude from DOM isolation.
+   * Used for apps that need full document access, such as global navigation.
    */
   readonly exclude?: readonly string[];
   /**
-   * 글로벌 셀렉터 패턴. 이 패턴에 매칭되는 쿼리는 컨테이너 격리를 우회한다.
-   * 예: ['#global-modal', '[data-esmap-global]']
+   * Global selector patterns. Queries matching these patterns bypass container isolation.
+   * Example: ['#global-modal', '[data-esmap-global]']
    */
   readonly globalSelectors?: readonly string[];
 }
 
 /**
- * DOM 쿼리 격리 플러그인을 생성한다.
- * 앱 mount 시 document.querySelector 등을 앱 컨테이너로 스코핑한다.
+ * Creates a DOM query isolation plugin.
+ * Scopes document.querySelector and similar methods to app containers on mount.
  *
- * @param options - DOM 격리 플러그인 옵션
- * @returns EsmapPlugin 인스턴스
+ * @param options - DOM isolation plugin options
+ * @returns EsmapPlugin instance
  */
 export function domIsolationPlugin(options: DomIsolationPluginOptions = {}): EsmapPlugin {
   const { exclude = [], globalSelectors = [] } = options;

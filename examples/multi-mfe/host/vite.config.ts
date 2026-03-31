@@ -16,18 +16,18 @@ export default defineConfig({
       configureServer(server) {
         const distAppsDir = resolve(__dirname, '../dist/apps');
 
-        // /apps/* 요청을 dist/apps/*로 라우팅
+        // Route /apps/* requests to dist/apps/*
         server.middlewares.use(async (req, res, next) => {
           if (!req.url?.startsWith('/apps/')) {
             next();
             return;
           }
 
-          // query string 제거 (Vite가 ?import 등을 붙일 수 있음)
+          // Remove query string (Vite may append ?import etc.)
           const urlPath = req.url.split('?')[0];
           const filePath = resolve(distAppsDir, urlPath.slice(6));
 
-          // 디렉토리 트래버설 방지
+          // Prevent directory traversal
           if (!filePath.startsWith(distAppsDir)) {
             next();
             return;
@@ -45,8 +45,8 @@ export default defineConfig({
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.end(content);
           } catch {
-            // 존재하지 않는 앱 JS 파일 요청 시, HTML 폴백 대신 에러를 throw하는 JS 모듈을 반환한다.
-            // 이렇게 해야 AppRegistry의 error boundary가 정상적으로 에러를 잡을 수 있다.
+            // For non-existent app JS file requests, return a JS module that throws an error instead of HTML fallback.
+            // This allows AppRegistry's error boundary to properly catch the error.
             const ext = filePath.split('.').pop();
             if (ext === 'js') {
               res.setHeader('Content-Type', 'application/javascript');

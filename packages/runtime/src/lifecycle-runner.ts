@@ -1,47 +1,47 @@
 import type { MfeApp, MfeAppStatus } from '@esmap/shared';
 
-/** lifecycle 상태 변경 콜백 */
+/** Lifecycle status change callback */
 type StatusChangeCallback = (from: MfeAppStatus, to: MfeAppStatus) => void;
 
-/** createLifecycleRunner 옵션 */
+/** createLifecycleRunner options */
 export interface LifecycleRunnerOptions {
-  /** 실행 대상 MfeApp */
+  /** Target MfeApp to execute */
   readonly app: MfeApp;
-  /** 마운트 대상 DOM 요소 */
+  /** Target DOM element for mounting */
   readonly container: HTMLElement;
-  /** 상태 변경 시 호출되는 콜백 */
+  /** Callback invoked on status changes */
   readonly onStatusChange?: StatusChangeCallback;
 }
 
 /**
- * MfeApp의 라이프사이클을 안전하게 실행하는 러너.
- * 상태 전이 가드와 에러 처리를 캡슐화한다.
+ * Runner that safely executes MfeApp lifecycle.
+ * Encapsulates state transition guards and error handling.
  */
 export interface LifecycleRunner {
-  /** 현재 라이프사이클 상태 */
+  /** Current lifecycle status */
   readonly status: MfeAppStatus;
-  /** bootstrap을 실행한다. NOT_LOADED → BOOTSTRAPPING → NOT_MOUNTED */
+  /** Executes bootstrap. NOT_LOADED -> BOOTSTRAPPING -> NOT_MOUNTED */
   bootstrap(): Promise<void>;
-  /** mount를 실행한다. NOT_MOUNTED → MOUNTED */
+  /** Executes mount. NOT_MOUNTED -> MOUNTED */
   mount(): Promise<void>;
-  /** unmount를 실행한다. MOUNTED → UNMOUNTING → NOT_MOUNTED */
+  /** Executes unmount. MOUNTED -> UNMOUNTING -> NOT_MOUNTED */
   unmount(): Promise<void>;
-  /** props를 업데이트한다. MOUNTED 상태에서만 유효하다. */
+  /** Updates props. Only valid in MOUNTED state. */
   update(props: Readonly<Record<string, unknown>>): Promise<void>;
 }
 
 /**
- * MfeApp 라이프사이클 러너를 생성한다.
- * AppRegistry와 Parcel이 공유하는 상태 전이 로직을 캡슐화한다.
+ * Creates an MfeApp lifecycle runner.
+ * Encapsulates state transition logic shared by AppRegistry and Parcel.
  *
- * @param options - 러너 옵션
- * @returns LifecycleRunner 인스턴스
+ * @param options - runner options
+ * @returns LifecycleRunner instance
  */
 export function createLifecycleRunner(options: LifecycleRunnerOptions): LifecycleRunner {
   const { app, container, onStatusChange } = options;
   const state: { status: MfeAppStatus } = { status: 'NOT_LOADED' };
 
-  /** 상태를 전이하고 콜백을 호출한다 */
+  /** Transitions state and invokes callback */
   function transition(to: MfeAppStatus): void {
     const from = state.status;
     state.status = to;
@@ -68,7 +68,7 @@ export function createLifecycleRunner(options: LifecycleRunnerOptions): Lifecycl
 
     async mount(): Promise<void> {
       if (state.status !== 'NOT_MOUNTED') {
-        throw new Error(`mount할 수 없는 상태입니다: ${state.status}`);
+        throw new Error(`Cannot mount in current state: ${state.status}`);
       }
 
       try {
@@ -82,7 +82,7 @@ export function createLifecycleRunner(options: LifecycleRunnerOptions): Lifecycl
 
     async unmount(): Promise<void> {
       if (state.status !== 'MOUNTED') {
-        throw new Error(`unmount할 수 없는 상태입니다: ${state.status}`);
+        throw new Error(`Cannot unmount in current state: ${state.status}`);
       }
 
       transition('UNMOUNTING');
@@ -97,11 +97,11 @@ export function createLifecycleRunner(options: LifecycleRunnerOptions): Lifecycl
 
     async update(props: Readonly<Record<string, unknown>>): Promise<void> {
       if (state.status !== 'MOUNTED') {
-        throw new Error(`update할 수 없는 상태입니다: ${state.status}`);
+        throw new Error(`Cannot update in current state: ${state.status}`);
       }
 
       if (!app.update) {
-        throw new Error('앱이 update 라이프사이클을 구현하지 않았습니다');
+        throw new Error('App does not implement the update lifecycle');
       }
 
       await app.update(props);

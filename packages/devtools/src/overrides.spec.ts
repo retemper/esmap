@@ -15,11 +15,11 @@ describe('overrides', () => {
   });
 
   describe('getOverrides', () => {
-    it('localStorage가 비어있으면 빈 배열을 반환한다', () => {
+    it('returns an empty array when localStorage is empty', () => {
       expect(getOverrides()).toStrictEqual([]);
     });
 
-    it('저장된 override를 반환한다', () => {
+    it('returns stored overrides', () => {
       localStorage.setItem(
         'esmap:overrides',
         JSON.stringify([{ specifier: 'react', url: 'http://localhost:3000/react.js' }]),
@@ -29,17 +29,17 @@ describe('overrides', () => {
       expect(result).toStrictEqual([{ specifier: 'react', url: 'http://localhost:3000/react.js' }]);
     });
 
-    it('잘못된 JSON이면 빈 배열을 반환한다', () => {
+    it('returns an empty array for invalid JSON', () => {
       localStorage.setItem('esmap:overrides', 'not-json');
       expect(getOverrides()).toStrictEqual([]);
     });
 
-    it('배열이 아닌 값이면 빈 배열을 반환한다', () => {
+    it('returns an empty array for non-array values', () => {
       localStorage.setItem('esmap:overrides', '"string"');
       expect(getOverrides()).toStrictEqual([]);
     });
 
-    it('유효하지 않은 엔트리를 필터링한다', () => {
+    it('filters out invalid entries', () => {
       localStorage.setItem(
         'esmap:overrides',
         JSON.stringify([
@@ -56,7 +56,7 @@ describe('overrides', () => {
   });
 
   describe('setOverride', () => {
-    it('새 override를 추가한다', () => {
+    it('adds a new override', () => {
       setOverride('react', 'http://localhost:3000/react.js');
 
       const result = getOverrides();
@@ -67,7 +67,7 @@ describe('overrides', () => {
       });
     });
 
-    it('동일 specifier가 있으면 URL을 갱신한다', () => {
+    it('updates the URL when the same specifier already exists', () => {
       setOverride('react', 'http://localhost:3000/react-old.js');
       setOverride('react', 'http://localhost:3000/react-new.js');
 
@@ -76,7 +76,7 @@ describe('overrides', () => {
       expect(result[0].url).toBe('http://localhost:3000/react-new.js');
     });
 
-    it('여러 specifier를 독립적으로 관리한다', () => {
+    it('manages multiple specifiers independently', () => {
       setOverride('react', 'http://localhost/react.js');
       setOverride('vue', 'http://localhost/vue.js');
 
@@ -86,7 +86,7 @@ describe('overrides', () => {
   });
 
   describe('removeOverride', () => {
-    it('특정 specifier의 override를 제거한다', () => {
+    it('removes the override for a specific specifier', () => {
       setOverride('react', 'http://localhost/react.js');
       setOverride('vue', 'http://localhost/vue.js');
 
@@ -97,7 +97,7 @@ describe('overrides', () => {
       expect(result[0].specifier).toBe('vue');
     });
 
-    it('존재하지 않는 specifier를 제거해도 에러가 없다', () => {
+    it('does not throw when removing a nonexistent specifier', () => {
       setOverride('react', 'http://localhost/react.js');
       removeOverride('vue');
 
@@ -106,7 +106,7 @@ describe('overrides', () => {
   });
 
   describe('clearOverrides', () => {
-    it('모든 override를 제거한다', () => {
+    it('removes all overrides', () => {
       setOverride('react', 'http://localhost/react.js');
       setOverride('vue', 'http://localhost/vue.js');
 
@@ -117,7 +117,7 @@ describe('overrides', () => {
   });
 
   describe('applyOverrides', () => {
-    it('override가 없으면 원본을 그대로 반환한다', () => {
+    it('returns the original when there are no overrides', () => {
       const importMap: ImportMap = {
         imports: { react: 'https://cdn.example.com/react.js' },
       };
@@ -126,7 +126,7 @@ describe('overrides', () => {
       expect(result).toBe(importMap);
     });
 
-    it('override가 있는 specifier의 URL을 대체한다', () => {
+    it('replaces the URL for overridden specifiers', () => {
       setOverride('react', 'http://localhost:3000/react.js');
 
       const importMap: ImportMap = {
@@ -142,7 +142,7 @@ describe('overrides', () => {
       expect(result.imports.vue).toBe('https://cdn.example.com/vue.js');
     });
 
-    it('import map에 없는 specifier의 override는 무시한다', () => {
+    it('ignores overrides for specifiers not in the import map', () => {
       setOverride('angular', 'http://localhost/angular.js');
 
       const importMap: ImportMap = {
@@ -153,7 +153,7 @@ describe('overrides', () => {
       expect(result.imports).toStrictEqual({ react: 'https://cdn.example.com/react.js' });
     });
 
-    it('원본 import map을 변경하지 않는다', () => {
+    it('does not modify the original import map', () => {
       setOverride('react', 'http://localhost:3000/react.js');
 
       const importMap: ImportMap = {
@@ -165,7 +165,7 @@ describe('overrides', () => {
       expect(importMap.imports.react).toBe('https://cdn.example.com/react.js');
     });
 
-    it('scopes와 integrity를 보존한다', () => {
+    it('preserves scopes and integrity', () => {
       setOverride('react', 'http://localhost/react.js');
 
       const importMap: ImportMap = {
@@ -182,16 +182,16 @@ describe('overrides', () => {
   });
 
   describe('hasActiveOverrides', () => {
-    it('override가 없으면 false를 반환한다', () => {
+    it('returns false when there are no overrides', () => {
       expect(hasActiveOverrides()).toBe(false);
     });
 
-    it('override가 있으면 true를 반환한다', () => {
+    it('returns true when overrides exist', () => {
       setOverride('react', 'http://localhost/react.js');
       expect(hasActiveOverrides()).toBe(true);
     });
 
-    it('모두 제거한 후 false를 반환한다', () => {
+    it('returns false after removing all overrides', () => {
       setOverride('react', 'http://localhost/react.js');
       clearOverrides();
       expect(hasActiveOverrides()).toBe(false);

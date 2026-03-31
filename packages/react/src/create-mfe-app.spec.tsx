@@ -2,17 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createElement, type ReactNode } from 'react';
 import { createReactMfeApp } from './create-mfe-app.js';
 
-/** 테스트용 간단한 React 컴포넌트 */
+/** Simple React component for testing */
 function TestApp(): ReactNode {
   return createElement('div', { 'data-testid': 'test-app' }, 'Hello MFE');
 }
 
-/** 테스트용 props 받는 컴포넌트 */
+/** Test component that accepts props */
 function PropsApp({ name }: { name: string }): ReactNode {
   return createElement('span', null, `Hello ${name}`);
 }
 
-/** 테스트용 Wrapper 컴포넌트 */
+/** Test Wrapper component */
 function TestWrapper({ children }: { children: ReactNode }): ReactNode {
   return createElement('div', { 'data-testid': 'wrapper' }, children);
 }
@@ -22,7 +22,7 @@ describe('createReactMfeApp', () => {
     document.body.innerHTML = '<div id="app"></div>';
   });
 
-  it('MfeApp 라이프사이클 인터페이스를 반환한다', () => {
+  it('returns an MfeApp lifecycle interface', () => {
     const app = createReactMfeApp({ rootComponent: TestApp });
 
     expect(typeof app.bootstrap).toBe('function');
@@ -31,12 +31,12 @@ describe('createReactMfeApp', () => {
     expect(typeof app.update).toBe('function');
   });
 
-  it('bootstrap은 에러 없이 완료된다', async () => {
+  it('bootstrap completes without errors', async () => {
     const app = createReactMfeApp({ rootComponent: TestApp });
     await expect(app.bootstrap()).resolves.toStrictEqual(undefined);
   });
 
-  it('mount 후 컴포넌트가 DOM에 렌더링된다', async () => {
+  it('renders the component to the DOM after mount', async () => {
     const app = createReactMfeApp({ rootComponent: TestApp });
     const container = document.getElementById('app')!;
 
@@ -46,7 +46,7 @@ describe('createReactMfeApp', () => {
     expect(container.innerHTML).toContain('Hello MFE');
   });
 
-  it('unmount 후 DOM이 정리된다', async () => {
+  it('cleans up the DOM after unmount', async () => {
     const app = createReactMfeApp({ rootComponent: TestApp });
     const container = document.getElementById('app')!;
 
@@ -57,7 +57,7 @@ describe('createReactMfeApp', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('wrapWith로 Provider 래핑이 적용된다', async () => {
+  it('applies Provider wrapping via wrapWith', async () => {
     const app = createReactMfeApp({
       rootComponent: TestApp,
       wrapWith: TestWrapper,
@@ -71,7 +71,7 @@ describe('createReactMfeApp', () => {
     expect(container.innerHTML).toContain('Hello MFE');
   });
 
-  it('update로 props를 변경하면 리렌더링된다', async () => {
+  it('re-renders when props are changed via update', async () => {
     const app = createReactMfeApp({ rootComponent: PropsApp });
     const container = document.getElementById('app')!;
 
@@ -82,7 +82,7 @@ describe('createReactMfeApp', () => {
     expect(container.innerHTML).toContain('Hello World');
   });
 
-  it('unmount 후 다시 mount할 수 있다 (라우트 재진입)', async () => {
+  it('can mount again after unmount (route re-entry)', async () => {
     const app = createReactMfeApp({ rootComponent: TestApp });
     const container = document.getElementById('app')!;
 

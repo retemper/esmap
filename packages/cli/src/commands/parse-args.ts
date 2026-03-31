@@ -1,19 +1,19 @@
 /**
- * process.argv에서 커맨드와 플래그를 파싱한다.
- * yargs 같은 외부 의존성 없이 간단한 --key value 형태를 처리한다.
+ * Parses commands and flags from process.argv.
+ * Handles simple --key value format without external dependencies like yargs.
  */
 export interface ParsedArgs {
-  /** 서브커맨드 (예: "deploy", "generate") */
+  /** Subcommand (e.g., "deploy", "generate") */
   readonly command: string | undefined;
-  /** --key value 플래그 맵 */
+  /** --key value flag map */
   readonly flags: Readonly<Record<string, string>>;
-  /** --help 플래그 존재 여부 */
+  /** Whether the --help flag is present */
   readonly help: boolean;
 }
 
 /**
- * argv 배열을 파싱하여 커맨드와 플래그를 추출한다.
- * @param argv - process.argv (node 경로, 스크립트 경로 포함)
+ * Parses the argv array to extract the command and flags.
+ * @param argv - process.argv (includes node path and script path)
  */
 export function parseArgs(argv: readonly string[]): ParsedArgs {
   const args = argv.slice(2);
@@ -50,10 +50,10 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
 }
 
 /**
- * 필수 플래그가 존재하는지 검증하고 값을 반환한다.
- * @param flags - 파싱된 플래그 맵
- * @param name - 필수 플래그 이름
- * @param commandName - 에러 메시지에 표시할 커맨드 이름
+ * Validates that a required flag exists and returns its value.
+ * @param flags - parsed flag map
+ * @param name - required flag name
+ * @param commandName - command name to display in error messages
  */
 export function requireFlag(
   flags: Readonly<Record<string, string>>,
