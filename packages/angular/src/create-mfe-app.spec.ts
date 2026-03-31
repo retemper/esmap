@@ -160,10 +160,7 @@ describe('createAngularMfeApp', () => {
     await app.mount(container);
 
     expect(createApplication).toHaveBeenCalledWith({
-      providers: [
-        { provide: ESMAP_PROPS, useValue: expect.any(Function) },
-        mockProvider,
-      ],
+      providers: [{ provide: ESMAP_PROPS, useValue: expect.any(Function) }, mockProvider],
     });
   });
 
