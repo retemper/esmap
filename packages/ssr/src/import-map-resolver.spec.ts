@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { createImportMapResolver } from './import-map-resolver.js';
 
 describe('createImportMapResolver', () => {
-  describe('기본 specifier 해석', () => {
-    it('imports 맵에서 정확히 일치하는 specifier를 해석한다', () => {
+  describe('basic specifier resolution', () => {
+    it('resolves an exact match from the imports map', () => {
       const resolver = createImportMapResolver({
         imports: { react: 'https://cdn.example.com/react.js' },
       });
@@ -11,7 +11,7 @@ describe('createImportMapResolver', () => {
       expect(resolver.resolve('react')).toBe('https://cdn.example.com/react.js');
     });
 
-    it('scoped 패키지 specifier를 해석한다', () => {
+    it('resolves scoped package specifiers', () => {
       const resolver = createImportMapResolver({
         imports: { '@myorg/checkout': 'https://cdn.example.com/checkout-a1b2.js' },
       });
@@ -19,7 +19,7 @@ describe('createImportMapResolver', () => {
       expect(resolver.resolve('@myorg/checkout')).toBe('https://cdn.example.com/checkout-a1b2.js');
     });
 
-    it('매핑되지 않은 specifier에 대해 에러를 던진다', () => {
+    it('throws for unmapped specifiers', () => {
       const resolver = createImportMapResolver({ imports: {} });
 
       expect(() => resolver.resolve('unknown-module')).toThrow(
@@ -27,7 +27,7 @@ describe('createImportMapResolver', () => {
       );
     });
 
-    it('절대 URL은 그대로 통과시킨다', () => {
+    it('passes through absolute URLs as-is', () => {
       const resolver = createImportMapResolver({ imports: {} });
 
       expect(resolver.resolve('https://cdn.example.com/mod.js')).toBe(
@@ -36,8 +36,8 @@ describe('createImportMapResolver', () => {
     });
   });
 
-  describe('패키지 경로 접두사 매칭 (trailing slash)', () => {
-    it('trailing slash 접두사를 사용하여 하위 경로를 해석한다', () => {
+  describe('package path prefix matching (trailing slash)', () => {
+    it('resolves subpaths via trailing slash prefix', () => {
       const resolver = createImportMapResolver({
         imports: { 'lodash/': 'https://cdn.example.com/lodash/' },
       });
@@ -45,7 +45,7 @@ describe('createImportMapResolver', () => {
       expect(resolver.resolve('lodash/debounce')).toBe('https://cdn.example.com/lodash/debounce');
     });
 
-    it('가장 긴 접두사를 우선 매칭한다', () => {
+    it('matches the longest prefix first', () => {
       const resolver = createImportMapResolver({
         imports: {
           'lodash/': 'https://cdn.example.com/lodash-v1/',
@@ -60,8 +60,8 @@ describe('createImportMapResolver', () => {
     });
   });
 
-  describe('scope 기반 해석', () => {
-    it('referrer URL에 매칭되는 scope의 매핑을 우선 사용한다', () => {
+  describe('scope-based resolution', () => {
+    it('uses the scope mapping when referrer URL matches', () => {
       const resolver = createImportMapResolver({
         imports: { react: 'https://cdn.example.com/react-18.js' },
         scopes: {
@@ -76,7 +76,7 @@ describe('createImportMapResolver', () => {
       );
     });
 
-    it('scope에 매칭되지 않으면 top-level imports를 사용한다', () => {
+    it('falls back to top-level imports when no scope matches', () => {
       const resolver = createImportMapResolver({
         imports: { react: 'https://cdn.example.com/react-18.js' },
         scopes: {
@@ -91,7 +91,7 @@ describe('createImportMapResolver', () => {
       );
     });
 
-    it('가장 긴 scope 접두사를 우선 매칭한다', () => {
+    it('matches the longest scope prefix first', () => {
       const resolver = createImportMapResolver({
         imports: { react: 'https://cdn.example.com/react-default.js' },
         scopes: {
@@ -109,7 +109,7 @@ describe('createImportMapResolver', () => {
       );
     });
 
-    it('scope에 specifier가 없으면 top-level로 폴백한다', () => {
+    it('falls back to top-level when specifier is not in scope', () => {
       const resolver = createImportMapResolver({
         imports: {
           react: 'https://cdn.example.com/react.js',
@@ -128,8 +128,8 @@ describe('createImportMapResolver', () => {
     });
   });
 
-  describe('에러 메시지', () => {
-    it('referrer 정보가 에러 메시지에 포함된다', () => {
+  describe('error messages', () => {
+    it('includes referrer info in the error message', () => {
       const resolver = createImportMapResolver({ imports: {} });
 
       expect(() => resolver.resolve('missing', 'https://cdn.example.com/app.js')).toThrow(

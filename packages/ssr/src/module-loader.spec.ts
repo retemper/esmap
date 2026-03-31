@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { createServerModuleLoader } from './module-loader.js';
 import type { ImportMapResolver } from './types.js';
 
@@ -27,8 +27,8 @@ describe('createServerModuleLoader', () => {
     }) as typeof globalThis.fetch;
   }
 
-  describe('externals 해석', () => {
-    it('externals에 등록된 specifier는 로컬 import로 해석한다', async () => {
+  describe('externals resolution', () => {
+    it('resolves externals specifiers via local import', async () => {
       const resolver = createMockResolver({});
       const loader = createServerModuleLoader({
         resolver,
@@ -42,8 +42,8 @@ describe('createServerModuleLoader', () => {
     });
   });
 
-  describe('fetch 실패 처리', () => {
-    it('404 응답에 대해 에러를 던진다', async () => {
+  describe('fetch failure handling', () => {
+    it('throws on 404 responses', async () => {
       const resolver = createMockResolver({
         '@myorg/app': 'https://cdn.example.com/app.js',
       });
@@ -54,8 +54,8 @@ describe('createServerModuleLoader', () => {
     });
   });
 
-  describe('캐시 동작', () => {
-    it('clearCache 이후 다시 fetch한다', async () => {
+  describe('cache behavior', () => {
+    it('re-fetches after clearCache', async () => {
       const resolver = createMockResolver({
         'mod-a': 'https://cdn.example.com/mod-a.js',
       });
@@ -77,7 +77,7 @@ describe('createServerModuleLoader', () => {
   });
 
   describe('prefetch', () => {
-    it('여러 모듈을 병렬로 미리 로드한다', async () => {
+    it('preloads multiple modules in parallel', async () => {
       const resolver = createMockResolver({
         'mod-a': 'https://cdn.example.com/a.js',
         'mod-b': 'https://cdn.example.com/b.js',
@@ -98,7 +98,7 @@ describe('createServerModuleLoader', () => {
       expect(fetchFn).toHaveBeenCalledTimes(2);
     });
 
-    it('externals에 등록된 specifier는 prefetch를 건너뛴다', async () => {
+    it('skips prefetch for externals specifiers', async () => {
       const resolver = createMockResolver({});
       const fetchFn = createMockFetch({});
       const loader = createServerModuleLoader({

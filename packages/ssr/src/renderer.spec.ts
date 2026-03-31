@@ -22,8 +22,8 @@ describe('createSsrRenderer', () => {
     };
   }
 
-  describe('앱 렌더링', () => {
-    it('ssrRender를 호출하여 HTML을 반환한다', async () => {
+  describe('app rendering', () => {
+    it('calls ssrRender and returns the HTML', async () => {
       const mockModule = {
         ssrRender: vi.fn().mockReturnValue('<div>Checkout</div>'),
       };
@@ -37,7 +37,7 @@ describe('createSsrRenderer', () => {
       expect(mockModule.ssrRender).toHaveBeenCalledOnce();
     });
 
-    it('props를 ssrRender에 전달한다', async () => {
+    it('passes props to ssrRender', async () => {
       const mockModule = {
         ssrRender: vi.fn().mockReturnValue('<div>Cart: 3</div>'),
       };
@@ -49,7 +49,7 @@ describe('createSsrRenderer', () => {
       expect(mockModule.ssrRender).toHaveBeenCalledWith({ itemCount: 3 });
     });
 
-    it('async ssrRender를 지원한다', async () => {
+    it('supports async ssrRender', async () => {
       const mockModule = {
         ssrRender: vi.fn().mockResolvedValue('<div>Async</div>'),
       };
@@ -61,7 +61,7 @@ describe('createSsrRenderer', () => {
       expect(result.html).toBe('<div>Async</div>');
     });
 
-    it('default export에서 ssrRender를 찾는다', async () => {
+    it('finds ssrRender from the default export', async () => {
       const mockModule = {
         default: {
           ssrRender: vi.fn().mockReturnValue('<div>Default</div>'),
@@ -76,8 +76,8 @@ describe('createSsrRenderer', () => {
     });
   });
 
-  describe('에러 처리', () => {
-    it('ssrRender가 없는 모듈에서 에러를 던진다', async () => {
+  describe('error handling', () => {
+    it('throws when the module has no ssrRender export', async () => {
       const mockModule = {
         bootstrap: vi.fn(),
         mount: vi.fn(),
@@ -91,7 +91,7 @@ describe('createSsrRenderer', () => {
       );
     });
 
-    it('객체가 아닌 모듈에서 에러를 던진다', async () => {
+    it('throws when the module is not an object', async () => {
       const loader = createMockLoader({ '@myorg/checkout': 'not an object' });
       const renderer = createSsrRenderer({ importMap: baseImportMap, moduleLoader: loader });
 
@@ -101,8 +101,8 @@ describe('createSsrRenderer', () => {
     });
   });
 
-  describe('preload URL 수집', () => {
-    it('import map에서 앱 entry URL을 preloadUrls에 포함한다', async () => {
+  describe('preload URL collection', () => {
+    it('includes the app entry URL in preloadUrls', async () => {
       const mockModule = { ssrRender: () => '<div>App</div>' };
       const loader = createMockLoader({ '@myorg/checkout': mockModule });
       const renderer = createSsrRenderer({ importMap: baseImportMap, moduleLoader: loader });
@@ -113,8 +113,8 @@ describe('createSsrRenderer', () => {
     });
   });
 
-  describe('renderer 속성 접근', () => {
-    it('moduleLoader와 resolver에 접근할 수 있다', () => {
+  describe('renderer property access', () => {
+    it('exposes moduleLoader and resolver', () => {
       const loader = createMockLoader({});
       const renderer = createSsrRenderer({ importMap: baseImportMap, moduleLoader: loader });
 

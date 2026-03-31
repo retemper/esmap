@@ -6,8 +6,8 @@ describe('composeHtml', () => {
     imports: { react: 'https://cdn.example.com/react.js' },
   };
 
-  describe('기본 HTML 구조', () => {
-    it('유효한 HTML5 문서를 생성한다', () => {
+  describe('basic HTML structure', () => {
+    it('generates a valid HTML5 document', () => {
       const html = composeHtml({ importMap: baseImportMap, appHtml: '<div>Hello</div>' });
 
       expect(html).toContain('<!DOCTYPE html>');
@@ -16,13 +16,13 @@ describe('composeHtml', () => {
       expect(html).toContain('</html>');
     });
 
-    it('앱 HTML을 container div 안에 렌더링한다', () => {
+    it('renders app HTML inside the container div', () => {
       const html = composeHtml({ importMap: baseImportMap, appHtml: '<p>App content</p>' });
 
       expect(html).toContain('<div id="root"><p>App content</p></div>');
     });
 
-    it('import map을 script 태그로 삽입한다', () => {
+    it('embeds the import map as a script tag', () => {
       const html = composeHtml({ importMap: baseImportMap, appHtml: '' });
 
       expect(html).toContain('<script type="importmap">');
@@ -31,8 +31,8 @@ describe('composeHtml', () => {
     });
   });
 
-  describe('옵션 커스터마이징', () => {
-    it('커스텀 container id를 설정할 수 있다', () => {
+  describe('option customization', () => {
+    it('sets a custom container id', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '<div>App</div>',
@@ -42,7 +42,7 @@ describe('composeHtml', () => {
       expect(html).toContain('<div id="app">');
     });
 
-    it('title을 설정할 수 있다', () => {
+    it('sets the page title', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '',
@@ -52,7 +52,7 @@ describe('composeHtml', () => {
       expect(html).toContain('<title>My App</title>');
     });
 
-    it('lang 속성을 설정할 수 있다', () => {
+    it('sets the lang attribute', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '',
@@ -62,7 +62,7 @@ describe('composeHtml', () => {
       expect(html).toContain('<html lang="ko">');
     });
 
-    it('modulepreload 링크를 생성한다', () => {
+    it('generates modulepreload links', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '',
@@ -75,7 +75,7 @@ describe('composeHtml', () => {
       );
     });
 
-    it('hydration 스크립트를 body 끝에 삽입한다', () => {
+    it('inserts the hydration script at the end of body', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '<div>SSR</div>',
@@ -87,7 +87,7 @@ describe('composeHtml', () => {
       );
     });
 
-    it('추가 head 콘텐츠를 삽입한다', () => {
+    it('inserts additional head content', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '',
@@ -97,7 +97,7 @@ describe('composeHtml', () => {
       expect(html).toContain('<link rel="stylesheet" href="/styles.css" />');
     });
 
-    it('body 속성을 추가한다', () => {
+    it('adds body attributes', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '',
@@ -108,8 +108,8 @@ describe('composeHtml', () => {
     });
   });
 
-  describe('XSS 방어', () => {
-    it('title에서 HTML을 이스케이프한다', () => {
+  describe('XSS prevention', () => {
+    it('escapes HTML in the title', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '',
@@ -120,7 +120,7 @@ describe('composeHtml', () => {
       expect(html).toContain('&lt;script&gt;');
     });
 
-    it('containerId에서 특수문자를 이스케이프한다', () => {
+    it('escapes special characters in containerId', () => {
       const html = composeHtml({
         importMap: baseImportMap,
         appHtml: '',

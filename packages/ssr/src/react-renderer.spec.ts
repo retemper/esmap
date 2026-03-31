@@ -3,7 +3,7 @@ import { createElement } from 'react';
 import { renderReactToString, createReactSsrRender } from './react-renderer.js';
 
 describe('renderReactToString', () => {
-  it('React 컴포넌트를 HTML 문자열로 렌더링한다', () => {
+  it('renders a React component to an HTML string', () => {
     const App = () => createElement('div', null, 'Hello SSR');
 
     const html = renderReactToString({ rootComponent: App });
@@ -11,7 +11,7 @@ describe('renderReactToString', () => {
     expect(html).toBe('<div>Hello SSR</div>');
   });
 
-  it('props를 컴포넌트에 전달한다', () => {
+  it('passes props to the component', () => {
     const App = ({ name }: { name: string }) => createElement('span', null, `Hi ${name}`);
 
     const html = renderReactToString({
@@ -22,7 +22,7 @@ describe('renderReactToString', () => {
     expect(html).toBe('<span>Hi World</span>');
   });
 
-  it('wrapWith으로 컴포넌트를 감싼다', () => {
+  it('wraps the component with wrapWith', () => {
     const App = () => createElement('div', null, 'Content');
     const Wrapper = ({ children }: { children: React.ReactNode }) =>
       createElement('main', { className: 'wrapper' }, children);
@@ -38,7 +38,7 @@ describe('renderReactToString', () => {
 });
 
 describe('createReactSsrRender', () => {
-  it('ssrRender 함수를 생성한다', () => {
+  it('creates an ssrRender function', () => {
     const App = () => createElement('div', null, 'SSR App');
 
     const ssrRender = createReactSsrRender({ rootComponent: App });
@@ -47,7 +47,7 @@ describe('createReactSsrRender', () => {
     expect(html).toBe('<div>SSR App</div>');
   });
 
-  it('호출 시 전달받은 props를 컴포넌트에 전달한다', () => {
+  it('passes runtime props to the component', () => {
     const App = ({ count }: { count: number }) => createElement('span', null, `Count: ${count}`);
 
     const ssrRender = createReactSsrRender({ rootComponent: App });
