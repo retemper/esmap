@@ -34,7 +34,7 @@ describe('createVueMfeApp', () => {
     document.body.innerHTML = '<div id="app"></div>';
   });
 
-  it('MfeApp 라이프사이클 인터페이스를 반환한다', () => {
+  it('returns the MfeApp lifecycle interface', () => {
     const app = createVueMfeApp({ rootComponent: TestApp });
 
     expect(typeof app.bootstrap).toBe('function');
@@ -43,12 +43,12 @@ describe('createVueMfeApp', () => {
     expect(typeof app.update).toBe('function');
   });
 
-  it('bootstrap가 에러 없이 완료된다', async () => {
+  it('completes bootstrap without errors', async () => {
     const app = createVueMfeApp({ rootComponent: TestApp });
     await expect(app.bootstrap()).resolves.toStrictEqual(undefined);
   });
 
-  it('mount 후 컴포넌트를 DOM에 렌더링한다', async () => {
+  it('renders the component into the DOM after mount', async () => {
     const app = createVueMfeApp({ rootComponent: TestApp });
     const container = document.getElementById('app')!;
 
@@ -58,7 +58,7 @@ describe('createVueMfeApp', () => {
     expect(container.innerHTML).toContain('Hello MFE');
   });
 
-  it('unmount 후 DOM을 정리한다', async () => {
+  it('cleans up the DOM after unmount', async () => {
     const app = createVueMfeApp({ rootComponent: TestApp });
     const container = document.getElementById('app')!;
 
@@ -69,7 +69,7 @@ describe('createVueMfeApp', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('wrapWith로 Provider 래핑을 적용한다', async () => {
+  it('applies wrapWith provider wrapping', async () => {
     const app = createVueMfeApp({
       rootComponent: TestApp,
       wrapWith: TestWrapper,
@@ -83,7 +83,7 @@ describe('createVueMfeApp', () => {
     expect(container.innerHTML).toContain('Hello MFE');
   });
 
-  it('update로 props 변경 시 리렌더링한다', async () => {
+  it('re-renders when props change via update', async () => {
     const app = createVueMfeApp({ rootComponent: PropsApp });
     const container = document.getElementById('app')!;
 
@@ -99,7 +99,7 @@ describe('createVueMfeApp', () => {
     expect(container.innerHTML).toContain('Hello World');
   });
 
-  it('unmount 후 다시 mount할 수 있다 (라우트 재진입)', async () => {
+  it('can remount after unmount (route re-entry)', async () => {
     const app = createVueMfeApp({ rootComponent: TestApp });
     const container = document.getElementById('app')!;
 

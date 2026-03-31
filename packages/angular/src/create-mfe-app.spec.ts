@@ -50,7 +50,7 @@ describe('createAngularMfeApp', () => {
     vi.clearAllMocks();
   });
 
-  it('MfeApp 라이프사이클 인터페이스를 반환한다', () => {
+  it('returns the MfeApp lifecycle interface', () => {
     const app = createAngularMfeApp({ rootComponent: TestComponent });
 
     expect(typeof app.bootstrap).toBe('function');
@@ -59,12 +59,12 @@ describe('createAngularMfeApp', () => {
     expect(typeof app.update).toBe('function');
   });
 
-  it('bootstrap가 에러 없이 완료된다', async () => {
+  it('completes bootstrap without errors', async () => {
     const app = createAngularMfeApp({ rootComponent: TestComponent });
     await expect(app.bootstrap()).resolves.toStrictEqual(undefined);
   });
 
-  it('mount 시 createApplication을 호출하고 컴포넌트를 부트스트랩한다', async () => {
+  it('calls createApplication and bootstraps the component on mount', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
@@ -80,7 +80,7 @@ describe('createAngularMfeApp', () => {
     expect(mockAppRef.bootstrap).toHaveBeenCalledWith(TestComponent, expect.any(HTMLElement));
   });
 
-  it('mount 시 컴포넌트 셀렉터로 호스트 엘리먼트를 생성한다', async () => {
+  it('creates a host element with the component selector on mount', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
@@ -94,7 +94,7 @@ describe('createAngularMfeApp', () => {
     expect(hostElement).not.toBeNull();
   });
 
-  it('unmount 시 앱을 destroy하고 DOM을 정리한다', async () => {
+  it('destroys the app and cleans up the DOM on unmount', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
@@ -109,7 +109,7 @@ describe('createAngularMfeApp', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('이미 마운트된 상태에서 재마운트 시 에러를 던진다', async () => {
+  it('throws an error when remounting while already mounted', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
@@ -122,7 +122,7 @@ describe('createAngularMfeApp', () => {
     await expect(app.mount(container)).rejects.toThrow('already mounted');
   });
 
-  it('unmount 후 다시 mount할 수 있다 (라우트 재진입)', async () => {
+  it('can remount after unmount (route re-entry)', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
@@ -138,14 +138,14 @@ describe('createAngularMfeApp', () => {
     expect(mockAppRef.bootstrap).toHaveBeenCalledTimes(2);
   });
 
-  it('마운트되지 않은 상태에서 unmount해도 에러를 던지지 않는다', async () => {
+  it('does not throw when unmounting while not mounted', async () => {
     const app = createAngularMfeApp({ rootComponent: TestComponent });
     const container = document.getElementById('app')!;
 
     await expect(app.unmount(container)).resolves.toBeUndefined();
   });
 
-  it('providers 옵션을 createApplication에 전달한다', async () => {
+  it('passes providers option to createApplication', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
@@ -167,7 +167,7 @@ describe('createAngularMfeApp', () => {
     });
   });
 
-  it('ɵcmp 메타데이터가 없으면 클래스명에서 셀렉터를 유추한다', async () => {
+  it('infers selector from class name when ɵcmp metadata is missing', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
@@ -181,7 +181,7 @@ describe('createAngularMfeApp', () => {
     expect(hostElement).not.toBeNull();
   });
 
-  it('update 호출 시 ESMAP_PROPS 시그널에 props를 전달한다', async () => {
+  it('passes props to the ESMAP_PROPS signal on update', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 
