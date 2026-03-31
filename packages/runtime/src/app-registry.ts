@@ -219,6 +219,9 @@ export class AppRegistry {
         throw new AppLifecycleError(name, 'mount');
       }
       await registered.app.mount(container);
+      // Ensure container is visible — it may have display:none from a
+      // keep-alive freeze of a different app sharing the same container.
+      container.style.display = '';
       this.setStatus(registered, 'MOUNTED');
     } catch (error) {
       const mountError =

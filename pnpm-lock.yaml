@@ -10,15 +10,15 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.1.0)
+      '@playwright/test':
+        specifier: ^1.58.2
+        version: 1.58.2
       '@vitest/coverage-v8':
         specifier: ^4.1.0
         version: 4.1.2(@vitest/browser@4.1.2(vite@6.4.1(@types/node@22.19.15)(tsx@4.21.0))(vitest@4.1.2(@types/node@22.19.15)(jsdom@26.1.0)(vite@6.4.1(@types/node@22.19.15)(tsx@4.21.0))))(vitest@4.1.2(@types/node@22.19.15)(jsdom@26.1.0)(vite@6.4.1(@types/node@22.19.15)(tsx@4.21.0)))
       eslint:
         specifier: ^10.1.0
         version: 10.1.0
-      playwright:
-        specifier: ^1.58.2
-        version: 1.58.2
       prettier:
         specifier: ^3.4.0
         version: 3.8.1
@@ -1299,6 +1299,14 @@ packages:
       {
         integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==,
       }
+
+  '@playwright/test@1.58.2':
+    resolution:
+      {
+        integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==,
+      }
+    engines: { node: '>=18' }
+    hasBin: true
 
   '@polka/url@1.0.0-next.29':
     resolution:
@@ -3712,6 +3720,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@playwright/test@1.58.2':
+    dependencies:
+      playwright: 1.58.2
 
   '@polka/url@1.0.0-next.29': {}
 

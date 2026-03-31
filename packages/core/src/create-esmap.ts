@@ -1,4 +1,4 @@
-import type { AppConfig, SharedConfig } from '@esmap/shared';
+import type { AppConfig, MfeAppStatus, SharedConfig } from '@esmap/shared';
 import {
   AppRegistry,
   Router,
@@ -6,6 +6,7 @@ import {
   createPrefetch,
   createSharedModuleRegistry,
 } from '@esmap/runtime';
+import type { LifecycleHooks, LifecyclePhase } from '@esmap/runtime';
 import type { SharedModuleRegistry } from '@esmap/runtime';
 import { PerfTracker } from '@esmap/monitor';
 import { installDevtoolsApi } from '@esmap/devtools';
@@ -79,6 +80,9 @@ export function createEsmap(options: EsmapOptions): EsmapInstance {
     });
   }
 
+  // Wire lifecycle hooks into registry status transitions
+  connectHooksToRegistry(registry, hooks);
+
   const pluginCleanups: readonly PluginCleanup[] = installPlugins(plugins, {
     registry,
     router,
@@ -110,6 +114,53 @@ export function createEsmap(options: EsmapOptions): EsmapInstance {
       await registry.destroy();
       perf.clear();
     },
+  };
+}
+
+/** Status transition → before-hook mapping for load/bootstrap phases */
+const STATUS_TO_BEFORE_HOOK: Readonly<Partial<Record<MfeAppStatus, LifecyclePhase>>> = {
+  LOADING: 'load',
+  BOOTSTRAPPING: 'bootstrap',
+};
+
+/** Status transition → after-hook mapping for load/bootstrap phases */
+const STATUS_TO_AFTER_HOOK: Readonly<Partial<Record<MfeAppStatus, LifecyclePhase>>> = {
+  BOOTSTRAPPING: 'load',
+  NOT_MOUNTED: 'bootstrap',
+};
+
+/**
+ * Connects lifecycle hooks to registry operations.
+ * Uses onStatusChange for load/bootstrap phases, and wraps mountApp/unmountApp
+ * for accurate before/after timing on mount/unmount.
+ */
+function connectHooksToRegistry(registry: AppRegistry, hooks: LifecycleHooks): void {
+  // Load/bootstrap: use status change events (timing is correct — status changes at phase boundaries)
+  registry.onStatusChange((event) => {
+    const beforePhase = STATUS_TO_BEFORE_HOOK[event.to];
+    if (beforePhase) {
+      void hooks.runHooks(event.appName, beforePhase, 'before');
+    }
+
+    const afterPhase = STATUS_TO_AFTER_HOOK[event.to];
+    if (afterPhase) {
+      void hooks.runHooks(event.appName, afterPhase, 'after');
+    }
+  });
+
+  // Mount/unmount: wrap methods so hooks fire before/after the actual operation
+  const originalMountApp = registry.mountApp.bind(registry);
+  registry.mountApp = async (name: string): Promise<void> => {
+    await hooks.runHooks(name, 'mount', 'before');
+    await originalMountApp(name);
+    await hooks.runHooks(name, 'mount', 'after');
+  };
+
+  const originalUnmountApp = registry.unmountApp.bind(registry);
+  registry.unmountApp = async (name: string): Promise<void> => {
+    await hooks.runHooks(name, 'unmount', 'before');
+    await originalUnmountApp(name);
+    await hooks.runHooks(name, 'unmount', 'after');
   };
 }
 
