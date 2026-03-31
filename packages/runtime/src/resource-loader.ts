@@ -140,7 +140,7 @@ export function createResourceLoader(options: ResourceLoaderOptions = {}): Resou
             return await response.text();
           } catch (error) {
             if (error instanceof DOMException && error.name === 'AbortError') {
-              throw new Error(`Resource load timeout: ${nextUrl} (${fetchTimeout}ms)`);
+              throw new Error(`Resource load timeout: ${nextUrl} (${fetchTimeout}ms)`, { cause: error });
             }
             throw error;
           } finally {
