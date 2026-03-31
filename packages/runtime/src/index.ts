@@ -38,8 +38,21 @@ export type {
   PrefetchController,
 } from './prefetch.js';
 
-export { withTimeout, withRetry, withResilience, TimeoutError, createCircuitBreaker, CircuitOpenError } from './resilience.js';
-export type { RetryOptions, ResilienceOptions, CircuitBreakerOptions, CircuitBreaker, CircuitState } from './resilience.js';
+export {
+  withTimeout,
+  withRetry,
+  withResilience,
+  TimeoutError,
+  createCircuitBreaker,
+  CircuitOpenError,
+} from './resilience.js';
+export type {
+  RetryOptions,
+  ResilienceOptions,
+  CircuitBreakerOptions,
+  CircuitBreaker,
+  CircuitState,
+} from './resilience.js';
 
 export { parseSemver, compareVersions, satisfiesRange } from './semver.js';
 export type { SemverParts } from './semver.js';

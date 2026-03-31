@@ -42,7 +42,7 @@ type PlatformEvents = {
   'auth:login': { userId: string; name: string };
   'auth:logout': Record<string, never>;
   'activity:new': { type: string; message: string };
-  'lifecycle': { app: string; from: string; to: string };
+  lifecycle: { app: string; from: string; to: string };
   'workspace:context-change': { projectId: string; view: string };
   'team:member-select': { memberId: string; memberName: string };
   'team:member-deselect': Record<string, never>;
@@ -250,7 +250,8 @@ async function boot(): Promise<void> {
         // Dashboard: main page + nested Parcel demo (keepAlive -> dedicated container)
         '@enterprise/dashboard': {
           path: '/',
-          activeWhen: (loc: Location) => loc.pathname === '/' || loc.pathname === '/dashboard' || loc.pathname === '/index.html',
+          activeWhen: (loc: Location) =>
+            loc.pathname === '/' || loc.pathname === '/dashboard' || loc.pathname === '/index.html',
           container: '#app-dashboard',
         },
         // Team Directory: keepAlive state preservation demo (keepAlive -> dedicated container)
@@ -326,7 +327,14 @@ async function boot(): Promise<void> {
       }),
       domIsolationPlugin({
         exclude: ['@enterprise/auth'],
-        globalSelectors: ['#esmap-devtools', '#app-auth', '#app-nav', '#app-dashboard', '#app-team', '#app-workspace'],
+        globalSelectors: [
+          '#esmap-devtools',
+          '#app-auth',
+          '#app-nav',
+          '#app-dashboard',
+          '#app-team',
+          '#app-workspace',
+        ],
       }),
       smartPrefetch.plugin,
       comm.plugin,
@@ -458,8 +466,8 @@ function renderNav(): void {
 function updateNavHighlight(pathname: string): void {
   const links = document.querySelectorAll<HTMLAnchorElement>('#app-nav [data-path]');
   for (const link of links) {
-    const isActive = link.dataset.path === pathname ||
-      (pathname === '/' && link.dataset.path === '/dashboard');
+    const isActive =
+      link.dataset.path === pathname || (pathname === '/' && link.dataset.path === '/dashboard');
     link.style.color = isActive ? '#ffffff' : '#94a3b8';
     link.style.borderBottomColor = isActive ? '#2563eb' : 'transparent';
   }

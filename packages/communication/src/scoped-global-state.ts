@@ -1,10 +1,7 @@
 import type { GlobalState, StateListener } from './global-state.js';
 
 /** Scope slice definition — restricts accessible keys at the type level for each app */
-interface ScopedGlobalStateOptions<
-  T extends Record<string, unknown>,
-  K extends keyof T,
-> {
+interface ScopedGlobalStateOptions<T extends Record<string, unknown>, K extends keyof T> {
   /** Parent global state */
   readonly state: GlobalState<T>;
   /** List of keys this scope can access */
@@ -45,10 +42,9 @@ interface ScopedGlobalState<T extends Record<string, unknown>, K extends keyof T
  * @param options - scope configuration
  * @returns scoped global state instance
  */
-function createScopedGlobalState<
-  T extends Record<string, unknown>,
-  K extends keyof T,
->(options: ScopedGlobalStateOptions<T, K>): ScopedGlobalState<T, K> {
+function createScopedGlobalState<T extends Record<string, unknown>, K extends keyof T>(
+  options: ScopedGlobalStateOptions<T, K>,
+): ScopedGlobalState<T, K> {
   const { state, keys, readonly: isReadonly = false } = options;
   const allowedKeySet = new Set<K>(keys);
 
@@ -73,7 +69,7 @@ function createScopedGlobalState<
       if (!allowedKeySet.has(key as K)) {
         throw new Error(
           `[esmap] Scope violation: key "${key}" is not accessible in this scope. ` +
-          `Allowed keys: [${keys.map(String).join(', ')}]`,
+            `Allowed keys: [${keys.map(String).join(', ')}]`,
         );
       }
     }
@@ -100,9 +96,7 @@ function createScopedGlobalState<
         const prevSlice = pickAllowedKeys(prevFull);
 
         // Only notify when at least one allowed key has changed
-        const hasRelevantChange = keys.some(
-          (key) => !Object.is(newFull[key], prevFull[key]),
-        );
+        const hasRelevantChange = keys.some((key) => !Object.is(newFull[key], prevFull[key]));
 
         if (hasRelevantChange) {
           listener(newSlice, prevSlice);

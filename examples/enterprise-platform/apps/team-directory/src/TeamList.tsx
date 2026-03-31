@@ -46,14 +46,70 @@ function emitMemberDeselect(): void {
 
 /** Demo team member list — IDs follow the 'user-N' pattern for cross-referencing with task-board */
 const MEMBERS: readonly Member[] = [
-  { id: 'user-1', name: 'Minhyeok Kim', team: 'Platform', role: 'Tech Lead', email: 'minhyeok@enterprise.dev', joinDate: '2023-01' },
-  { id: 'user-2', name: 'Seoyeon Lee', team: 'Platform', role: 'Frontend Engineer', email: 'seoyeon@enterprise.dev', joinDate: '2023-03' },
-  { id: 'user-3', name: 'Jihoon Park', team: 'Analytics', role: 'Backend Engineer', email: 'jihoon@enterprise.dev', joinDate: '2023-06' },
-  { id: 'user-4', name: 'Subin Choi', team: 'Analytics', role: 'Data Engineer', email: 'subin@enterprise.dev', joinDate: '2024-01' },
-  { id: 'user-5', name: 'Daeun Jeong', team: 'HR', role: 'Product Manager', email: 'daeun@enterprise.dev', joinDate: '2023-09' },
-  { id: 'user-6', name: 'Sori Han', team: 'HR', role: 'Designer', email: 'sori@enterprise.dev', joinDate: '2024-03' },
-  { id: 'user-7', name: 'Hyunwoo Oh', team: 'Platform', role: 'SRE', email: 'hyunwoo@enterprise.dev', joinDate: '2024-02' },
-  { id: 'user-8', name: 'Chaerin Yoon', team: 'Analytics', role: 'Frontend Engineer', email: 'chaerin@enterprise.dev', joinDate: '2024-06' },
+  {
+    id: 'user-1',
+    name: 'Minhyeok Kim',
+    team: 'Platform',
+    role: 'Tech Lead',
+    email: 'minhyeok@enterprise.dev',
+    joinDate: '2023-01',
+  },
+  {
+    id: 'user-2',
+    name: 'Seoyeon Lee',
+    team: 'Platform',
+    role: 'Frontend Engineer',
+    email: 'seoyeon@enterprise.dev',
+    joinDate: '2023-03',
+  },
+  {
+    id: 'user-3',
+    name: 'Jihoon Park',
+    team: 'Analytics',
+    role: 'Backend Engineer',
+    email: 'jihoon@enterprise.dev',
+    joinDate: '2023-06',
+  },
+  {
+    id: 'user-4',
+    name: 'Subin Choi',
+    team: 'Analytics',
+    role: 'Data Engineer',
+    email: 'subin@enterprise.dev',
+    joinDate: '2024-01',
+  },
+  {
+    id: 'user-5',
+    name: 'Daeun Jeong',
+    team: 'HR',
+    role: 'Product Manager',
+    email: 'daeun@enterprise.dev',
+    joinDate: '2023-09',
+  },
+  {
+    id: 'user-6',
+    name: 'Sori Han',
+    team: 'HR',
+    role: 'Designer',
+    email: 'sori@enterprise.dev',
+    joinDate: '2024-03',
+  },
+  {
+    id: 'user-7',
+    name: 'Hyunwoo Oh',
+    team: 'Platform',
+    role: 'SRE',
+    email: 'hyunwoo@enterprise.dev',
+    joinDate: '2024-02',
+  },
+  {
+    id: 'user-8',
+    name: 'Chaerin Yoon',
+    team: 'Analytics',
+    role: 'Frontend Engineer',
+    email: 'chaerin@enterprise.dev',
+    joinDate: '2024-06',
+  },
 ];
 
 /** Team list */
@@ -95,7 +151,8 @@ export function TeamList({ mode = 'page' }: TeamListProps): ReactNode {
   }, []);
 
   const filtered = MEMBERS.filter((m) => {
-    const matchesSearch = m.name.includes(search) || m.email.includes(search) || m.role.includes(search);
+    const matchesSearch =
+      m.name.includes(search) || m.email.includes(search) || m.role.includes(search);
     const matchesTeam = teamFilter === 'All' || m.team === teamFilter;
     return matchesSearch && matchesTeam;
   });
@@ -131,7 +188,9 @@ export function TeamList({ mode = 'page' }: TeamListProps): ReactNode {
         {/* Compact member list — single column, small avatars */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           {filtered.length === 0 && (
-            <div style={{ padding: '16px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}>
+            <div
+              style={{ padding: '16px', textAlign: 'center', color: '#94a3b8', fontSize: '13px' }}
+            >
               No results
             </div>
           )}
@@ -180,7 +239,8 @@ export function TeamList({ mode = 'page' }: TeamListProps): ReactNode {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0 }}>Team Directory</h1>
       <p style={{ color: '#64748b', margin: 0 }}>
-        keepAlive state preservation demo — search terms and selection state persist across page navigations
+        keepAlive state preservation demo — search terms and selection state persist across page
+        navigations
       </p>
 
       {/* Search + filter */}
@@ -218,7 +278,13 @@ export function TeamList({ mode = 'page' }: TeamListProps): ReactNode {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: selectedMember ? '1fr 1fr' : '1fr', gap: '16px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: selectedMember ? '1fr 1fr' : '1fr',
+          gap: '16px',
+        }}
+      >
         {/* List */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {filtered.length === 0 && (
@@ -237,7 +303,9 @@ export function TeamList({ mode = 'page' }: TeamListProps): ReactNode {
               }}
               onClick={() => handleMemberClick(member)}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
                 <div>
                   <div style={{ fontWeight: '600', fontSize: '14px' }}>{member.name}</div>
                   <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>

@@ -12,14 +12,62 @@ interface ActivityItem {
 
 /** Demo activity data */
 const DEMO_ACTIVITIES: readonly ActivityItem[] = [
-  { id: '1', type: 'create', user: 'Minhyeok Kim', message: 'Created new project "Q1 OKR"', time: '2m ago' },
-  { id: '2', type: 'update', user: 'Seoyeon Lee', message: 'Updated the team list', time: '15m ago' },
-  { id: '3', type: 'comment', user: 'Jihoon Park', message: 'Commented on "Weekly Retrospective" document', time: '1h ago' },
-  { id: '4', type: 'delete', user: 'Subin Choi', message: 'Deleted expired invitation links', time: '2h ago' },
-  { id: '5', type: 'create', user: 'Daeun Jeong', message: 'Added new team member "Sori Han"', time: '3h ago' },
-  { id: '6', type: 'update', user: 'Minhyeok Kim', message: 'Reordered dashboard widgets', time: '4h ago' },
-  { id: '7', type: 'comment', user: 'Seoyeon Lee', message: 'Left feedback on "Tech Stack Selection" document', time: '5h ago' },
-  { id: '8', type: 'create', user: 'Jihoon Park', message: 'Created new channel "#architecture"', time: 'Yesterday' },
+  {
+    id: '1',
+    type: 'create',
+    user: 'Minhyeok Kim',
+    message: 'Created new project "Q1 OKR"',
+    time: '2m ago',
+  },
+  {
+    id: '2',
+    type: 'update',
+    user: 'Seoyeon Lee',
+    message: 'Updated the team list',
+    time: '15m ago',
+  },
+  {
+    id: '3',
+    type: 'comment',
+    user: 'Jihoon Park',
+    message: 'Commented on "Weekly Retrospective" document',
+    time: '1h ago',
+  },
+  {
+    id: '4',
+    type: 'delete',
+    user: 'Subin Choi',
+    message: 'Deleted expired invitation links',
+    time: '2h ago',
+  },
+  {
+    id: '5',
+    type: 'create',
+    user: 'Daeun Jeong',
+    message: 'Added new team member "Sori Han"',
+    time: '3h ago',
+  },
+  {
+    id: '6',
+    type: 'update',
+    user: 'Minhyeok Kim',
+    message: 'Reordered dashboard widgets',
+    time: '4h ago',
+  },
+  {
+    id: '7',
+    type: 'comment',
+    user: 'Seoyeon Lee',
+    message: 'Left feedback on "Tech Stack Selection" document',
+    time: '5h ago',
+  },
+  {
+    id: '8',
+    type: 'create',
+    user: 'Jihoon Park',
+    message: 'Created new channel "#architecture"',
+    time: 'Yesterday',
+  },
 ];
 
 /** Icon per activity type */
@@ -55,9 +103,10 @@ export function Feed(props: FeedProps): ReactNode {
   const maxItems = props.maxItems ?? DEMO_ACTIVITIES.length;
   const [filter, setFilter] = useState<string>('all');
 
-  const filtered = DEMO_ACTIVITIES.filter(
-    (item) => filter === 'all' || item.type === filter,
-  ).slice(0, maxItems);
+  const filtered = DEMO_ACTIVITIES.filter((item) => filter === 'all' || item.type === filter).slice(
+    0,
+    maxItems,
+  );
 
   // ─── Widget mode: compact rendering ───
   if (mode === 'widget') {
@@ -94,9 +143,7 @@ export function Feed(props: FeedProps): ReactNode {
             <span style={{ flex: 1, color: '#334155' }}>
               <strong>{item.user}</strong> {item.message}
             </span>
-            <span style={{ color: '#94a3b8', fontSize: '11px', flexShrink: 0 }}>
-              {item.time}
-            </span>
+            <span style={{ color: '#94a3b8', fontSize: '11px', flexShrink: 0 }}>{item.time}</span>
           </div>
         ))}
       </div>
@@ -108,7 +155,8 @@ export function Feed(props: FeedProps): ReactNode {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <h1 style={{ fontSize: '24px', fontWeight: '700', margin: 0 }}>Activity Feed</h1>
       <p style={{ color: '#64748b', margin: 0 }}>
-        Dual-mode MFE — this view works as both a standalone route (/activity) and a Dashboard Parcel widget
+        Dual-mode MFE — this view works as both a standalone route (/activity) and a Dashboard
+        Parcel widget
       </p>
 
       {/* Filter buttons */}

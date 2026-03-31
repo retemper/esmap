@@ -13,15 +13,23 @@ describe('createDevtoolsInspector', () => {
     listenerCounts: Record<string, number> = {},
   ) {
     return {
-      getHistory: (event?: string) =>
-        event ? history.filter((h) => h.event === event) : history,
+      getHistory: (event?: string) => (event ? history.filter((h) => h.event === event) : history),
       listenerCount: (event: string) => listenerCounts[event] ?? 0,
     };
   }
 
   /** Creates a mock shared module registry stub for testing */
   function createMockSharedModules(
-    registered: ReadonlyMap<string, ReadonlyArray<{ name: string; version: string; singleton?: boolean; eager?: boolean; from?: string }>> = new Map(),
+    registered: ReadonlyMap<
+      string,
+      ReadonlyArray<{
+        name: string;
+        version: string;
+        singleton?: boolean;
+        eager?: boolean;
+        from?: string;
+      }>
+    > = new Map(),
     loaded: ReadonlyMap<string, { version: string; module: unknown; from?: string }> = new Map(),
   ) {
     return {
@@ -57,12 +65,8 @@ describe('createDevtoolsInspector', () => {
 
     it('retains the latest connection', () => {
       const inspector = createDevtoolsInspector();
-      const bus1 = createMockEventBus([
-        { event: 'old', payload: null, timestamp: 1000 },
-      ]);
-      const bus2 = createMockEventBus([
-        { event: 'new', payload: null, timestamp: 2000 },
-      ]);
+      const bus1 = createMockEventBus([{ event: 'old', payload: null, timestamp: 1000 }]);
+      const bus2 = createMockEventBus([{ event: 'new', payload: null, timestamp: 2000 }]);
 
       inspector.connect({ eventBus: bus1 });
       inspector.connect({ eventBus: bus2 });
@@ -70,9 +74,7 @@ describe('createDevtoolsInspector', () => {
       const logSpy = vi.spyOn(console, 'log');
       inspector.events();
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('1 entries'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('1 entries'));
     });
   });
 
@@ -83,9 +85,7 @@ describe('createDevtoolsInspector', () => {
 
       inspector.events();
 
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('EventBus is not connected'),
-      );
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('EventBus is not connected'));
     });
 
     it('prints an empty message when there is no history', () => {
@@ -95,9 +95,7 @@ describe('createDevtoolsInspector', () => {
       const logSpy = vi.spyOn(console, 'log');
       inspector.events();
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('No event history'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('No event history'));
     });
 
     it('prints the full event history', () => {
@@ -136,28 +134,20 @@ describe('createDevtoolsInspector', () => {
       const groupSpy = vi.spyOn(console, 'group');
       inspector.events('user:*');
 
-      expect(groupSpy).toHaveBeenCalledWith(
-        expect.stringContaining('2 entries'),
-      );
-      expect(groupSpy).toHaveBeenCalledWith(
-        expect.stringContaining('filter: "user:*"'),
-      );
+      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('2 entries'));
+      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('filter: "user:*"'));
     });
 
     it('prints an empty message when no events match the filter', () => {
       const inspector = createDevtoolsInspector();
       inspector.connect({
-        eventBus: createMockEventBus([
-          { event: 'app:mounted', payload: null, timestamp: 1000 },
-        ]),
+        eventBus: createMockEventBus([{ event: 'app:mounted', payload: null, timestamp: 1000 }]),
       });
 
       const logSpy = vi.spyOn(console, 'log');
       inspector.events('user:*');
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('filter: "user:*"'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('filter: "user:*"'));
     });
 
     it('supports exact match filtering', () => {
@@ -183,9 +173,7 @@ describe('createDevtoolsInspector', () => {
 
       inspector.listeners('some:event');
 
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('EventBus is not connected'),
-      );
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('EventBus is not connected'));
     });
 
     it('prints the listener count for a specific event', () => {
@@ -197,9 +185,7 @@ describe('createDevtoolsInspector', () => {
       const logSpy = vi.spyOn(console, 'log');
       inspector.listeners('user:login');
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('"user:login" listeners: 3'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('"user:login" listeners: 3'));
     });
 
     it('prints 0 for events with no listeners', () => {
@@ -211,9 +197,7 @@ describe('createDevtoolsInspector', () => {
       const logSpy = vi.spyOn(console, 'log');
       inspector.listeners('unknown:event');
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('listeners: 0'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('listeners: 0'));
     });
   });
 
@@ -232,11 +216,15 @@ describe('createDevtoolsInspector', () => {
     it('prints registration and loading status', () => {
       const registered = new Map([
         ['react', [{ name: 'react', version: '18.2.0', singleton: true }]],
-        ['lodash', [{ name: 'lodash', version: '4.17.0' }, { name: 'lodash', version: '4.18.0' }]],
+        [
+          'lodash',
+          [
+            { name: 'lodash', version: '4.17.0' },
+            { name: 'lodash', version: '4.18.0' },
+          ],
+        ],
       ]);
-      const loaded = new Map([
-        ['react', { version: '18.2.0', module: {}, from: 'host' }],
-      ]);
+      const loaded = new Map([['react', { version: '18.2.0', module: {}, from: 'host' }]]);
 
       const inspector = createDevtoolsInspector();
       inspector.connect({
@@ -249,25 +237,15 @@ describe('createDevtoolsInspector', () => {
 
       inspector.shared();
 
-      expect(groupSpy).toHaveBeenCalledWith(
-        expect.stringContaining('registered: 2, loaded: 1'),
-      );
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('react'),
-      );
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('singleton'),
-      );
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('from: host'),
-      );
+      expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('registered: 2, loaded: 1'));
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('react'));
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('singleton'));
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('from: host'));
       expect(groupEndSpy).toHaveBeenCalled();
     });
 
     it('marks unloaded modules as not loaded', () => {
-      const registered = new Map([
-        ['vue', [{ name: 'vue', version: '3.3.0' }]],
-      ]);
+      const registered = new Map([['vue', [{ name: 'vue', version: '3.3.0' }]]]);
 
       const inspector = createDevtoolsInspector();
       inspector.connect({
@@ -288,9 +266,7 @@ describe('createDevtoolsInspector', () => {
 
       inspector.apps();
 
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('AppRegistry is not connected'),
-      );
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('AppRegistry is not connected'));
     });
 
     it('prints an empty message when no apps are registered', () => {
@@ -300,9 +276,7 @@ describe('createDevtoolsInspector', () => {
       const logSpy = vi.spyOn(console, 'log');
       inspector.apps();
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('No registered apps'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('No registered apps'));
     });
 
     it('prints the app list', () => {
@@ -351,9 +325,7 @@ describe('createDevtoolsInspector', () => {
       const logSpy = vi.spyOn(console, 'log');
       inspector.status();
 
-      const statusOutput = logSpy.mock.calls
-        .map((call) => call.join(' '))
-        .join(' ');
+      const statusOutput = logSpy.mock.calls.map((call) => call.join(' ')).join(' ');
       expect(statusOutput).toContain('EventBus: connected');
       expect(statusOutput).toContain('SharedModules: connected');
       expect(statusOutput).toContain('Registry: connected');

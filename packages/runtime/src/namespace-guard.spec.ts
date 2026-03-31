@@ -26,9 +26,7 @@ describe('createNamespaceGuard', () => {
       const result = guard.claim('theme', 'app-b');
 
       expect(result).toBe(false);
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Namespace conflict'),
-      );
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Namespace conflict'));
 
       warnSpy.mockRestore();
     });

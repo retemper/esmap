@@ -11,11 +11,7 @@ export interface OverlayOptions {
   /** Keyboard shortcut to toggle the overlay. Defaults to 'Alt+Shift+D'. */
   readonly triggerKey?: string;
   /** Initial position. Defaults to 'bottom-right'. */
-  readonly position?:
-    | 'top-left'
-    | 'top-right'
-    | 'bottom-left'
-    | 'bottom-right';
+  readonly position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 }
 
 /** Overlay control handle */
@@ -263,8 +259,7 @@ function createAppRow(app: OverlayAppInfo): HTMLTableRowElement {
   containerCell.style.color = '#aaa';
 
   const durationCell = document.createElement('td');
-  durationCell.textContent =
-    app.perfDuration !== undefined ? `${app.perfDuration}ms` : '-';
+  durationCell.textContent = app.perfDuration !== undefined ? `${app.perfDuration}ms` : '-';
   durationCell.style.padding = '4px 8px';
   durationCell.style.color = '#aaa';
 
@@ -293,9 +288,7 @@ function applyRootStyles(
   }
 
   const posStyles = getPositionStyles(position);
-  const posEntries = Object.entries(posStyles) as ReadonlyArray<
-    [PositionKey, string]
-  >;
+  const posEntries = Object.entries(posStyles) as ReadonlyArray<[PositionKey, string]>;
   for (const [key, value] of posEntries) {
     root.style[key] = value;
   }

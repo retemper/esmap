@@ -34,7 +34,8 @@ export default defineConfig({
           const relativePath = urlPath.slice(6); // Remove '/apps/'
 
           // shared/, design-system/ are at dist root, others under dist/apps/
-          const isInfra = relativePath.startsWith('shared/') || relativePath.startsWith('design-system/');
+          const isInfra =
+            relativePath.startsWith('shared/') || relativePath.startsWith('design-system/');
           const filePath = isInfra
             ? resolve(distDir, relativePath)
             : resolve(distDir, 'apps', relativePath);

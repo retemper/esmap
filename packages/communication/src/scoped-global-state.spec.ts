@@ -3,12 +3,12 @@ import { createGlobalState } from './global-state.js';
 import { createScopedGlobalState } from './scoped-global-state.js';
 
 /** State type for testing */
-interface TestState {
+type TestState = {
   theme: string;
   locale: string;
   user: string | null;
   count: number;
-}
+};
 
 /** Creates the default initial state */
 function createInitialState(): TestState {

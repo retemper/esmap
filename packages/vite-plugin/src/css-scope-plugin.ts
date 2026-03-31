@@ -84,9 +84,7 @@ export function esmapCssScope(options: CssScopePluginOptions): Plugin {
       if (isExcluded(id, exclude)) return null;
 
       const scoped = scopeCssText(code, appName);
-      const result = namespaceKeyframes
-        ? namespaceCssKeyframes(scoped, appName)
-        : scoped;
+      const result = namespaceKeyframes ? namespaceCssKeyframes(scoped, appName) : scoped;
 
       const marked = `${PRESCOPED_MARKER}=${appName} */\n${result}`;
 

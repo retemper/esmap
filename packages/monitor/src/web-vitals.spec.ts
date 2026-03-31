@@ -8,7 +8,10 @@ import type { WebVitalsTracker } from './web-vitals.js';
  * Callback storage for mocking PerformanceObserver.
  * Stores callbacks by type on observe() calls so entries can be manually injected in tests.
  */
-const observerCallbacks = new Map<string, (list: { getEntries: () => PerformanceEntry[] }) => void>();
+const observerCallbacks = new Map<
+  string,
+  (list: { getEntries: () => PerformanceEntry[] }) => void
+>();
 
 /** Spy to track disconnect calls */
 const disconnectSpy = vi.fn();
@@ -152,9 +155,7 @@ describe('createWebVitalsTracker', () => {
     document.body.appendChild(orphan);
     const tracker = createWebVitalsTracker();
 
-    emitEntries('layout-shift', [
-      createLayoutShiftEntry(0.1, 100, [{ node: orphan }]),
-    ]);
+    emitEntries('layout-shift', [createLayoutShiftEntry(0.1, 100, [{ node: orphan }])]);
 
     const clsMap = tracker.getMetric('CLS');
     expect(clsMap.get('__host__')).toBe(0.1);
@@ -166,12 +167,8 @@ describe('createWebVitalsTracker', () => {
     const child = createScopedElement('app-a');
     const tracker = createWebVitalsTracker();
 
-    emitEntries('layout-shift', [
-      createLayoutShiftEntry(0.1, 100, [{ node: child }]),
-    ]);
-    emitEntries('layout-shift', [
-      createLayoutShiftEntry(0.3, 1200, [{ node: child }]),
-    ]);
+    emitEntries('layout-shift', [createLayoutShiftEntry(0.1, 100, [{ node: child }])]);
+    emitEntries('layout-shift', [createLayoutShiftEntry(0.3, 1200, [{ node: child }])]);
 
     const clsMap = tracker.getMetric('CLS');
     // 0.3 > 0.1 so the max session is 0.3
@@ -217,15 +214,9 @@ describe('createWebVitalsTracker', () => {
     const child = createScopedElement('app-x');
     const tracker = createWebVitalsTracker();
 
-    emitEntries('layout-shift', [
-      createLayoutShiftEntry(0.05, 100, [{ node: child }]),
-    ]);
-    emitEntries('largest-contentful-paint', [
-      createLcpEntry(300, child),
-    ]);
-    emitEntries('event', [
-      createEventEntry(child, 1, 75),
-    ]);
+    emitEntries('layout-shift', [createLayoutShiftEntry(0.05, 100, [{ node: child }])]);
+    emitEntries('largest-contentful-paint', [createLcpEntry(300, child)]);
+    emitEntries('event', [createEventEntry(child, 1, 75)]);
 
     const summary = tracker.summarize();
     const appSummary = summary.get('app-x');
@@ -244,12 +235,8 @@ describe('createWebVitalsTracker', () => {
     const childB = createScopedElement('app-b');
     const tracker = createWebVitalsTracker();
 
-    emitEntries('layout-shift', [
-      createLayoutShiftEntry(0.1, 100, [{ node: childA }]),
-    ]);
-    emitEntries('largest-contentful-paint', [
-      createLcpEntry(200, childB),
-    ]);
+    emitEntries('layout-shift', [createLayoutShiftEntry(0.1, 100, [{ node: childA }])]);
+    emitEntries('largest-contentful-paint', [createLcpEntry(200, childB)]);
 
     const summary = tracker.summarize();
 
@@ -275,9 +262,7 @@ describe('createWebVitalsTracker', () => {
 
     tracker.onVital(listener);
 
-    emitEntries('layout-shift', [
-      createLayoutShiftEntry(0.1, 100, [{ node: child }]),
-    ]);
+    emitEntries('layout-shift', [createLayoutShiftEntry(0.1, 100, [{ node: child }])]);
 
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener).toHaveBeenCalledWith(
@@ -299,9 +284,7 @@ describe('createWebVitalsTracker', () => {
     const unsubscribe = tracker.onVital(listener);
     unsubscribe();
 
-    emitEntries('layout-shift', [
-      createLayoutShiftEntry(0.1, 100, [{ node: child }]),
-    ]);
+    emitEntries('layout-shift', [createLayoutShiftEntry(0.1, 100, [{ node: child }])]);
 
     expect(listener).not.toHaveBeenCalled();
 
@@ -312,9 +295,7 @@ describe('createWebVitalsTracker', () => {
     const child = createScopedElement('app-a');
     const tracker = createWebVitalsTracker();
 
-    emitEntries('event', [
-      createEventEntry(child, 0, 100),
-    ]);
+    emitEntries('event', [createEventEntry(child, 0, 100)]);
 
     const inpMap = tracker.getMetric('INP');
     expect(inpMap.size).toBe(0);
@@ -331,9 +312,7 @@ describe('createWebVitalsTracker', () => {
 
     const tracker = createWebVitalsTracker({ scopeAttribute: 'data-custom-scope' });
 
-    emitEntries('largest-contentful-paint', [
-      createLcpEntry(400, child),
-    ]);
+    emitEntries('largest-contentful-paint', [createLcpEntry(400, child)]);
 
     const lcpMap = tracker.getMetric('LCP');
     expect(lcpMap.get('custom-app')).toBe(400);
@@ -389,7 +368,11 @@ function createLcpEntry(startTime: number, element: Element | null): Performance
  * @param duration - event duration
  * @returns mocked PerformanceEntry
  */
-function createEventEntry(target: Element | null, interactionId: number, duration: number): PerformanceEntry {
+function createEventEntry(
+  target: Element | null,
+  interactionId: number,
+  duration: number,
+): PerformanceEntry {
   return {
     entryType: 'event',
     name: 'event',

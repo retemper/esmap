@@ -1,5 +1,12 @@
 import type { EsmapConfig, ImportMap } from '@esmap/shared';
-import type { AppRegistry, Router, LifecycleHooks, PrefetchController, RouterOptions, SharedModuleRegistry } from '@esmap/runtime';
+import type {
+  AppRegistry,
+  Router,
+  LifecycleHooks,
+  PrefetchController,
+  RouterOptions,
+  SharedModuleRegistry,
+} from '@esmap/runtime';
 import type { PerfTracker } from '@esmap/monitor';
 import type { EsmapPlugin } from './plugin.js';
 

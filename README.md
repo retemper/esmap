@@ -222,7 +222,11 @@ pnpm turbo test --filter=@esmap/runtime
 
 ## Contributing
 
-Contributions are welcome! Please open an issue first to discuss what you would like to change.
+We welcome contributions! Please see:
+
+- [**CONTRIBUTING.md**](./CONTRIBUTING.md) — Setup, development workflow, PR guidelines
+- [**Code of Conduct**](./CODE_OF_CONDUCT.md) — Community standards
+- [**Security Policy**](./SECURITY.md) — Reporting vulnerabilities
 
 ## License
 

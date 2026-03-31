@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { withTimeout, withRetry, withResilience, TimeoutError, createCircuitBreaker, CircuitOpenError } from './resilience.js';
+import {
+  withTimeout,
+  withRetry,
+  withResilience,
+  TimeoutError,
+  createCircuitBreaker,
+  CircuitOpenError,
+} from './resilience.js';
 import type { CircuitBreakerOptions } from './resilience.js';
 
 describe('TimeoutError', () => {

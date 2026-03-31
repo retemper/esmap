@@ -5,12 +5,7 @@
 import ReactDOM from 'react-dom';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 
-export const {
-  createPortal,
-  flushSync,
-  unmountComponentAtNode,
-  version,
-} = ReactDOM;
+export const { createPortal, flushSync, unmountComponentAtNode, version } = ReactDOM;
 
 export { createRoot, hydrateRoot };
 export default ReactDOM;

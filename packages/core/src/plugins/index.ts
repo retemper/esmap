@@ -5,7 +5,4 @@ export { sandboxPlugin } from './sandbox-plugin.js';
 export type { SandboxPluginOptions } from './sandbox-plugin.js';
 
 export { communicationPlugin } from './communication-plugin.js';
-export type {
-  CommunicationPluginOptions,
-  CommunicationResources,
-} from './communication-plugin.js';
+export type { CommunicationPluginOptions, CommunicationResources } from './communication-plugin.js';

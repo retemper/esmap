@@ -37,21 +37,21 @@ packages/                         apps/
 
 ## 시연하는 고급 기능
 
-| 기능 | 위치 | 설명 |
-|---|---|---|
-| **공유 의존성 버전 협상** | `shared-deps` + host config | `esmapSharedDeps`로 빌드 → `SharedModuleRegistry` 런타임 해석 |
-| **Import Map 서버 + SSE** | `platform-server` + host SSE | 동적 배포/롤백, SSE로 실시간 import map 갱신 |
-| **ReadyGate 인증 게이팅** | `auth` + host | 인증 전 보호 라우트 차단, `markReady` 후 해제 |
-| **중첩 Parcel** | `dashboard` → `activity-feed` | `EsmapParcel`로 MFE 안에 MFE 삽입 |
-| **keepAlive 상태 보존** | `team-directory` | 라우트 전환 후 복귀 시 검색어/선택 상태 유지 |
-| **듀얼 모드 MFE** | `activity-feed` | 동일 컴포넌트가 라우트 페이지 + Parcel 위젯으로 동작 |
-| **MFE 내부 코드 스플리팅** | `team-directory` MemberDetail | `lazy()`로 서브모듈 동적 로드 |
-| **MF 마이그레이션** | `legacy-settings` | `@esmap/compat` convertMfToImportMap 실전 |
-| **커스텀 플러그인 작성** | `host/plugins/audit-log` | EsmapPlugin 인터페이스 직접 구현, hooks/registry/router 접근 |
-| **서버 fetch + fallback** | `host boot.ts` | 서버에서 import map 동적 로드, 실패 시 로컬 fallback |
-| **프레임워크 무관성** | `legacy-settings` | Vanilla JS MFE (React 없음) |
-| **빌드타임 CSS 스코핑** | 모든 React MFE | `esmapCssScope` 플러그인으로 FOUC 방지 |
-| **공유 디자인 시스템** | `design-system` → 여러 MFE | import map 경유 단일 인스턴스 소비 |
+| 기능                       | 위치                          | 설명                                                          |
+| -------------------------- | ----------------------------- | ------------------------------------------------------------- |
+| **공유 의존성 버전 협상**  | `shared-deps` + host config   | `esmapSharedDeps`로 빌드 → `SharedModuleRegistry` 런타임 해석 |
+| **Import Map 서버 + SSE**  | `platform-server` + host SSE  | 동적 배포/롤백, SSE로 실시간 import map 갱신                  |
+| **ReadyGate 인증 게이팅**  | `auth` + host                 | 인증 전 보호 라우트 차단, `markReady` 후 해제                 |
+| **중첩 Parcel**            | `dashboard` → `activity-feed` | `EsmapParcel`로 MFE 안에 MFE 삽입                             |
+| **keepAlive 상태 보존**    | `team-directory`              | 라우트 전환 후 복귀 시 검색어/선택 상태 유지                  |
+| **듀얼 모드 MFE**          | `activity-feed`               | 동일 컴포넌트가 라우트 페이지 + Parcel 위젯으로 동작          |
+| **MFE 내부 코드 스플리팅** | `team-directory` MemberDetail | `lazy()`로 서브모듈 동적 로드                                 |
+| **MF 마이그레이션**        | `legacy-settings`             | `@esmap/compat` convertMfToImportMap 실전                     |
+| **커스텀 플러그인 작성**   | `host/plugins/audit-log`      | EsmapPlugin 인터페이스 직접 구현, hooks/registry/router 접근  |
+| **서버 fetch + fallback**  | `host boot.ts`                | 서버에서 import map 동적 로드, 실패 시 로컬 fallback          |
+| **프레임워크 무관성**      | `legacy-settings`             | Vanilla JS MFE (React 없음)                                   |
+| **빌드타임 CSS 스코핑**    | 모든 React MFE                | `esmapCssScope` 플러그인으로 FOUC 방지                        |
+| **공유 디자인 시스템**     | `design-system` → 여러 MFE    | import map 경유 단일 인스턴스 소비                            |
 
 ## 실행
 

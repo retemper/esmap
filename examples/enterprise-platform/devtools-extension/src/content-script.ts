@@ -14,7 +14,9 @@ window.addEventListener('message', (event) => {
   if (event.data?.source !== 'esmap-devtools') return;
   try {
     port.postMessage({ payload: event.data.payload });
-  } catch { /* port disconnected */ }
+  } catch {
+    /* port disconnected */
+  }
 });
 
 // Extension → Page
