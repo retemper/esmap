@@ -24,9 +24,7 @@ export const legacyMfRemotes: readonly MfRemoteConfig[] = [
     name: 'flexProfile',
     scope: '@flex/profile',
     remoteEntryUrl: 'https://cdn.old.example.com/profile/remoteEntry.js',
-    exposes: [
-      { key: './ProfileEditor', path: './src/components/ProfileEditor.tsx' },
-    ],
+    exposes: [{ key: './ProfileEditor', path: './src/components/ProfileEditor.tsx' }],
   },
 ];
 

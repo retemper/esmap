@@ -5,7 +5,7 @@
  */
 
 chrome.devtools.panels.create(
-  'esmap',         // Panel tab name
-  '',              // Icon (empty string = default)
-  'panel.html',    // Panel page URL
+  'esmap', // Panel tab name
+  '', // Icon (empty string = default)
+  'panel.html', // Panel page URL
 );

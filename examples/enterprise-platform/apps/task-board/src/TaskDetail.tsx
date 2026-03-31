@@ -41,9 +41,9 @@ const PRIORITY_COLORS: Record<Priority, string> = {
 
 /** Label mapping per status */
 const STATUS_LABELS: Record<string, string> = {
-  'todo': 'To Do',
+  todo: 'To Do',
   'in-progress': 'In Progress',
-  'done': 'Done',
+  done: 'Done',
 };
 
 /**
@@ -76,10 +76,20 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
       {/* Header — title + close button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ flex: 1 }}>
-          <span style={{ fontSize: '12px', color: '#484f58', marginBottom: '4px', display: 'block' }}>
+          <span
+            style={{ fontSize: '12px', color: '#484f58', marginBottom: '4px', display: 'block' }}
+          >
             {task.id}
           </span>
-          <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: '#e6edf3', lineHeight: '1.4' }}>
+          <h2
+            style={{
+              fontSize: '18px',
+              fontWeight: '700',
+              margin: 0,
+              color: '#e6edf3',
+              lineHeight: '1.4',
+            }}
+          >
             {task.title}
           </h2>
         </div>
@@ -102,7 +112,15 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
       >
         {/* Status */}
         <div>
-          <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>
+          <div
+            style={{
+              fontSize: '11px',
+              color: '#484f58',
+              marginBottom: '4px',
+              textTransform: 'uppercase',
+              fontWeight: '600',
+            }}
+          >
             Status
           </div>
           <div style={{ fontSize: '13px', color: '#e6edf3' }}>
@@ -112,7 +130,15 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
 
         {/* Priority */}
         <div>
-          <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>
+          <div
+            style={{
+              fontSize: '11px',
+              color: '#484f58',
+              marginBottom: '4px',
+              textTransform: 'uppercase',
+              fontWeight: '600',
+            }}
+          >
             Priority
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -133,7 +159,15 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
 
         {/* Assignee */}
         <div style={{ gridColumn: '1 / -1' }}>
-          <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>
+          <div
+            style={{
+              fontSize: '11px',
+              color: '#484f58',
+              marginBottom: '4px',
+              textTransform: 'uppercase',
+              fontWeight: '600',
+            }}
+          >
             Assignee
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -162,7 +196,15 @@ export function TaskDetail({ task, onClose }: TaskDetailProps): ReactNode {
 
       {/* Description */}
       <div>
-        <div style={{ fontSize: '11px', color: '#484f58', marginBottom: '8px', textTransform: 'uppercase', fontWeight: '600' }}>
+        <div
+          style={{
+            fontSize: '11px',
+            color: '#484f58',
+            marginBottom: '8px',
+            textTransform: 'uppercase',
+            fontWeight: '600',
+          }}
+        >
           Description
         </div>
         <p style={{ fontSize: '14px', color: '#c9d1d9', margin: 0, lineHeight: '1.6' }}>

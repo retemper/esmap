@@ -70,9 +70,7 @@ describe('analyzeDependencyConflicts', () => {
   });
 
   it('dependencies from a single app pass without conflicts', () => {
-    const declarations = [
-      createDeclaration('app-a', { react: '^18.0.0', lodash: '^4.17.0' }),
-    ];
+    const declarations = [createDeclaration('app-a', { react: '^18.0.0', lodash: '^4.17.0' })];
 
     const result = analyzeDependencyConflicts(declarations);
 

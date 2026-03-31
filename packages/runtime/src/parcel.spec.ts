@@ -134,6 +134,8 @@ describe('mountParcel', () => {
   it('propagates the error when the async loader fails', async () => {
     const loader = vi.fn().mockRejectedValue(new Error('load failed'));
 
-    await expect(mountParcel({ app: loader, domElement: container })).rejects.toThrow('load failed');
+    await expect(mountParcel({ app: loader, domElement: container })).rejects.toThrow(
+      'load failed',
+    );
   });
 });

@@ -11,7 +11,15 @@
 // ─── Types ───
 
 /** App status string */
-type AppStatus = 'MOUNTED' | 'FROZEN' | 'NOT_LOADED' | 'LOADING' | 'LOAD_ERROR' | 'BOOTSTRAPPING' | 'NOT_MOUNTED' | 'UNMOUNTING';
+type AppStatus =
+  | 'MOUNTED'
+  | 'FROZEN'
+  | 'NOT_LOADED'
+  | 'LOADING'
+  | 'LOAD_ERROR'
+  | 'BOOTSTRAPPING'
+  | 'NOT_MOUNTED'
+  | 'UNMOUNTING';
 
 /** App information */
 interface AppInfo {
@@ -26,43 +34,73 @@ interface AppInfo {
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface EventBusHandle {
-  readonly getHistory: (event?: string) => ReadonlyArray<{ event: string; payload: unknown; timestamp: number }>;
+  readonly getHistory: (
+    event?: string,
+  ) => ReadonlyArray<{ event: string; payload: unknown; timestamp: number }>;
   readonly on: (event: string, handler: (...args: any[]) => void, options?: unknown) => unknown;
 }
 
 /** Global state handle */
 interface GlobalStateHandle {
   readonly getState: () => Record<string, unknown>;
-  readonly subscribe: (cb: (newState: Record<string, unknown>, prevState: Record<string, unknown>) => void) => void;
+  readonly subscribe: (
+    cb: (newState: Record<string, unknown>, prevState: Record<string, unknown>) => void,
+  ) => void;
 }
 
 /** App registry handle */
 interface RegistryHandle {
   readonly getApps: () => ReadonlyArray<AppInfo>;
-  readonly onStatusChange: (cb: (event: { appName: string; from: string; to: string }) => void) => void;
+  readonly onStatusChange: (
+    cb: (event: { appName: string; from: string; to: string }) => void,
+  ) => void;
 }
 
 /** Router handle */
 interface RouterHandle {
-  readonly afterRouteChange: (cb: (from: { pathname: string }, to: { pathname: string }) => void) => void;
+  readonly afterRouteChange: (
+    cb: (from: { pathname: string }, to: { pathname: string }) => void,
+  ) => void;
 }
 
 /** Performance handle */
 interface PerfHandle {
-  readonly summarize: () => ReadonlyMap<string, { readonly total: number; readonly phases: Record<string, number> }>;
-  readonly onMeasurement?: (listener: (m: { appName: string; phase: string; duration: number; startTime: number }) => void) => () => void;
+  readonly summarize: () => ReadonlyMap<
+    string,
+    { readonly total: number; readonly phases: Record<string, number> }
+  >;
+  readonly onMeasurement?: (
+    listener: (m: { appName: string; phase: string; duration: number; startTime: number }) => void,
+  ) => () => void;
 }
 
 /** Prefetch controller handle */
 interface PrefetchHandle {
-  readonly getStats: () => ReadonlyArray<{ from: string; to: string; count: number; ratio: number }>;
-  readonly getPriorities: (currentApp: string) => ReadonlyArray<{ appName: string; probability: number }>;
+  readonly getStats: () => ReadonlyArray<{
+    from: string;
+    to: string;
+    count: number;
+    ratio: number;
+  }>;
+  readonly getPriorities: (
+    currentApp: string,
+  ) => ReadonlyArray<{ appName: string; probability: number }>;
   readonly historySize: number;
 }
 
 /** Shared module registry handle */
 interface SharedModulesHandle {
-  readonly getRegistered: () => ReadonlyMap<string, ReadonlyArray<{ name: string; version: string; requiredVersion?: string; singleton?: boolean; eager?: boolean; from?: string }>>;
+  readonly getRegistered: () => ReadonlyMap<
+    string,
+    ReadonlyArray<{
+      name: string;
+      version: string;
+      requiredVersion?: string;
+      singleton?: boolean;
+      eager?: boolean;
+      from?: string;
+    }>
+  >;
   readonly getLoaded: () => ReadonlyMap<string, { version: string; from?: string }>;
 }
 
@@ -163,12 +201,42 @@ const APP_TOPOLOGY: ReadonlyArray<{
   icon: string;
 }> = [
   { name: '@enterprise/auth', short: 'Auth', container: '#app-auth', angle: -120, icon: '🔑' },
-  { name: '@enterprise/dashboard', short: 'Dashboard', container: '#app-dashboard', angle: -60, icon: '📊' },
+  {
+    name: '@enterprise/dashboard',
+    short: 'Dashboard',
+    container: '#app-dashboard',
+    angle: -60,
+    icon: '📊',
+  },
   { name: '@enterprise/task-board', short: 'Tasks', container: '#app-main', angle: 0, icon: '📝' },
-  { name: '@enterprise/team-directory', short: 'Team', container: '#app-team', angle: 60, icon: '👥' },
-  { name: '@enterprise/activity-feed', short: 'Activity', container: '#app-main', angle: 120, icon: '📋' },
-  { name: '@enterprise/notifications', short: 'Notif', container: '#app-main', angle: 170, icon: '🔔' },
-  { name: '@enterprise/legacy-settings', short: 'Settings', container: '#app-main', angle: -170, icon: '⚙' },
+  {
+    name: '@enterprise/team-directory',
+    short: 'Team',
+    container: '#app-team',
+    angle: 60,
+    icon: '👥',
+  },
+  {
+    name: '@enterprise/activity-feed',
+    short: 'Activity',
+    container: '#app-main',
+    angle: 120,
+    icon: '📋',
+  },
+  {
+    name: '@enterprise/notifications',
+    short: 'Notif',
+    container: '#app-main',
+    angle: 170,
+    icon: '🔔',
+  },
+  {
+    name: '@enterprise/legacy-settings',
+    short: 'Settings',
+    container: '#app-main',
+    angle: -170,
+    icon: '⚙',
+  },
 ];
 
 /** dashboard -> activity-feed Parcel relationships */
@@ -823,16 +891,34 @@ function shortName(name: string): string {
 
 /** Determines the event category from a log message */
 function classifyMessage(message: string): EventCategory {
-  if (message.includes('fail') || message.includes('error') || message.includes('block') || message.includes('violation')) return 'error';
-  if (message.includes('route') || message.includes('Route') || message.includes('404')) return 'route';
-  if (message.includes('auth') || message.includes('logout') || message.includes('Auth')) return 'auth';
-  if (message.includes('→') || message.includes('mount') || message.includes('cleanup') || message.includes('app registered')) return 'lifecycle';
-  if (message.includes('current app') || message.includes('state') || message.includes('theme')) return 'state';
+  if (
+    message.includes('fail') ||
+    message.includes('error') ||
+    message.includes('block') ||
+    message.includes('violation')
+  )
+    return 'error';
+  if (message.includes('route') || message.includes('Route') || message.includes('404'))
+    return 'route';
+  if (message.includes('auth') || message.includes('logout') || message.includes('Auth'))
+    return 'auth';
+  if (
+    message.includes('→') ||
+    message.includes('mount') ||
+    message.includes('cleanup') ||
+    message.includes('app registered')
+  )
+    return 'lifecycle';
+  if (message.includes('current app') || message.includes('state') || message.includes('theme'))
+    return 'state';
   return 'lifecycle';
 }
 
 /** Creates an element using the SVG namespace */
-function svgEl<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}): SVGElementTagNameMap[K] {
+function svgEl<K extends keyof SVGElementTagNameMap>(
+  tag: K,
+  attrs: Record<string, string | number> = {},
+): SVGElementTagNameMap[K] {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
   for (const [key, value] of Object.entries(attrs)) {
     el.setAttribute(key, String(value));
@@ -858,17 +944,20 @@ function renderJsonTree(value: unknown, indent: number = 0, isLast: boolean = tr
   }
   if (Array.isArray(value)) {
     if (value.length === 0) return `<span class="state-brace">[]</span>${isLast ? '' : ','}`;
-    const items = value.map((item, i) =>
-      `${pad}  ${renderJsonTree(item, indent + 1, i === value.length - 1)}`
-    ).join('\n');
+    const items = value
+      .map((item, i) => `${pad}  ${renderJsonTree(item, indent + 1, i === value.length - 1)}`)
+      .join('\n');
     return `<span class="state-brace">[</span>\n${items}\n${pad}<span class="state-brace">]</span>${isLast ? '' : ','}`;
   }
   if (typeof value === 'object') {
     const entries = Object.entries(value);
     if (entries.length === 0) return `<span class="state-brace">{}</span>${isLast ? '' : ','}`;
-    const items = entries.map(([k, v], i) =>
-      `${pad}  <span class="state-key">"${escapeHtml(k)}"</span>: ${renderJsonTree(v, indent + 1, i === entries.length - 1)}`
-    ).join('\n');
+    const items = entries
+      .map(
+        ([k, v], i) =>
+          `${pad}  <span class="state-key">"${escapeHtml(k)}"</span>: ${renderJsonTree(v, indent + 1, i === entries.length - 1)}`,
+      )
+      .join('\n');
     return `<span class="state-brace">{</span>\n${items}\n${pad}<span class="state-brace">}</span>${isLast ? '' : ','}`;
   }
   return `<span class="state-null">${String(value)}</span>${isLast ? '' : ','}`;
@@ -876,7 +965,11 @@ function renderJsonTree(value: unknown, indent: number = 0, isLast: boolean = tr
 
 /** Escapes HTML special characters */
 function escapeHtml(text: string): string {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /** Calculates the angle between two points */
@@ -892,7 +985,8 @@ function angleBetween(x1: number, y1: number, x2: number, y2: number): number {
  * @param config - data sources and configuration
  */
 export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel {
-  const { registry, eventBus, globalState, router, perf, prefetch, sharedModules, importMap } = config;
+  const { registry, eventBus, globalState, router, perf, prefetch, sharedModules, importMap } =
+    config;
   const containerId = config.container ?? '#esmap-devtools';
 
   // ─── Internal state ───
@@ -1125,7 +1219,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     defs.appendChild(parcelArrowMarker);
 
     // Glow filter
-    const glowFilter = svgEl('filter', { id: 'node-glow', x: '-50%', y: '-50%', width: '200%', height: '200%' });
+    const glowFilter = svgEl('filter', {
+      id: 'node-glow',
+      x: '-50%',
+      y: '-50%',
+      width: '200%',
+      height: '200%',
+    });
     const feGaussianBlur = svgEl('feGaussianBlur', { stdDeviation: '4', result: 'blur' });
     glowFilter.appendChild(feGaussianBlur);
     const feMerge = svgEl('feMerge');
@@ -1139,7 +1239,15 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     topoSvg.appendChild(defs);
 
     // ─── Plugin badges (top) ───
-    const pluginNames = ['guard', 'sandbox', 'keepAlive', 'domIsolation', 'prefetch', 'communication', 'audit'];
+    const pluginNames = [
+      'guard',
+      'sandbox',
+      'keepAlive',
+      'domIsolation',
+      'prefetch',
+      'communication',
+      'audit',
+    ];
     const pluginY = 16;
     const pluginSpacing = 90;
     const pluginStartX = cx - ((pluginNames.length - 1) * pluginSpacing) / 2;
@@ -1147,15 +1255,25 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     for (const [i, name] of pluginNames.entries()) {
       const px = pluginStartX + i * pluginSpacing;
       const pillBg = svgEl('rect', {
-        x: px - 34, y: pluginY - 8, width: 68, height: 16,
-        rx: 8, ry: 8,
-        fill: '#161b22', stroke: '#21262d', 'stroke-width': 1,
+        x: px - 34,
+        y: pluginY - 8,
+        width: 68,
+        height: 16,
+        rx: 8,
+        ry: 8,
+        fill: '#161b22',
+        stroke: '#21262d',
+        'stroke-width': 1,
       });
       topoSvg.appendChild(pillBg);
       const pillText = svgEl('text', {
-        x: px, y: pluginY,
-        'text-anchor': 'middle', 'dominant-baseline': 'central',
-        fill: '#7d8590', 'font-size': '8', 'font-family': "'SF Mono', monospace",
+        x: px,
+        y: pluginY,
+        'text-anchor': 'middle',
+        'dominant-baseline': 'central',
+        fill: '#7d8590',
+        'font-size': '8',
+        'font-family': "'SF Mono', monospace",
       });
       pillText.textContent = name;
       topoSvg.appendChild(pillText);
@@ -1170,15 +1288,25 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     for (const [i, dep] of sharedDeps.entries()) {
       const sx = sharedStartX + i * sharedSpacing;
       const pillBg = svgEl('rect', {
-        x: sx - 50, y: sharedY - 8, width: 100, height: 16,
-        rx: 8, ry: 8,
-        fill: '#161b22', stroke: '#21262d', 'stroke-width': 1,
+        x: sx - 50,
+        y: sharedY - 8,
+        width: 100,
+        height: 16,
+        rx: 8,
+        ry: 8,
+        fill: '#161b22',
+        stroke: '#21262d',
+        'stroke-width': 1,
       });
       topoSvg.appendChild(pillBg);
       const pillText = svgEl('text', {
-        x: sx, y: sharedY,
-        'text-anchor': 'middle', 'dominant-baseline': 'central',
-        fill: '#484f58', 'font-size': '8', 'font-family': "'SF Mono', monospace",
+        x: sx,
+        y: sharedY,
+        'text-anchor': 'middle',
+        'dominant-baseline': 'central',
+        fill: '#484f58',
+        'font-size': '8',
+        'font-family': "'SF Mono', monospace",
       });
       pillText.textContent = dep;
       topoSvg.appendChild(pillText);
@@ -1216,8 +1344,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const startY = cy + Math.sin(angle) * 28;
 
       const line = svgEl('line', {
-        x1: startX, y1: startY,
-        x2: endX, y2: endY,
+        x1: startX,
+        y1: startY,
+        x2: endX,
+        y2: endY,
         class: 'topo-edge',
         'marker-end': 'url(#arrow-marker)',
       });
@@ -1249,8 +1379,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const endY = toPos.y - Math.sin(angle) * (nodeHeight / 2 + 4);
 
       const line = svgEl('line', {
-        x1: startX, y1: startY,
-        x2: endX, y2: endY,
+        x1: startX,
+        y1: startY,
+        x2: endX,
+        y2: endY,
         class: 'topo-edge-parcel',
         'marker-end': 'url(#parcel-arrow-marker)',
       });
@@ -1260,15 +1392,25 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const midX = (startX + endX) / 2;
       const midY = (startY + endY) / 2 - 10;
       const parcelPill = svgEl('rect', {
-        x: midX - 20, y: midY - 7, width: 40, height: 14,
-        rx: 7, ry: 7,
-        fill: '#161b22', stroke: '#8b5cf6', 'stroke-width': 0.5,
+        x: midX - 20,
+        y: midY - 7,
+        width: 40,
+        height: 14,
+        rx: 7,
+        ry: 7,
+        fill: '#161b22',
+        stroke: '#8b5cf6',
+        'stroke-width': 0.5,
       });
       topoSvg.appendChild(parcelPill);
       const parcelLabel = svgEl('text', {
-        x: midX, y: midY,
-        'text-anchor': 'middle', 'dominant-baseline': 'central',
-        fill: '#8b5cf6', 'font-size': '8', 'font-family': "'SF Mono', monospace",
+        x: midX,
+        y: midY,
+        'text-anchor': 'middle',
+        'dominant-baseline': 'central',
+        fill: '#8b5cf6',
+        'font-size': '8',
+        'font-family': "'SF Mono', monospace",
         'font-weight': '600',
       });
       parcelLabel.textContent = 'Parcel';
@@ -1289,15 +1431,21 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
           const offsetAngle = angle + Math.PI / 2;
           const offset = 6; // Offset to avoid overlapping regular edges
 
-          const startX = fromPos.x + Math.cos(angle) * (nodeWidth / 2 + 2) + Math.cos(offsetAngle) * offset;
-          const startY = fromPos.y + Math.sin(angle) * (nodeHeight / 2 + 2) + Math.sin(offsetAngle) * offset;
-          const endX = toPos.x - Math.cos(angle) * (nodeWidth / 2 + 4) + Math.cos(offsetAngle) * offset;
-          const endY = toPos.y - Math.sin(angle) * (nodeHeight / 2 + 4) + Math.sin(offsetAngle) * offset;
+          const startX =
+            fromPos.x + Math.cos(angle) * (nodeWidth / 2 + 2) + Math.cos(offsetAngle) * offset;
+          const startY =
+            fromPos.y + Math.sin(angle) * (nodeHeight / 2 + 2) + Math.sin(offsetAngle) * offset;
+          const endX =
+            toPos.x - Math.cos(angle) * (nodeWidth / 2 + 4) + Math.cos(offsetAngle) * offset;
+          const endY =
+            toPos.y - Math.sin(angle) * (nodeHeight / 2 + 4) + Math.sin(offsetAngle) * offset;
 
           const opacity = 0.3 + stat.ratio * 0.7;
           const line = svgEl('line', {
-            x1: startX, y1: startY,
-            x2: endX, y2: endY,
+            x1: startX,
+            y1: startY,
+            x2: endX,
+            y2: endY,
             class: 'topo-edge-prefetch',
           });
           line.style.opacity = String(opacity);
@@ -1308,9 +1456,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
           const midX = (startX + endX) / 2 + Math.cos(offsetAngle) * 10;
           const midY = (startY + endY) / 2 + Math.sin(offsetAngle) * 10;
           const probLabel = svgEl('text', {
-            x: midX, y: midY,
-            'text-anchor': 'middle', 'dominant-baseline': 'central',
-            fill: '#1f6feb', 'font-size': '7', 'font-family': "'SF Mono', monospace",
+            x: midX,
+            y: midY,
+            'text-anchor': 'middle',
+            'dominant-baseline': 'central',
+            fill: '#1f6feb',
+            'font-size': '7',
+            'font-family': "'SF Mono', monospace",
             opacity: String(opacity),
           });
           probLabel.textContent = `${Math.round(stat.ratio * 100)}%`;
@@ -1329,9 +1481,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     hostLabel.textContent = 'Host';
     hostGroup.appendChild(hostLabel);
     const hostSubLabel = svgEl('text', {
-      x: cx, y: cy + 10,
-      'text-anchor': 'middle', 'dominant-baseline': 'central',
-      fill: '#484f58', 'font-size': '7', 'font-family': "'SF Mono', monospace",
+      x: cx,
+      y: cy + 10,
+      'text-anchor': 'middle',
+      'dominant-baseline': 'central',
+      fill: '#484f58',
+      'font-size': '7',
+      'font-family': "'SF Mono', monospace",
     });
     hostSubLabel.textContent = 'esmap';
     hostGroup.appendChild(hostSubLabel);
@@ -1355,7 +1511,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         y: pos.y - nodeHeight / 2 - 6,
         width: nodeWidth + 12,
         height: nodeHeight + 12,
-        rx: 14, ry: 14,
+        rx: 14,
+        ry: 14,
         fill: statusColor,
         opacity: 0,
         filter: 'url(#node-glow)',
@@ -1369,7 +1526,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         y: pos.y - nodeHeight / 2 - 4,
         width: nodeWidth + 8,
         height: nodeHeight + 8,
-        rx: 14, ry: 14,
+        rx: 14,
+        ry: 14,
         class: `topo-active-ring${isActive ? ' visible' : ''}`,
       });
       activeRing.setAttribute('data-active-ring', appDef.name);
@@ -1392,13 +1550,15 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       if (perfData && perfData.total > 0) {
         const maxMs = 500; // Reference value
         const barWidth = Math.min((perfData.total / maxMs) * (nodeWidth - 4), nodeWidth - 4);
-        const barColor = perfData.total < 100 ? '#3fb950' : perfData.total < 300 ? '#d29922' : '#f85149';
+        const barColor =
+          perfData.total < 100 ? '#3fb950' : perfData.total < 300 ? '#d29922' : '#f85149';
         const perfBar = svgEl('rect', {
           x: pos.x - nodeWidth / 2 + 2,
           y: pos.y + nodeHeight / 2 - 4,
           width: barWidth,
           height: 2,
-          rx: 1, ry: 1,
+          rx: 1,
+          ry: 1,
           fill: barColor,
           opacity: 0.8,
           class: 'topo-perf-bar',
@@ -1409,8 +1569,11 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         const perfLabel = svgEl('text', {
           x: pos.x + nodeWidth / 2 - 4,
           y: pos.y + nodeHeight / 2 - 6,
-          'text-anchor': 'end', 'dominant-baseline': 'auto',
-          fill: barColor, 'font-size': '7', 'font-family': "'SF Mono', monospace",
+          'text-anchor': 'end',
+          'dominant-baseline': 'auto',
+          fill: barColor,
+          'font-size': '7',
+          'font-family': "'SF Mono', monospace",
           opacity: 0.7,
         });
         perfLabel.textContent = `${Math.round(perfData.total)}ms`;
@@ -1462,22 +1625,33 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       group.addEventListener('mouseenter', (e) => {
         const pData = perf.summarize().get(appDef.name);
         const perfRows = pData
-          ? Object.entries(pData.phases).map(([phase, duration]) =>
-              `<div class="topo-tooltip-row"><span class="topo-tooltip-label">${phase}</span><span class="topo-tooltip-value">${duration.toFixed(0)}ms</span></div>`
-            ).join('') +
+          ? Object.entries(pData.phases)
+              .map(
+                ([phase, duration]) =>
+                  `<div class="topo-tooltip-row"><span class="topo-tooltip-label">${phase}</span><span class="topo-tooltip-value">${duration.toFixed(0)}ms</span></div>`,
+              )
+              .join('') +
             `<div class="topo-tooltip-row"><span class="topo-tooltip-label">Total</span><span class="topo-tooltip-value" style="font-weight:600">${pData.total.toFixed(0)}ms</span></div>`
           : '<div style="color:#484f58">No perf data yet</div>';
 
-        const prefetchRows = prefetch ? (() => {
-          try {
-            const priorities = prefetch.getPriorities(appDef.name);
-            if (priorities.length === 0) return '';
-            const items = priorities.slice(0, 3).map((p) =>
-              `<span style="color:#1f6feb">${shortName(p.appName)}</span> ${Math.round(p.probability * 100)}%`
-            ).join(', ');
-            return `<div class="topo-tooltip-row" style="margin-top:4px"><span class="topo-tooltip-label">Prefetch →</span><span class="topo-tooltip-value">${items}</span></div>`;
-          } catch { return ''; }
-        })() : '';
+        const prefetchRows = prefetch
+          ? (() => {
+              try {
+                const priorities = prefetch.getPriorities(appDef.name);
+                if (priorities.length === 0) return '';
+                const items = priorities
+                  .slice(0, 3)
+                  .map(
+                    (p) =>
+                      `<span style="color:#1f6feb">${shortName(p.appName)}</span> ${Math.round(p.probability * 100)}%`,
+                  )
+                  .join(', ');
+                return `<div class="topo-tooltip-row" style="margin-top:4px"><span class="topo-tooltip-label">Prefetch →</span><span class="topo-tooltip-value">${items}</span></div>`;
+              } catch {
+                return '';
+              }
+            })()
+          : '';
 
         const inboundKey = `host→${appDef.name}`;
         const outboundKey = `${appDef.name}→host`;
@@ -1541,12 +1715,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   function animateParticle(fromApp: string, toApp: string, color: string): void {
     if (topologyPanel.style.display === 'none') return;
 
-    const fromPos = fromApp === 'host'
-      ? { x: centerCache.x, y: centerCache.y }
-      : nodePositionsCache[fromApp];
-    const toPos = toApp === 'host'
-      ? { x: centerCache.x, y: centerCache.y }
-      : nodePositionsCache[toApp];
+    const fromPos =
+      fromApp === 'host' ? { x: centerCache.x, y: centerCache.y } : nodePositionsCache[fromApp];
+    const toPos =
+      toApp === 'host' ? { x: centerCache.x, y: centerCache.y } : nodePositionsCache[toApp];
 
     if (!fromPos || !toPos) return;
 
@@ -1777,7 +1949,9 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     btn.textContent = CATEGORY_LABELS[cat];
     btn.style.color = CATEGORY_COLORS[cat];
     btn.addEventListener('click', () => {
-      eventsToolbar.querySelectorAll('.events-filter-btn').forEach((b) => b.classList.remove('active'));
+      eventsToolbar
+        .querySelectorAll('.events-filter-btn')
+        .forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       activeFilter.value = cat;
       renderFilteredEvents();
@@ -1804,9 +1978,10 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   /** Renders only events matching the filter */
   function renderFilteredEvents(): void {
     eventsList.innerHTML = '';
-    const filtered = activeFilter.value === 'all'
-      ? events
-      : events.filter((e) => e.category === activeFilter.value);
+    const filtered =
+      activeFilter.value === 'all'
+        ? events
+        : events.filter((e) => e.category === activeFilter.value);
 
     for (const entry of filtered) {
       eventsList.appendChild(createEventElement(entry));
@@ -1853,7 +2028,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     logCountEl.textContent = `${logCountRef.value} events`;
 
     if (activeFilter.value === 'all' || activeFilter.value === entry.category) {
-      const shouldScroll = eventsList.scrollHeight - eventsList.scrollTop - eventsList.clientHeight < 40;
+      const shouldScroll =
+        eventsList.scrollHeight - eventsList.scrollTop - eventsList.clientHeight < 40;
       eventsList.appendChild(createEventElement(entry));
 
       while (eventsList.children.length > MAX_EVENTS) {
@@ -1926,16 +2102,22 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   // ═══════════════════════════════════════════════
 
   /** Maps state transitions to lifecycle phase names */
-  function resolvePhaseFromTransition(from: string, to: string): { endPhase: string; startPhase: string } | null {
+  function resolvePhaseFromTransition(
+    from: string,
+    to: string,
+  ): { endPhase: string; startPhase: string } | null {
     const upper = (s: string): string => s.toUpperCase();
     const f = upper(from);
     const t = upper(to);
 
     if (f === 'NOT_LOADED' && t === 'LOADING') return { endPhase: '', startPhase: 'load' };
-    if (f === 'LOADING' && t === 'BOOTSTRAPPING') return { endPhase: 'load', startPhase: 'bootstrap' };
-    if (f === 'BOOTSTRAPPING' && t === 'NOT_MOUNTED') return { endPhase: 'bootstrap', startPhase: 'mount' };
+    if (f === 'LOADING' && t === 'BOOTSTRAPPING')
+      return { endPhase: 'load', startPhase: 'bootstrap' };
+    if (f === 'BOOTSTRAPPING' && t === 'NOT_MOUNTED')
+      return { endPhase: 'bootstrap', startPhase: 'mount' };
     if (f === 'NOT_MOUNTED' && t === 'MOUNTED') return { endPhase: 'mount', startPhase: '' };
-    if ((f === 'MOUNTED' || f === 'NOT_MOUNTED') && t === 'UNMOUNTING') return { endPhase: '', startPhase: 'unmount' };
+    if ((f === 'MOUNTED' || f === 'NOT_MOUNTED') && t === 'UNMOUNTING')
+      return { endPhase: '', startPhase: 'unmount' };
     if (f === 'UNMOUNTING' && t === 'NOT_MOUNTED') return { endPhase: 'unmount', startPhase: '' };
     return null;
   }
@@ -1970,8 +2152,9 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       if (phaseInfo.endPhase && phaseStartTimes[event.appName][phaseInfo.endPhase]) {
         const duration = now - phaseStartTimes[event.appName][phaseInfo.endPhase];
         derivedPerfData[event.appName].phases[phaseInfo.endPhase] = duration;
-        derivedPerfData[event.appName].total = Object.values(derivedPerfData[event.appName].phases)
-          .reduce((sum, d) => sum + d, 0);
+        derivedPerfData[event.appName].total = Object.values(
+          derivedPerfData[event.appName].phases,
+        ).reduce((sum, d) => sum + d, 0);
         delete phaseStartTimes[event.appName][phaseInfo.endPhase];
       }
 
@@ -2093,7 +2276,9 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         timestamp: Date.now(),
         category: 'state',
         name: 'state:change',
-        detail: diffs.map((d) => `${d.key}: ${JSON.stringify(d.oldValue)} → ${JSON.stringify(d.newValue)}`).join(', '),
+        detail: diffs
+          .map((d) => `${d.key}: ${JSON.stringify(d.oldValue)} → ${JSON.stringify(d.newValue)}`)
+          .join(', '),
       });
 
       if (statePanel.classList.contains('active')) {
@@ -2220,7 +2405,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     if (summary.size === 0) {
       const empty = document.createElement('div');
       empty.className = 'perf-empty';
-      empty.textContent = 'No performance data yet. Navigate between pages to collect measurements.';
+      empty.textContent =
+        'No performance data yet. Navigate between pages to collect measurements.';
       container.appendChild(empty);
       return;
     }
@@ -2231,7 +2417,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     // Scale tick marks
     const scale = document.createElement('div');
     scale.className = 'perf-scale';
-    const ticks = [0, Math.round(maxTotal * 0.25), Math.round(maxTotal * 0.5), Math.round(maxTotal * 0.75), Math.round(maxTotal)];
+    const ticks = [
+      0,
+      Math.round(maxTotal * 0.25),
+      Math.round(maxTotal * 0.5),
+      Math.round(maxTotal * 0.75),
+      Math.round(maxTotal),
+    ];
     for (const tick of ticks) {
       const marker = document.createElement('span');
       marker.className = 'perf-scale-marker';
@@ -2320,7 +2512,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     }
 
     const container = document.createElement('div');
-    container.style.cssText = 'padding:16px;font-family:"SF Mono","JetBrains Mono",monospace;font-size:12px;overflow-y:auto;height:100%';
+    container.style.cssText =
+      'padding:16px;font-family:"SF Mono","JetBrains Mono",monospace;font-size:12px;overflow-y:auto;height:100%';
     depsPanel.appendChild(container);
 
     const title = document.createElement('div');
@@ -2348,12 +2541,14 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
     if (conflictModules.length > 0) {
       const banner = document.createElement('div');
-      banner.style.cssText = 'background:#f8717120;border:1px solid #f8717140;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px';
+      banner.style.cssText =
+        'background:#f8717120;border:1px solid #f8717140;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px';
       banner.innerHTML = `<span style="font-size:16px">⚠</span><span style="color:#f87171;font-weight:600">Version conflicts detected in ${conflictModules.length} module(s):</span> <span style="color:#e6edf3">${conflictModules.join(', ')}</span>`;
       container.appendChild(banner);
     } else {
       const banner = document.createElement('div');
-      banner.style.cssText = 'background:#3fb95015;border:1px solid #3fb95030;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px';
+      banner.style.cssText =
+        'background:#3fb95015;border:1px solid #3fb95030;border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:8px';
       banner.innerHTML = `<span style="font-size:16px">✓</span><span style="color:#3fb950;font-weight:600">${registered.size} shared modules — all versions aligned</span>`;
       container.appendChild(banner);
     }
@@ -2389,7 +2584,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const isSingleton = candidates.some((c) => c.singleton);
       if (isSingleton) {
         const singletonBadge = document.createElement('span');
-        singletonBadge.style.cssText = 'font-size:10px;padding:1px 8px;border-radius:10px;background:#c084fc20;color:#c084fc;border:1px solid #c084fc40;font-weight:500';
+        singletonBadge.style.cssText =
+          'font-size:10px;padding:1px 8px;border-radius:10px;background:#c084fc20;color:#c084fc;border:1px solid #c084fc40;font-weight:500';
         singletonBadge.textContent = 'singleton';
         header.appendChild(singletonBadge);
       }
@@ -2398,7 +2594,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const isEager = candidates.some((c) => c.eager);
       if (isEager) {
         const eagerBadge = document.createElement('span');
-        eagerBadge.style.cssText = 'font-size:10px;padding:1px 8px;border-radius:10px;background:#60a5fa20;color:#60a5fa;border:1px solid #60a5fa40;font-weight:500';
+        eagerBadge.style.cssText =
+          'font-size:10px;padding:1px 8px;border-radius:10px;background:#60a5fa20;color:#60a5fa;border:1px solid #60a5fa40;font-weight:500';
         eagerBadge.textContent = 'eager';
         header.appendChild(eagerBadge);
       }
@@ -2406,7 +2603,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       // Version conflict badge
       if (hasConflict) {
         const conflictBadge = document.createElement('span');
-        conflictBadge.style.cssText = 'font-size:10px;padding:1px 8px;border-radius:10px;background:#f8717120;color:#f87171;border:1px solid #f8717140;font-weight:500';
+        conflictBadge.style.cssText =
+          'font-size:10px;padding:1px 8px;border-radius:10px;background:#f8717120;color:#f87171;border:1px solid #f8717140;font-weight:500';
         conflictBadge.textContent = `${uniqueVersions.size} versions`;
         header.appendChild(conflictBadge);
       }
@@ -2422,7 +2620,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:11px';
 
         // Display selected version (highlighted if matching loaded)
-        const isActive = loadedInfo?.version === candidate.version && loadedInfo.from === candidate.from;
+        const isActive =
+          loadedInfo?.version === candidate.version && loadedInfo.from === candidate.from;
         const indicator = document.createElement('span');
         indicator.style.cssText = `width:6px;height:6px;border-radius:50%;flex-shrink:0;background:${isActive ? '#4ade80' : '#30363d'}`;
         row.appendChild(indicator);
@@ -2459,24 +2658,36 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       container.appendChild(imTitle);
 
       const table = document.createElement('div');
-      table.style.cssText = 'background:#161b22;border:1px solid #21262d;border-radius:8px;overflow:hidden';
+      table.style.cssText =
+        'background:#161b22;border:1px solid #21262d;border-radius:8px;overflow:hidden';
 
       // Header
       const headerRow = document.createElement('div');
-      headerRow.style.cssText = 'display:flex;padding:8px 12px;border-bottom:1px solid #21262d;font-size:10px;font-weight:600;color:#7d8590;text-transform:uppercase;letter-spacing:0.5px';
-      headerRow.innerHTML = '<span style="width:200px;flex-shrink:0">Specifier</span><span style="flex:1">URL</span><span style="width:60px;text-align:right">Type</span>';
+      headerRow.style.cssText =
+        'display:flex;padding:8px 12px;border-bottom:1px solid #21262d;font-size:10px;font-weight:600;color:#7d8590;text-transform:uppercase;letter-spacing:0.5px';
+      headerRow.innerHTML =
+        '<span style="width:200px;flex-shrink:0">Specifier</span><span style="flex:1">URL</span><span style="width:60px;text-align:right">Type</span>';
       table.appendChild(headerRow);
 
       // Import entries
-      const sortedImports = Object.entries(importMap.imports).sort(([a], [b]) => a.localeCompare(b));
+      const sortedImports = Object.entries(importMap.imports).sort(([a], [b]) =>
+        a.localeCompare(b),
+      );
       for (const [specifier, url] of sortedImports) {
         const row = document.createElement('div');
-        row.style.cssText = 'display:flex;padding:6px 12px;border-bottom:1px solid #161b22;font-size:11px;align-items:center';
-        row.addEventListener('mouseenter', () => { row.style.background = '#1c2128'; });
-        row.addEventListener('mouseleave', () => { row.style.background = ''; });
+        row.style.cssText =
+          'display:flex;padding:6px 12px;border-bottom:1px solid #161b22;font-size:11px;align-items:center';
+        row.addEventListener('mouseenter', () => {
+          row.style.background = '#1c2128';
+        });
+        row.addEventListener('mouseleave', () => {
+          row.style.background = '';
+        });
 
         // Determine if app or library
-        const isApp = APP_TOPOLOGY.some((a) => specifier.includes(a.name.replace('@enterprise/', '')));
+        const isApp = APP_TOPOLOGY.some((a) =>
+          specifier.includes(a.name.replace('@enterprise/', '')),
+        );
         const typeColor = isApp ? '#60a5fa' : '#c084fc';
         const typeLabel = isApp ? 'App' : 'Lib';
 
@@ -2499,7 +2710,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
         for (const [scope, mappings] of Object.entries(importMap.scopes)) {
           const scopeCard = document.createElement('div');
-          scopeCard.style.cssText = 'background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px 12px;margin-bottom:6px';
+          scopeCard.style.cssText =
+            'background:#161b22;border:1px solid #21262d;border-radius:6px;padding:8px 12px;margin-bottom:6px';
           scopeCard.innerHTML = `<div style="color:#fbbf24;font-size:11px;font-weight:600;margin-bottom:4px">scope: ${escapeHtml(scope)}</div>`;
           for (const [spec, url] of Object.entries(mappings)) {
             const row = document.createElement('div');
@@ -2519,7 +2731,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     container.appendChild(graphTitle);
 
     const svgContainer = document.createElement('div');
-    svgContainer.style.cssText = 'background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:16px;position:relative;min-height:200px';
+    svgContainer.style.cssText =
+      'background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:16px;position:relative;min-height:200px';
     container.appendChild(svgContainer);
 
     const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');

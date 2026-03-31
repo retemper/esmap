@@ -32,7 +32,9 @@
         align-items: center;
         justify-content: center;
       }
-      #app-auth:empty { display: none; }
+      #app-auth:empty {
+        display: none;
+      }
       #app-nav {
         background: #1e293b;
         color: #fff;
@@ -52,7 +54,8 @@
         display: none;
       }
       /* keepAlive 컨테이너: 비어 있으면 공간 차지 안 함 */
-      #app-dashboard:empty, #app-team:empty {
+      #app-dashboard:empty,
+      #app-team:empty {
         display: none;
       }
 
@@ -86,7 +89,6 @@
         color: #e2e8f0;
         overflow-y: auto;
       }
-
     </style>
   </head>
   <body>
@@ -98,12 +100,18 @@
       <div id="app-nav"></div>
 
       <!-- Main content: 라우트별 MFE (keepAlive 앱은 freeze 시 컨테이너를 숨기므로 별도 컨테이너 필요) -->
-      <div id="app-dashboard" style="padding:24px;max-width:1200px;width:100%;margin:0 auto;min-height:400px"></div>
-      <div id="app-team" style="padding:24px;max-width:1200px;width:100%;margin:0 auto;min-height:400px"></div>
+      <div
+        id="app-dashboard"
+        style="padding: 24px; max-width: 1200px; width: 100%; margin: 0 auto; min-height: 400px"
+      ></div>
+      <div
+        id="app-team"
+        style="padding: 24px; max-width: 1200px; width: 100%; margin: 0 auto; min-height: 400px"
+      ></div>
       <div id="app-main"></div>
 
       <!-- Workspace: multi-app composition layout -->
-      <div id="app-workspace" class="workspace-layout" style="display:none">
+      <div id="app-workspace" class="workspace-layout" style="display: none">
         <div id="workspace-header"></div>
         <div id="workspace-sidebar"></div>
         <div id="workspace-main"></div>

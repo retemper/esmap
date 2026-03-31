@@ -22,13 +22,7 @@ const paddingMap: Record<string, string> = {
  * Shared design system Card.
  * A container component that visually groups content.
  */
-export function Card({
-  title,
-  padding = 'md',
-  children,
-  style,
-  ...rest
-}: CardProps): ReactNode {
+export function Card({ title, padding = 'md', children, style, ...rest }: CardProps): ReactNode {
   const cardStyle: Record<string, string> = {
     background: theme.colors.surface,
     border: `1px solid ${theme.colors.border}`,

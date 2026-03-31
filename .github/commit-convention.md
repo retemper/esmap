@@ -12,19 +12,19 @@ Since we squash-merge PRs, **the PR title** is what matters — it becomes the f
 
 ### Type
 
-| Type | Description |
-| --- | --- |
-| `feat` | A new feature |
-| `fix` | A bug fix |
-| `docs` | Documentation only changes |
-| `style` | Formatting, missing semi colons, etc. (no code change) |
+| Type       | Description                                             |
+| ---------- | ------------------------------------------------------- |
+| `feat`     | A new feature                                           |
+| `fix`      | A bug fix                                               |
+| `docs`     | Documentation only changes                              |
+| `style`    | Formatting, missing semi colons, etc. (no code change)  |
 | `refactor` | Code change that neither fixes a bug nor adds a feature |
-| `perf` | A code change that improves performance |
-| `test` | Adding or updating tests |
-| `build` | Changes to the build system or dependencies |
-| `ci` | Changes to CI configuration |
-| `chore` | Other changes that don't modify src or test files |
-| `revert` | Reverts a previous commit |
+| `perf`     | A code change that improves performance                 |
+| `test`     | Adding or updating tests                                |
+| `build`    | Changes to the build system or dependencies             |
+| `ci`       | Changes to CI configuration                             |
+| `chore`    | Other changes that don't modify src or test files       |
+| `revert`   | Reverts a previous commit                               |
 
 ### Scope
 

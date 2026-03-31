@@ -77,7 +77,11 @@ export interface ResourceLoader {
   /** Clears the cache. */
   clearCache(): void;
   /** Returns the list of registered interceptor/transformer names (for debugging). */
-  getRegisteredNames(): { readonly fetch: readonly string[]; readonly js: readonly string[]; readonly css: readonly string[] };
+  getRegisteredNames(): {
+    readonly fetch: readonly string[];
+    readonly js: readonly string[];
+    readonly css: readonly string[];
+  };
 }
 
 /** Default cache TTL (5 minutes) */
@@ -129,9 +133,7 @@ export function createResourceLoader(options: ResourceLoaderOptions = {}): Resou
       return async (nextUrl: string): Promise<string> => {
         if (index >= fetchInterceptors.length) {
           const controller = fetchTimeout > 0 ? new AbortController() : undefined;
-          const timer = controller
-            ? setTimeout(() => controller.abort(), fetchTimeout)
-            : undefined;
+          const timer = controller ? setTimeout(() => controller.abort(), fetchTimeout) : undefined;
           try {
             const response = await fetch(nextUrl, { signal: controller?.signal });
             if (!response.ok) {
@@ -140,7 +142,9 @@ export function createResourceLoader(options: ResourceLoaderOptions = {}): Resou
             return await response.text();
           } catch (error) {
             if (error instanceof DOMException && error.name === 'AbortError') {
-              throw new Error(`Resource load timeout: ${nextUrl} (${fetchTimeout}ms)`, { cause: error });
+              throw new Error(`Resource load timeout: ${nextUrl} (${fetchTimeout}ms)`, {
+                cause: error,
+              });
             }
             throw error;
           } finally {
@@ -206,7 +210,11 @@ export function createResourceLoader(options: ResourceLoaderOptions = {}): Resou
       cache.clear();
     },
 
-    getRegisteredNames(): { readonly fetch: readonly string[]; readonly js: readonly string[]; readonly css: readonly string[] } {
+    getRegisteredNames(): {
+      readonly fetch: readonly string[];
+      readonly js: readonly string[];
+      readonly css: readonly string[];
+    } {
       return {
         fetch: fetchInterceptors.map((i) => i.name),
         js: jsTransformers.map((t) => t.name),

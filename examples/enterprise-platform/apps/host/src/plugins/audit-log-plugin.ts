@@ -42,9 +42,7 @@ interface AuditLogPluginResult {
  * @param options - plugin options
  * @returns the plugin and log accessor
  */
-export function auditLogPlugin(
-  options: AuditLogPluginOptions = {},
-): AuditLogPluginResult {
+export function auditLogPlugin(options: AuditLogPluginOptions = {}): AuditLogPluginResult {
   const { maxEntries = 200, onLog } = options;
   const entries: AuditLogEntry[] = [];
 

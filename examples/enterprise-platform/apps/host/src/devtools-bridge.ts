@@ -10,27 +10,54 @@
 interface DevtoolsBridgeOptions {
   readonly registry: {
     readonly getApps: () => ReadonlyArray<{ name: string; status: string; container: string }>;
-    readonly onStatusChange: (cb: (e: { appName: string; from: string; to: string }) => void) => () => void;
+    readonly onStatusChange: (
+      cb: (e: { appName: string; from: string; to: string }) => void,
+    ) => () => void;
   };
   readonly eventBus: {
     readonly on: (event: string, handler: (...args: unknown[]) => void) => unknown;
-    readonly getHistory: () => ReadonlyArray<{ event: string; payload: unknown; timestamp: number }>;
+    readonly getHistory: () => ReadonlyArray<{
+      event: string;
+      payload: unknown;
+      timestamp: number;
+    }>;
   };
   readonly globalState: {
     readonly getState: () => Record<string, unknown>;
-    readonly subscribe: (cb: (newState: Record<string, unknown>, prevState: Record<string, unknown>) => void) => () => void;
+    readonly subscribe: (
+      cb: (newState: Record<string, unknown>, prevState: Record<string, unknown>) => void,
+    ) => () => void;
   };
   readonly router: {
-    readonly afterRouteChange: (cb: (from: { pathname: string }, to: { pathname: string }) => void) => void;
+    readonly afterRouteChange: (
+      cb: (from: { pathname: string }, to: { pathname: string }) => void,
+    ) => void;
   };
   readonly perf: {
-    readonly onMeasurement?: (cb: (m: { appName: string; phase: string; duration: number; startTime: number }) => void) => () => void;
+    readonly onMeasurement?: (
+      cb: (m: { appName: string; phase: string; duration: number; startTime: number }) => void,
+    ) => () => void;
   };
   readonly prefetch?: {
-    readonly getStats: () => ReadonlyArray<{ from: string; to: string; count: number; ratio: number }>;
+    readonly getStats: () => ReadonlyArray<{
+      from: string;
+      to: string;
+      count: number;
+      ratio: number;
+    }>;
   };
   readonly sharedModules?: {
-    readonly getRegistered: () => ReadonlyMap<string, ReadonlyArray<{ name: string; version: string; requiredVersion?: string; singleton?: boolean; eager?: boolean; from?: string }>>;
+    readonly getRegistered: () => ReadonlyMap<
+      string,
+      ReadonlyArray<{
+        name: string;
+        version: string;
+        requiredVersion?: string;
+        singleton?: boolean;
+        eager?: boolean;
+        from?: string;
+      }>
+    >;
     readonly getLoaded: () => ReadonlyMap<string, { version: string; from?: string }>;
   };
   readonly importMap?: {
@@ -49,19 +76,28 @@ function send(payload: Record<string, unknown>): void {
 }
 
 /** Extracts only serializable fields from an app object */
-function serializeApp(app: { name: string; status: string; container: string }): { name: string; status: string; container: string } {
+function serializeApp(app: { name: string; status: string; container: string }): {
+  name: string;
+  status: string;
+  container: string;
+} {
   return { name: app.name, status: app.status, container: app.container };
 }
 
 /** Converts the shared module registry into a serializable format */
-function serializeSharedModules(
-  sm: NonNullable<DevtoolsBridgeOptions['sharedModules']>,
-): { registered: Record<string, Array<Record<string, unknown>>>; loaded: Record<string, Record<string, unknown>> } {
+function serializeSharedModules(sm: NonNullable<DevtoolsBridgeOptions['sharedModules']>): {
+  registered: Record<string, Array<Record<string, unknown>>>;
+  loaded: Record<string, Record<string, unknown>>;
+} {
   const registered: Record<string, Array<Record<string, unknown>>> = {};
   for (const [name, configs] of sm.getRegistered()) {
     registered[name] = configs.map((c) => ({
-      name: c.name, version: c.version, requiredVersion: c.requiredVersion,
-      singleton: c.singleton, eager: c.eager, from: c.from,
+      name: c.name,
+      version: c.version,
+      requiredVersion: c.requiredVersion,
+      singleton: c.singleton,
+      eager: c.eager,
+      from: c.from,
     }));
   }
   const loaded: Record<string, Record<string, unknown>> = {};
@@ -84,7 +120,8 @@ function classifyEvent(eventName: string): string {
 
 /** Sets up the DevTools bridge. Works safely even without an extension */
 export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
-  const { registry, eventBus, globalState, router, perf, prefetch, sharedModules, importMap } = options;
+  const { registry, eventBus, globalState, router, perf, prefetch, sharedModules, importMap } =
+    options;
 
   /** State for snapshot capture */
   interface BridgeSnapshot {
@@ -100,7 +137,11 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
   };
 
   if (prefetch) {
-    try { snapshot.prefetchStats = [...prefetch.getStats()]; } catch { /* empty */ }
+    try {
+      snapshot.prefetchStats = [...prefetch.getStats()];
+    } catch {
+      /* empty */
+    }
   }
 
   // Send initial INIT message
@@ -149,9 +190,15 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
 
   // Event bus — subscribe to known events
   const knownEvents = [
-    'auth:login', 'auth:logout', 'activity:new', 'lifecycle',
-    'team:member-select', 'team:member-deselect',
-    'task:select', 'task:deselect', 'task:status-change',
+    'auth:login',
+    'auth:logout',
+    'activity:new',
+    'lifecycle',
+    'team:member-select',
+    'team:member-deselect',
+    'task:select',
+    'task:deselect',
+    'task:status-change',
     'notification:click',
   ];
   for (const eventName of knownEvents) {
@@ -165,7 +212,9 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
           timestamp: Date.now(),
         });
       });
-    } catch { /* unsupported event */ }
+    } catch {
+      /* unsupported event */
+    }
   }
 
   // Subscribe to global state
@@ -186,7 +235,9 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
           stats: snapshot.prefetchStats,
           timestamp: Date.now(),
         });
-      } catch { /* empty */ }
+      } catch {
+        /* empty */
+      }
     }
   });
 
@@ -213,7 +264,9 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
           timestamp: Date.now(),
         });
       });
-    } catch { /* empty */ }
+    } catch {
+      /* empty */
+    }
   }
 
   // Send existing event history
@@ -228,7 +281,9 @@ export function createDevtoolsBridge(options: DevtoolsBridgeOptions): void {
         timestamp: item.timestamp,
       });
     }
-  } catch { /* empty */ }
+  } catch {
+    /* empty */
+  }
 
   console.log('[esmap] DevTools bridge active');
 }

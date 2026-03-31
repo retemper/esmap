@@ -24,7 +24,7 @@ body:
       description: |
         Describe the problem you're trying to solve. What is frustrating or missing today?
         Focus on the problem, not the solution — this helps us find the best approach.
-      placeholder: 'When I try to ... I can''t ... because ...'
+      placeholder: "When I try to ... I can't ... because ..."
     validations:
       required: true
 

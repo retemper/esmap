@@ -1,5 +1,11 @@
 import type { AppConfig, SharedConfig } from '@esmap/shared';
-import { AppRegistry, Router, createLifecycleHooks, createPrefetch, createSharedModuleRegistry } from '@esmap/runtime';
+import {
+  AppRegistry,
+  Router,
+  createLifecycleHooks,
+  createPrefetch,
+  createSharedModuleRegistry,
+} from '@esmap/runtime';
 import type { SharedModuleRegistry } from '@esmap/runtime';
 import { PerfTracker } from '@esmap/monitor';
 import { installDevtoolsApi } from '@esmap/devtools';
@@ -32,7 +38,14 @@ function extractPrefetchApps(
  * @returns fully connected EsmapInstance
  */
 export function createEsmap(options: EsmapOptions): EsmapInstance {
-  const { config, importMap, router: routerOptions, disablePerf = false, disableDevtools = false, plugins = [] } = options;
+  const {
+    config,
+    importMap,
+    router: routerOptions,
+    disablePerf = false,
+    disableDevtools = false,
+    plugins = [],
+  } = options;
 
   const registry = new AppRegistry({ importMap });
   const router = new Router(registry, routerOptions);

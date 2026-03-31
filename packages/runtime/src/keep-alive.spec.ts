@@ -21,8 +21,8 @@ function createRegistryWithApp(appName: string, container: string): AppRegistry 
   const mockApp = createMockApp();
   const mockModuleUrl = `data:text/javascript,${encodeURIComponent(
     'export const bootstrap = async () => {};' +
-    'export const mount = async (c) => { c.innerHTML = "<div>mock-mfe</div>"; };' +
-    'export const unmount = async (c) => { c.innerHTML = ""; };'
+      'export const mount = async (c) => { c.innerHTML = "<div>mock-mfe</div>"; };' +
+      'export const unmount = async (c) => { c.innerHTML = ""; };',
   )}`;
 
   const registry = new AppRegistry({

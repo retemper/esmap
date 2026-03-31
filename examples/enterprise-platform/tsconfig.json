@@ -12,5 +12,11 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["types.d.ts", "packages/**/*.ts", "packages/**/*.tsx", "apps/**/*.ts", "apps/**/*.tsx"]
+  "include": [
+    "types.d.ts",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "apps/**/*.ts",
+    "apps/**/*.tsx"
+  ]
 }

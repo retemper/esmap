@@ -47,7 +47,11 @@ const DEFAULT_PREFETCH_DELAY = 1000;
 export function intelligentPrefetchPlugin(
   options: IntelligentPrefetchPluginOptions = {},
 ): IntelligentPrefetchPluginResult {
-  const { prefetchDelay = DEFAULT_PREFETCH_DELAY, excludeContainers = [], ...prefetchOptions } = options;
+  const {
+    prefetchDelay = DEFAULT_PREFETCH_DELAY,
+    excludeContainers = [],
+    ...prefetchOptions
+  } = options;
   const controller = createIntelligentPrefetch(prefetchOptions);
 
   const plugin: EsmapPlugin = {
@@ -97,9 +101,7 @@ export function intelligentPrefetchPlugin(
             .getApps()
             .filter((app) => app.status === 'MOUNTED' && app.name !== event.appName);
 
-          const previousApp = mountedApps.find(
-            (app) => !excludeContainers.includes(app.container),
-          );
+          const previousApp = mountedApps.find((app) => !excludeContainers.includes(app.container));
           controller.recordNavigation(previousApp?.name, event.appName);
         }
       });

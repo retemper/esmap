@@ -6,7 +6,10 @@ import { installAutoPerf } from './auto-perf.js';
 
 /** Creates a mock LifecycleHooks object for testing */
 function createMockHooks(): LifecycleHooks & {
-  readonly registeredBefore: Array<{ readonly phase: LifecyclePhase; readonly hook: LifecycleHook }>;
+  readonly registeredBefore: Array<{
+    readonly phase: LifecyclePhase;
+    readonly hook: LifecycleHook;
+  }>;
   readonly registeredAfter: Array<{ readonly phase: LifecyclePhase; readonly hook: LifecycleHook }>;
 } {
   const registeredBefore: Array<{ phase: LifecyclePhase; hook: LifecycleHook }> = [];

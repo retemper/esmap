@@ -143,11 +143,13 @@ chore: update TypeScript to 5.7
 ### Before submitting
 
 1. **Create a feature branch** from `main`:
+
    ```bash
    git checkout -b feat/my-feature
    ```
 
 2. **Make sure all checks pass:**
+
    ```bash
    pnpm type-check
    pnpm test

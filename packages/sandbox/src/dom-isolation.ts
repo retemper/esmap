@@ -51,8 +51,15 @@ function isGlobalSelector(selector: string, globalPatterns: readonly string[]): 
     if (!selector.startsWith(pattern)) return false;
     // The character immediately after the pattern must be a CSS combinator or whitespace (prevents prefix false-positives)
     const nextChar = selector[pattern.length];
-    return nextChar === ' ' || nextChar === '>' || nextChar === '+' || nextChar === '~'
-      || nextChar === ',' || nextChar === ':' || nextChar === '[';
+    return (
+      nextChar === ' ' ||
+      nextChar === '>' ||
+      nextChar === '+' ||
+      nextChar === '~' ||
+      nextChar === ',' ||
+      nextChar === ':' ||
+      nextChar === '['
+    );
   });
 }
 

@@ -35,7 +35,7 @@ export function createImportMapRoutes(storage: ImportMapStorage): Hono {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
+        Connection: 'keep-alive',
       },
     });
   });
@@ -181,7 +181,12 @@ function isValidServiceName(name: string): boolean {
  * Checks that the url field is a string with http(s) protocol.
  */
 function isDeployRequest(body: unknown): body is DeployRequest {
-  if (typeof body !== 'object' || body === null || !('url' in body) || typeof body.url !== 'string') {
+  if (
+    typeof body !== 'object' ||
+    body === null ||
+    !('url' in body) ||
+    typeof body.url !== 'string'
+  ) {
     return false;
   }
   try {
