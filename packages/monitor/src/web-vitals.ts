@@ -90,9 +90,7 @@ function findAppScope(element: Element | null, attr: string): string | null {
  * @param entry - entry to inspect
  * @returns whether the sources property exists
  */
-function hasLayoutShiftSources(
-  entry: PerformanceEntry,
-): entry is PerformanceEntry & {
+function hasLayoutShiftSources(entry: PerformanceEntry): entry is PerformanceEntry & {
   readonly sources: readonly LayoutShiftSource[];
   readonly value: number;
 } {
