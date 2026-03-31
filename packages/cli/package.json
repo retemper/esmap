@@ -11,10 +11,11 @@
     }
   },
   "bin": {
-    "esmap": "./dist/bin.js"
+    "esmap": "./bin.mjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "bin.mjs"
   ],
   "scripts": {
     "build": "tsup",
