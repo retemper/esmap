@@ -54,11 +54,14 @@ describe('Router route guards', () => {
   const routers: Router[] = [];
 
   /** Creates a Router and adds it to the cleanup list. */
-  function createRouter(registry: RouterRegistry, options?: {
-    mode?: 'history' | 'hash';
-    baseUrl?: string;
-    onNoMatch?: (context: { pathname: string; search: string; hash: string }) => void;
-  }): Router {
+  function createRouter(
+    registry: RouterRegistry,
+    options?: {
+      mode?: 'history' | 'hash';
+      baseUrl?: string;
+      onNoMatch?: (context: { pathname: string; search: string; hash: string }) => void;
+    },
+  ): Router {
     const router = new Router(registry, options);
     routers.push(router);
     return router;

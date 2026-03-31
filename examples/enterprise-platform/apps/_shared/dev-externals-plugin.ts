@@ -12,14 +12,8 @@ const MONOREPO_ROOT = resolve(__dirname, '../..');
  * Vite can transform and serve them with HMR.
  */
 const DEV_ALIASES: Record<string, string> = {
-  '@enterprise/design-system': resolve(
-    MONOREPO_ROOT,
-    'packages/design-system/src/index.ts',
-  ),
-  '@enterprise/activity-feed': resolve(
-    MONOREPO_ROOT,
-    'apps/activity-feed/src/index.tsx',
-  ),
+  '@enterprise/design-system': resolve(MONOREPO_ROOT, 'packages/design-system/src/index.ts'),
+  '@enterprise/activity-feed': resolve(MONOREPO_ROOT, 'apps/activity-feed/src/index.tsx'),
 };
 
 /**

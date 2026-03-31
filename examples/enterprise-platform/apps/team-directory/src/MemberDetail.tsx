@@ -29,7 +29,9 @@ export default function MemberDetail({ member, onClose }: MemberDetailProps): Re
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>{member.name}</h2>
-            <div style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>{member.role}</div>
+            <div style={{ color: '#64748b', fontSize: '14px', marginTop: '4px' }}>
+              {member.role}
+            </div>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose}>
             Close
@@ -53,7 +55,14 @@ export default function MemberDetail({ member, onClose }: MemberDetailProps): Re
           {member.name.slice(0, 1)}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 16px', fontSize: '14px' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'auto 1fr',
+            gap: '8px 16px',
+            fontSize: '14px',
+          }}
+        >
           <span style={{ color: '#94a3b8', fontWeight: '500' }}>Team</span>
           <span>{member.team}</span>
 
@@ -79,8 +88,8 @@ export default function MemberDetail({ member, onClose }: MemberDetailProps): Re
             color: '#94a3b8',
           }}
         >
-          This component is code-split via <code>lazy()</code> and is only
-          downloaded when a team member is selected. (MFE internal sub-module)
+          This component is code-split via <code>lazy()</code> and is only downloaded when a team
+          member is selected. (MFE internal sub-module)
         </div>
       </div>
     </Card>

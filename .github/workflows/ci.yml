@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  # Skip CI if only docs/non-code files changed
+  changed:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      should_skip: ${{ steps.changed-files.outputs.only_changed == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+      # Pinned to SHA for supply-chain safety (v47.0.5)
+      - uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323
+        id: changed-files
+        with:
+          files: |
+            **.md
+            LICENSE
+            .editorconfig
+            .github/ISSUE_TEMPLATE/**
+            .github/pull_request_template.md
+
+  lint:
+    needs: changed
+    if: needs.changed.outputs.should_skip != 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - run: pnpm lint
+
+      - run: pnpm format:check
+
+      - run: pnpm type-check
+
+  test:
+    needs: changed
+    if: needs.changed.outputs.should_skip != 'true'
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        node-version: [22]
+        include:
+          - os: macos-latest
+            node-version: 22
+          - os: windows-latest
+            node-version: 22
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - run: pnpm test
+
+  # Gate job for branch protection — provides a single required status check
+  ci-passed:
+    if: always()
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        run: |
+          if [[ "${{ needs.lint.result }}" != "success" && "${{ needs.lint.result }}" != "skipped" ]] || \
+             [[ "${{ needs.test.result }}" != "success" && "${{ needs.test.result }}" != "skipped" ]]; then
+            echo "CI failed (lint=${{ needs.lint.result }}, test=${{ needs.test.result }})"
+            exit 1
+          fi
+          echo "CI passed"

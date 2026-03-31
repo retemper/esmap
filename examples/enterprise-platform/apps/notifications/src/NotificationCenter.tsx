@@ -139,7 +139,8 @@ function resolveTargetId(eventType: NotificationType, detail: Record<string, unk
  * providing an unread count badge and toast animations.
  */
 export function NotificationCenter(): ReactNode {
-  const [notifications, setNotifications] = useState<readonly NotificationItem[]>(SEED_NOTIFICATIONS);
+  const [notifications, setNotifications] =
+    useState<readonly NotificationItem[]>(SEED_NOTIFICATIONS);
   const [isOpen, setIsOpen] = useState(false);
   const generateId = useRef(createIdGenerator()).current;
 
@@ -216,9 +217,7 @@ export function NotificationCenter(): ReactNode {
       targetId: notification.targetId,
     };
 
-    window.dispatchEvent(
-      new CustomEvent('esmap:notification:click', { detail: clickDetail }),
-    );
+    window.dispatchEvent(new CustomEvent('esmap:notification:click', { detail: clickDetail }));
   }, []);
 
   /** Marks all notifications as read. */
@@ -232,7 +231,9 @@ export function NotificationCenter(): ReactNode {
   }, []);
 
   return (
-    <div style={{ position: 'relative', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}>
+    <div
+      style={{ position: 'relative', fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif' }}
+    >
       {/* Toggle button + badge */}
       <button
         type="button"

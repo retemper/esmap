@@ -18,19 +18,25 @@ interface InspectableEventBus {
 
 /** Minimal interface for inspecting the shared module registry */
 interface InspectableSharedModules {
-  readonly getRegistered: () => ReadonlyMap<string, ReadonlyArray<{
-    readonly name: string;
-    readonly version: string;
-    readonly requiredVersion?: string;
-    readonly singleton?: boolean;
-    readonly eager?: boolean;
-    readonly from?: string;
-  }>>;
-  readonly getLoaded: () => ReadonlyMap<string, {
-    readonly version: string;
-    readonly module: unknown;
-    readonly from?: string;
-  }>;
+  readonly getRegistered: () => ReadonlyMap<
+    string,
+    ReadonlyArray<{
+      readonly name: string;
+      readonly version: string;
+      readonly requiredVersion?: string;
+      readonly singleton?: boolean;
+      readonly eager?: boolean;
+      readonly from?: string;
+    }>
+  >;
+  readonly getLoaded: () => ReadonlyMap<
+    string,
+    {
+      readonly version: string;
+      readonly module: unknown;
+      readonly from?: string;
+    }
+  >;
 }
 
 /** Minimal interface for inspecting the app registry */
@@ -107,7 +113,9 @@ export function createDevtoolsInspector(): DevtoolsInspector {
         return;
       }
 
-      console.group(`[esmap:inspector] Event history (${filtered.length} entries${filter ? `, filter: "${filter}"` : ''})`);
+      console.group(
+        `[esmap:inspector] Event history (${filtered.length} entries${filter ? `, filter: "${filter}"` : ''})`,
+      );
       for (const record of filtered) {
         const time = new Date(record.timestamp).toISOString().slice(11, 23);
         console.log(`[${time}] ${record.event}`, record.payload);
@@ -136,7 +144,9 @@ export function createDevtoolsInspector(): DevtoolsInspector {
       const registered = modules.getRegistered();
       const loaded = modules.getLoaded();
 
-      console.group(`[esmap:inspector] Shared modules (registered: ${registered.size}, loaded: ${loaded.size})`);
+      console.group(
+        `[esmap:inspector] Shared modules (registered: ${registered.size}, loaded: ${loaded.size})`,
+      );
 
       for (const [name, candidates] of registered) {
         const loadedInfo = loaded.get(name);
@@ -176,7 +186,10 @@ export function createDevtoolsInspector(): DevtoolsInspector {
     },
 
     status(): void {
-      console.log('[esmap:inspector] Connection status:', formatConnectionStatus(connections.current));
+      console.log(
+        '[esmap:inspector] Connection status:',
+        formatConnectionStatus(connections.current),
+      );
     },
   };
 }

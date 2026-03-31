@@ -90,7 +90,7 @@ function createReadyGate(options?: ReadyGateOptions): ReadyGate {
   function createTimeoutError(names: readonly string[]): Error {
     return new Error(
       `[esmap] ReadyGate timed out (${timeout}ms): ` +
-      `resources [${names.join(', ')}] are not ready.`,
+        `resources [${names.join(', ')}] are not ready.`,
     );
   }
 

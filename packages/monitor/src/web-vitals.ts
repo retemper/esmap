@@ -22,7 +22,10 @@ interface WebVitalsTracker {
   /** Returns per-app values for a specific metric */
   getMetric(metric: WebVitalMetric): ReadonlyMap<string, number>;
   /** Summarizes all metrics per app */
-  summarize(): ReadonlyMap<string, { readonly cls: number; readonly lcp: number; readonly inp: number }>;
+  summarize(): ReadonlyMap<
+    string,
+    { readonly cls: number; readonly lcp: number; readonly inp: number }
+  >;
   /** Registers a metric event listener */
   onVital(listener: WebVitalListener): () => void;
   /** Stops tracking and disconnects observers */
@@ -87,9 +90,10 @@ function findAppScope(element: Element | null, attr: string): string | null {
  * @param entry - entry to inspect
  * @returns whether the sources property exists
  */
-function hasLayoutShiftSources(
-  entry: PerformanceEntry,
-): entry is PerformanceEntry & { readonly sources: readonly LayoutShiftSource[]; readonly value: number } {
+function hasLayoutShiftSources(entry: PerformanceEntry): entry is PerformanceEntry & {
+  readonly sources: readonly LayoutShiftSource[];
+  readonly value: number;
+} {
   return 'sources' in entry && 'value' in entry;
 }
 
@@ -302,7 +306,10 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
    * @param attr - scope attribute name
    * @returns app name, or HOST_APP_NAME if unidentifiable
    */
-  const resolveAppFromShiftSources = (sources: readonly LayoutShiftSource[], attr: string): string => {
+  const resolveAppFromShiftSources = (
+    sources: readonly LayoutShiftSource[],
+    attr: string,
+  ): string => {
     for (const source of sources) {
       const appName = findAppScope(source.node, attr);
       if (appName) return appName;
@@ -352,9 +359,15 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
       }
     },
 
-    summarize(): ReadonlyMap<string, { readonly cls: number; readonly lcp: number; readonly inp: number }> {
+    summarize(): ReadonlyMap<
+      string,
+      { readonly cls: number; readonly lcp: number; readonly inp: number }
+    > {
       const appNames = new Set([...clsPerApp.keys(), ...lcpPerApp.keys(), ...inpPerApp.keys()]);
-      const result = new Map<string, { readonly cls: number; readonly lcp: number; readonly inp: number }>();
+      const result = new Map<
+        string,
+        { readonly cls: number; readonly lcp: number; readonly inp: number }
+      >();
 
       for (const appName of appNames) {
         result.set(appName, {
@@ -394,7 +407,10 @@ function createNoopTracker(): WebVitalsTracker {
     getMetric(): ReadonlyMap<string, number> {
       return new Map();
     },
-    summarize(): ReadonlyMap<string, { readonly cls: number; readonly lcp: number; readonly inp: number }> {
+    summarize(): ReadonlyMap<
+      string,
+      { readonly cls: number; readonly lcp: number; readonly inp: number }
+    > {
       return new Map();
     },
     onVital(): () => void {

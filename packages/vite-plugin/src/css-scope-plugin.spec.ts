@@ -3,11 +3,7 @@ import { esmapCssScope } from './css-scope-plugin.js';
 import type { Plugin } from 'vite';
 
 /** Helper that calls the transform hook */
-function callTransform(
-  plugin: Plugin,
-  code: string,
-  id: string,
-): { code: string } | null {
+function callTransform(plugin: Plugin, code: string, id: string): { code: string } | null {
   const hook = plugin.transform;
   if (typeof hook !== 'function') throw new Error('transform hook not found');
   return hook.call({} as never, code, id) as { code: string } | null;

@@ -1,4 +1,10 @@
-import type { EventBus, EventHandler, EventMap, EventRecord, SubscribeOptions } from './event-bus.js';
+import type {
+  EventBus,
+  EventHandler,
+  EventMap,
+  EventRecord,
+  SubscribeOptions,
+} from './event-bus.js';
 
 /** Scoped event bus interface. All events are automatically prefixed with a namespace. */
 interface ScopedEventBus<E extends EventMap = EventMap> {
@@ -22,7 +28,11 @@ interface ScopedEventBus<E extends EventMap = EventMap> {
    * Request-Response within the scope. Emits an event and waits for a response.
    * Internally, `${scope}:${event}` is emitted and the response is received via `${scope}:${event}:response`.
    */
-  request: <K extends keyof E & string>(event: K, payload?: E[K], timeout?: number) => Promise<unknown>;
+  request: <K extends keyof E & string>(
+    event: K,
+    payload?: E[K],
+    timeout?: number,
+  ) => Promise<unknown>;
   /** Returns the namespace prefix of this scope. */
   readonly scope: string;
 }

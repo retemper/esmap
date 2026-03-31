@@ -25,18 +25,41 @@ export interface TransitionStats {
 
 /** Page -> Panel direction messages (page postMessage -> content-script -> background -> panel) */
 export type PageToPanel =
-  | { type: 'ESMAP_INIT'; apps: AppInfo[]; currentState: Record<string, unknown>; prefetchStats: TransitionStats[] }
+  | {
+      type: 'ESMAP_INIT';
+      apps: AppInfo[];
+      currentState: Record<string, unknown>;
+      prefetchStats: TransitionStats[];
+    }
   | { type: 'ESMAP_STATUS_CHANGE'; appName: string; from: string; to: string; timestamp: number }
-  | { type: 'ESMAP_EVENT'; event: string; payload: string; category: EventCategory; appName?: string; timestamp: number }
-  | { type: 'ESMAP_STATE_CHANGE'; newState: Record<string, unknown>; prevState: Record<string, unknown>; timestamp: number }
+  | {
+      type: 'ESMAP_EVENT';
+      event: string;
+      payload: string;
+      category: EventCategory;
+      appName?: string;
+      timestamp: number;
+    }
+  | {
+      type: 'ESMAP_STATE_CHANGE';
+      newState: Record<string, unknown>;
+      prevState: Record<string, unknown>;
+      timestamp: number;
+    }
   | { type: 'ESMAP_ROUTE_CHANGE'; from: string; to: string; timestamp: number }
-  | { type: 'ESMAP_PERF'; appName: string; phase: string; duration: number; startTime: number; timestamp: number }
+  | {
+      type: 'ESMAP_PERF';
+      appName: string;
+      phase: string;
+      duration: number;
+      startTime: number;
+      timestamp: number;
+    }
   | { type: 'ESMAP_PREFETCH_STATS'; stats: TransitionStats[]; timestamp: number }
   | { type: 'ESMAP_LOG'; message: string; timestamp: number };
 
 /** Panel -> Page direction messages (panel -> background -> content-script -> page postMessage) */
-export type PanelToPage =
-  | { type: 'ESMAP_GET_SNAPSHOT' };
+export type PanelToPage = { type: 'ESMAP_GET_SNAPSHOT' };
 
 /** window.postMessage envelope */
 export interface MessageEnvelope {

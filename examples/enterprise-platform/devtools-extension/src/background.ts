@@ -21,7 +21,11 @@ chrome.runtime.onConnect.addListener((port) => {
       // Forward Content -> Panel
       const panel = panelPorts.get(tabId);
       if (panel) {
-        try { panel.postMessage(msg); } catch { /* disconnected */ }
+        try {
+          panel.postMessage(msg);
+        } catch {
+          /* disconnected */
+        }
       }
     });
 
@@ -43,7 +47,11 @@ chrome.runtime.onConnect.addListener((port) => {
         // Forward snapshot request to the connected content script
         const content = contentPorts.get(panelState.tabId);
         if (content) {
-          try { content.postMessage({ payload: { type: 'ESMAP_GET_SNAPSHOT' } }); } catch { /* empty */ }
+          try {
+            content.postMessage({ payload: { type: 'ESMAP_GET_SNAPSHOT' } });
+          } catch {
+            /* empty */
+          }
         }
         return;
       }
@@ -52,7 +60,11 @@ chrome.runtime.onConnect.addListener((port) => {
       if (panelState.tabId >= 0) {
         const content = contentPorts.get(panelState.tabId);
         if (content) {
-          try { content.postMessage(msg); } catch { /* empty */ }
+          try {
+            content.postMessage(msg);
+          } catch {
+            /* empty */
+          }
         }
       }
     });

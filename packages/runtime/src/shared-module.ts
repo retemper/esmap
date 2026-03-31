@@ -102,7 +102,9 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
 
     // Start loading immediately when eager is true
     if (config.eager) {
-      const promise = resolve(config.name).then(() => undefined).catch(() => undefined);
+      const promise = resolve(config.name)
+        .then(() => undefined)
+        .catch(() => undefined);
       eagerPromises.push(promise);
     }
   }
@@ -173,10 +175,7 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
     // Search for subpath factory in parent module candidates
     const candidates = registered.get(name);
     if (!candidates || candidates.length === 0) {
-      throw new SharedVersionConflictError(
-        name,
-        `Shared module "${name}" is not registered`,
-      );
+      throw new SharedVersionConflictError(name, `Shared module "${name}" is not registered`);
     }
 
     // Find the subpath factory from the selected best candidate's subpaths
@@ -187,7 +186,7 @@ export function createSharedModuleRegistry(): SharedModuleRegistry {
       throw new SharedVersionConflictError(
         name,
         `Shared module "${name}" does not have subpath "${subpath}" registered. ` +
-        `Registered subpaths: [${Object.keys(selected.subpaths ?? {}).join(', ')}]`,
+          `Registered subpaths: [${Object.keys(selected.subpaths ?? {}).join(', ')}]`,
       );
     }
 
@@ -252,9 +251,7 @@ function selectBestCandidate(
   // No compatible version — check for candidates with fallback factory
   const withFallback = candidates.find((c) => c.fallback !== undefined);
   if (withFallback?.fallback) {
-    console.warn(
-      `[esmap] Shared module "${name}" version conflict — using fallback factory.`,
-    );
+    console.warn(`[esmap] Shared module "${name}" version conflict — using fallback factory.`);
     return {
       ...withFallback,
       factory: withFallback.fallback,

@@ -44,7 +44,9 @@ function killPortProcess(port: number): void {
       const otherPids = pids.split('\n').filter((pid) => pid !== currentPid);
       if (otherPids.length > 0) {
         execSync(`kill -9 ${otherPids.join(' ')}`, { encoding: 'utf-8' });
-        console.log(`[platform-server] Killed stale process(es) on port ${port}: ${otherPids.join(', ')}`);
+        console.log(
+          `[platform-server] Killed stale process(es) on port ${port}: ${otherPids.join(', ')}`,
+        );
       }
     }
   } catch {

@@ -52,7 +52,6 @@ const smartPrefetch = intelligentPrefetchPlugin({
   maxPrefetch: 2,
 });
 
-
 const comm = communicationPlugin({
   initialState: {
     theme: 'light' as const,

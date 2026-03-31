@@ -38,10 +38,7 @@ export function createReactMfeApp<P extends Record<string, unknown> = Record<str
 
   /** Synchronously renders the component tree with the current props */
   function renderToRoot(root: Root): void {
-    const componentElement = createElement(
-      options.rootComponent,
-      propsRef.current as Readonly<P>,
-    );
+    const componentElement = createElement(options.rootComponent, propsRef.current as Readonly<P>);
 
     const rendered = options.wrapWith
       ? createElement(options.wrapWith, null, componentElement)

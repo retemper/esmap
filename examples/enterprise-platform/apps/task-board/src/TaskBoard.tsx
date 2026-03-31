@@ -43,16 +43,97 @@ const STATUS_ORDER: readonly TaskStatus[] = ['todo', 'in-progress', 'done'] as c
 
 /** Demo task data */
 const INITIAL_TASKS: readonly Task[] = [
-  { id: 'task-1', title: 'Design SSO Auth Module', description: 'Write architecture design document for SAML/OIDC-based SSO authentication flow', assigneeId: 'user-1', assigneeName: 'Minhyeok Kim', priority: 'high', status: 'in-progress' },
-  { id: 'task-2', title: 'Configure API Gateway Routing', description: 'Define and implement API gateway routing rules between microservices', assigneeId: 'user-2', assigneeName: 'Seoyeon Lee', priority: 'high', status: 'todo' },
-  { id: 'task-3', title: 'Optimize Dashboard Widget Performance', description: 'Profile dashboard widget rendering performance and apply React.memo', assigneeId: 'user-3', assigneeName: 'Jihoon Park', priority: 'medium', status: 'in-progress' },
-  { id: 'task-4', title: 'Implement Team Onboarding Checklist', description: 'Build onboarding workflow checklist UI for new team members', assigneeId: 'user-1', assigneeName: 'Minhyeok Kim', priority: 'medium', status: 'todo' },
-  { id: 'task-5', title: 'Integrate Notification Service WebSocket', description: 'Implement WebSocket connection and reconnection logic for real-time notifications', assigneeId: 'user-4', assigneeName: 'Subin Choi', priority: 'high', status: 'todo' },
-  { id: 'task-6', title: 'Design User Permission Matrix', description: 'Define RBAC-based user permission matrix and design management UI', assigneeId: 'user-2', assigneeName: 'Seoyeon Lee', priority: 'medium', status: 'done' },
-  { id: 'task-7', title: 'Set Up CI/CD Deployment Pipeline', description: 'Configure multi-stage deployment pipeline using GitHub Actions', assigneeId: 'user-5', assigneeName: 'Daeun Jeong', priority: 'low', status: 'done' },
-  { id: 'task-8', title: 'Write E2E Test Scenarios', description: 'Write Playwright-based E2E test scenarios for key user flows', assigneeId: 'user-3', assigneeName: 'Jihoon Park', priority: 'low', status: 'todo' },
-  { id: 'task-9', title: 'Clean Up i18n Keys', description: 'Remove duplicate and unused i18n keys, unify naming conventions', assigneeId: 'user-5', assigneeName: 'Daeun Jeong', priority: 'low', status: 'in-progress' },
-  { id: 'task-10', title: 'Integrate Grafana Monitoring Dashboard', description: 'Configure Grafana dashboard templates based on Prometheus metrics', assigneeId: 'user-4', assigneeName: 'Subin Choi', priority: 'medium', status: 'todo' },
+  {
+    id: 'task-1',
+    title: 'Design SSO Auth Module',
+    description: 'Write architecture design document for SAML/OIDC-based SSO authentication flow',
+    assigneeId: 'user-1',
+    assigneeName: 'Minhyeok Kim',
+    priority: 'high',
+    status: 'in-progress',
+  },
+  {
+    id: 'task-2',
+    title: 'Configure API Gateway Routing',
+    description: 'Define and implement API gateway routing rules between microservices',
+    assigneeId: 'user-2',
+    assigneeName: 'Seoyeon Lee',
+    priority: 'high',
+    status: 'todo',
+  },
+  {
+    id: 'task-3',
+    title: 'Optimize Dashboard Widget Performance',
+    description: 'Profile dashboard widget rendering performance and apply React.memo',
+    assigneeId: 'user-3',
+    assigneeName: 'Jihoon Park',
+    priority: 'medium',
+    status: 'in-progress',
+  },
+  {
+    id: 'task-4',
+    title: 'Implement Team Onboarding Checklist',
+    description: 'Build onboarding workflow checklist UI for new team members',
+    assigneeId: 'user-1',
+    assigneeName: 'Minhyeok Kim',
+    priority: 'medium',
+    status: 'todo',
+  },
+  {
+    id: 'task-5',
+    title: 'Integrate Notification Service WebSocket',
+    description:
+      'Implement WebSocket connection and reconnection logic for real-time notifications',
+    assigneeId: 'user-4',
+    assigneeName: 'Subin Choi',
+    priority: 'high',
+    status: 'todo',
+  },
+  {
+    id: 'task-6',
+    title: 'Design User Permission Matrix',
+    description: 'Define RBAC-based user permission matrix and design management UI',
+    assigneeId: 'user-2',
+    assigneeName: 'Seoyeon Lee',
+    priority: 'medium',
+    status: 'done',
+  },
+  {
+    id: 'task-7',
+    title: 'Set Up CI/CD Deployment Pipeline',
+    description: 'Configure multi-stage deployment pipeline using GitHub Actions',
+    assigneeId: 'user-5',
+    assigneeName: 'Daeun Jeong',
+    priority: 'low',
+    status: 'done',
+  },
+  {
+    id: 'task-8',
+    title: 'Write E2E Test Scenarios',
+    description: 'Write Playwright-based E2E test scenarios for key user flows',
+    assigneeId: 'user-3',
+    assigneeName: 'Jihoon Park',
+    priority: 'low',
+    status: 'todo',
+  },
+  {
+    id: 'task-9',
+    title: 'Clean Up i18n Keys',
+    description: 'Remove duplicate and unused i18n keys, unify naming conventions',
+    assigneeId: 'user-5',
+    assigneeName: 'Daeun Jeong',
+    priority: 'low',
+    status: 'in-progress',
+  },
+  {
+    id: 'task-10',
+    title: 'Integrate Grafana Monitoring Dashboard',
+    description: 'Configure Grafana dashboard templates based on Prometheus metrics',
+    assigneeId: 'user-4',
+    assigneeName: 'Subin Choi',
+    priority: 'medium',
+    status: 'todo',
+  },
 ] as const;
 
 /**
@@ -74,7 +155,12 @@ const dispatchTaskSelect = (task: Task): void => {
  * @param to - new status
  * @param assigneeId - assignee identifier
  */
-const dispatchStatusChange = (taskId: string, from: TaskStatus, to: TaskStatus, assigneeId: string): void => {
+const dispatchStatusChange = (
+  taskId: string,
+  from: TaskStatus,
+  to: TaskStatus,
+  assigneeId: string,
+): void => {
   window.dispatchEvent(
     new CustomEvent('esmap:task:status-change', {
       detail: { taskId, from, to, assigneeId },
@@ -102,9 +188,7 @@ export function TaskBoard(): ReactNode {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [filterMemberId, setFilterMemberId] = useState<string | null>(null);
 
-  const selectedTask = selectedTaskId
-    ? tasks.find((t) => t.id === selectedTaskId) ?? null
-    : null;
+  const selectedTask = selectedTaskId ? (tasks.find((t) => t.id === selectedTaskId) ?? null) : null;
 
   /** Updates selection state and dispatches event on task click. */
   const handleTaskClick = useCallback((task: Task): void => {
@@ -115,11 +199,7 @@ export function TaskBoard(): ReactNode {
   /** Moves the task to the next status when the status chip is clicked. */
   const handleStatusChange = useCallback((task: Task): void => {
     const nextStatus = getNextStatus(task.status);
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === task.id ? { ...t, status: nextStatus } : t,
-      ),
-    );
+    setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus } : t)));
     dispatchStatusChange(task.id, task.status, nextStatus, task.assigneeId);
   }, []);
 
@@ -204,9 +284,7 @@ export function TaskBoard(): ReactNode {
               Clear Filter
             </Button>
           )}
-          <span style={{ fontSize: '13px', color: '#8b949e' }}>
-            {filteredTasks.length} tasks
-          </span>
+          <span style={{ fontSize: '13px', color: '#8b949e' }}>{filteredTasks.length} tasks</span>
         </div>
       </div>
 
@@ -257,7 +335,13 @@ interface KanbanColumnProps {
  * Renders a kanban column.
  * Displays the task count in the column header and lists the contained task cards.
  */
-function KanbanColumn({ column, tasks, selectedTaskId, onTaskClick, onStatusChange }: KanbanColumnProps): ReactNode {
+function KanbanColumn({
+  column,
+  tasks,
+  selectedTaskId,
+  onTaskClick,
+  onStatusChange,
+}: KanbanColumnProps): ReactNode {
   return (
     <div
       style={{

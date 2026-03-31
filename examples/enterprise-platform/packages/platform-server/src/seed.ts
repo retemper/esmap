@@ -84,7 +84,15 @@ async function seed(): Promise<void> {
   }
 
   // 3. MFE app mapping
-  const appDirs = ['auth', 'dashboard', 'team-directory', 'activity-feed', 'task-board', 'notifications', 'legacy-settings'];
+  const appDirs = [
+    'auth',
+    'dashboard',
+    'team-directory',
+    'activity-feed',
+    'task-board',
+    'notifications',
+    'legacy-settings',
+  ];
 
   if (isDev) {
     for (const appDir of appDirs) {

@@ -418,17 +418,17 @@ describe('SharedModuleRegistry', () => {
         }),
       );
 
-      await expect(
-        registry.resolveSubpath('react-dom', './nonexistent'),
-      ).rejects.toThrow('subpath "./nonexistent"');
+      await expect(registry.resolveSubpath('react-dom', './nonexistent')).rejects.toThrow(
+        'subpath "./nonexistent"',
+      );
     });
 
     it('throws an error when requesting a subpath of an unregistered module', async () => {
       const registry = createSharedModuleRegistry();
 
-      await expect(
-        registry.resolveSubpath('unknown', './client'),
-      ).rejects.toThrow(SharedVersionConflictError);
+      await expect(registry.resolveSubpath('unknown', './client')).rejects.toThrow(
+        SharedVersionConflictError,
+      );
     });
   });
 

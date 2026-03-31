@@ -27,9 +27,7 @@ export async function loadConfig(cwd?: string): Promise<EsmapConfig> {
     }
   }
 
-  throw new Error(
-    `Config file not found. Please create one of: ${CONFIG_FILE_NAMES.join(', ')}`,
-  );
+  throw new Error(`Config file not found. Please create one of: ${CONFIG_FILE_NAMES.join(', ')}`);
 }
 
 /**

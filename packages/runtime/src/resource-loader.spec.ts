@@ -32,9 +32,7 @@ describe('createResourceLoader', () => {
     });
 
     it('throws an error on fetch failure', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('Not Found', { status: 404 }),
-      );
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('Not Found', { status: 404 }));
 
       const loader = createResourceLoader({ enableCache: false });
 
@@ -46,9 +44,9 @@ describe('createResourceLoader', () => {
 
   describe('caching', () => {
     it('returns the second request for the same URL from cache', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('cached-content', { status: 200 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(new Response('cached-content', { status: 200 }));
 
       const loader = createResourceLoader();
       await loader.loadScript('https://cdn.example.com/app.js');
@@ -58,9 +56,9 @@ describe('createResourceLoader', () => {
     });
 
     it('fetches again after clearing the cache', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
-        () => Promise.resolve(new Response('content', { status: 200 })),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockImplementation(() => Promise.resolve(new Response('content', { status: 200 })));
 
       const loader = createResourceLoader();
       await loader.loadScript('https://cdn.example.com/app.js');
@@ -72,9 +70,9 @@ describe('createResourceLoader', () => {
     });
 
     it('does not cache when enableCache is false', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
-        () => Promise.resolve(new Response('content', { status: 200 })),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockImplementation(() => Promise.resolve(new Response('content', { status: 200 })));
 
       const loader = createResourceLoader({ enableCache: false });
       await loader.loadScript('https://cdn.example.com/app.js');
@@ -86,9 +84,9 @@ describe('createResourceLoader', () => {
 
   describe('fetch interceptors', () => {
     it('allows a fetch interceptor to modify the URL', async () => {
-      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('proxied', { status: 200 }),
-      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(new Response('proxied', { status: 200 }));
 
       const interceptor: FetchInterceptor = {
         name: 'cors-proxy',
@@ -128,9 +126,7 @@ describe('createResourceLoader', () => {
     });
 
     it('chains multiple fetch interceptors', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('original', { status: 200 }),
-      );
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('original', { status: 200 }));
 
       const order: string[] = [];
 
@@ -166,9 +162,7 @@ describe('createResourceLoader', () => {
 
   describe('JS transformers', () => {
     it('transforms JS source code', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('var x = 1;', { status: 200 }),
-      );
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('var x = 1;', { status: 200 }));
 
       const transformer: JsTransformer = {
         name: 'strict-mode',
@@ -185,9 +179,7 @@ describe('createResourceLoader', () => {
     });
 
     it('executes multiple JS transformers in order', async () => {
-      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response('code', { status: 200 }),
-      );
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('code', { status: 200 }));
 
       const first: JsTransformer = {
         name: 'wrapper',
