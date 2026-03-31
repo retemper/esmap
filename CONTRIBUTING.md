@@ -10,6 +10,7 @@ Thank you for your interest in contributing to esmap! This guide will help you g
 - [Development Workflow](#development-workflow)
 - [Commit Convention](#commit-convention)
 - [Pull Request Guidelines](#pull-request-guidelines)
+- [Adding a Changeset](#adding-a-changeset)
 - [Testing](#testing)
 - [Coding Standards](#coding-standards)
 - [Reporting Issues](#reporting-issues)
@@ -172,6 +173,23 @@ chore: update TypeScript to 5.7
 1. A maintainer will review your PR.
 2. Address feedback by pushing new commits (do not force-push during review).
 3. Once approved, a maintainer will squash-merge your PR.
+
+## Adding a Changeset
+
+If your PR changes the behavior of any published package (`packages/*`), you need to include a changeset:
+
+```bash
+pnpm changeset
+```
+
+Follow the prompts to:
+
+1. Select the affected package(s).
+2. Choose the semver bump type (`patch`, `minor`, `major`).
+3. Write a concise description of the change (this appears in the CHANGELOG).
+4. Commit the generated `.changeset/*.md` file with your PR.
+
+Not every PR needs a changeset — skip it for docs-only, test-only, CI, or example changes. See [RELEASE.md](./RELEASE.md) for the full release policy.
 
 ## Testing
 

@@ -13,3 +13,4 @@
 - [ ] I have added or updated tests for this change
 - [ ] All checks pass (`pnpm type-check && pnpm test && pnpm lint`)
 - [ ] I have updated documentation if this change affects public APIs
+- [ ] I have added a [changeset](./RELEASE.md#changeset-workflow) if this PR changes published package behavior (`pnpm changeset`)
