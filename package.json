@@ -6,10 +6,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/niceplugin/esmap"
+    "url": "https://github.com/retemper/esmap"
   },
-  "bugs": "https://github.com/niceplugin/esmap/issues",
-  "homepage": "https://github.com/niceplugin/esmap#readme",
+  "bugs": "https://github.com/retemper/esmap/issues",
+  "homepage": "https://github.com/retemper/esmap#readme",
   "engines": {
     "node": ">=22",
     "pnpm": ">=10"

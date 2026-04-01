@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
-  "changelog": ["@changesets/changelog-github", { "repo": "niceplugin/esmap" }],
+  "changelog": ["@changesets/changelog-github", { "repo": "retemper/esmap" }],
   "commit": false,
   "fixed": [],
   "linked": [],

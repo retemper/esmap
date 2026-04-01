@@ -6,7 +6,7 @@ If you discover a security vulnerability in esmap, please report it responsibly.
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Instead, please report vulnerabilities via [GitHub Security Advisories](https://github.com/niceplugin/esmap/security/advisories/new).
+Instead, please report vulnerabilities via [GitHub Security Advisories](https://github.com/retemper/esmap/security/advisories/new).
 
 ### What to include
 

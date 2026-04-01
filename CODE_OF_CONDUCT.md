@@ -26,7 +26,7 @@ Project maintainers are responsible for clarifying and enforcing standards of ac
 
 ## Reporting
 
-If you experience or witness unacceptable behavior, please report it by emailing **niceplugin@gmail.com** or by opening a [GitHub Security Advisory](https://github.com/niceplugin/esmap/security/advisories/new).
+If you experience or witness unacceptable behavior, please report it by emailing **rkdalsgur032@gmail.com** or by opening a [GitHub Security Advisory](https://github.com/retemper/esmap/security/advisories/new).
 
 ## Attribution
 

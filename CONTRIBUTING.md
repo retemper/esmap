@@ -29,7 +29,7 @@ This project follows the [Contributor Covenant Code of Conduct](./CODE_OF_CONDUC
 ### Setup
 
 ```bash
-git clone https://github.com/niceplugin/esmap.git
+git clone https://github.com/retemper/esmap.git
 cd esmap
 pnpm install
 pnpm build
@@ -241,7 +241,7 @@ pnpm turbo test --filter=@esmap/sandbox -- --coverage
 
 ### Bug reports
 
-Use the [bug report template](https://github.com/niceplugin/esmap/issues/new?template=bug_report.yml). Please include:
+Use the [bug report template](https://github.com/retemper/esmap/issues/new?template=bug_report.yml). Please include:
 
 - A **minimal reproduction** (repository link or code snippet).
 - Expected vs. actual behavior.
@@ -249,14 +249,14 @@ Use the [bug report template](https://github.com/niceplugin/esmap/issues/new?tem
 
 ### Feature requests
 
-Use the [feature request template](https://github.com/niceplugin/esmap/issues/new?template=feature_request.yml). Please explain:
+Use the [feature request template](https://github.com/retemper/esmap/issues/new?template=feature_request.yml). Please explain:
 
 - The **problem** you're trying to solve (not just the solution you want).
 - Any alternatives you've considered.
 
 ### Questions
 
-For general questions, use [GitHub Discussions](https://github.com/niceplugin/esmap/discussions) instead of opening an issue.
+For general questions, use [GitHub Discussions](https://github.com/retemper/esmap/discussions) instead of opening an issue.
 
 ---
 
