@@ -1,8 +1,8 @@
 <p align="center">
   <br />
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/niceplugin/esmap/main/.github/logo-dark.svg">
-    <img src="https://raw.githubusercontent.com/niceplugin/esmap/main/.github/logo-light.svg" width="360" alt="esmap">
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/retemper/esmap/main/.github/logo-dark.svg">
+    <img src="https://raw.githubusercontent.com/retemper/esmap/main/.github/logo-light.svg" width="360" alt="esmap">
   </picture>
   <br />
   <br />
@@ -12,7 +12,7 @@
   <br />
   <br />
   <a href="https://www.npmjs.com/package/@esmap/runtime"><img src="https://img.shields.io/npm/v/@esmap/runtime?style=flat&colorA=18181b&colorB=28cf8d" alt="npm version" /></a>
-  <a href="https://github.com/niceplugin/esmap/actions"><img src="https://img.shields.io/github/actions/workflow/status/niceplugin/esmap/ci.yml?branch=main&style=flat&colorA=18181b" alt="CI" /></a>
+  <a href="https://github.com/retemper/esmap/actions"><img src="https://img.shields.io/github/actions/workflow/status/retemper/esmap/ci.yml?branch=main&style=flat&colorA=18181b" alt="CI" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat&colorA=18181b" alt="License" /></a>
 </p>
 
@@ -206,7 +206,7 @@ cd examples/multi-mfe && pnpm dev
 ## Development
 
 ```bash
-git clone https://github.com/niceplugin/esmap.git
+git clone https://github.com/retemper/esmap.git
 cd esmap
 pnpm install
 

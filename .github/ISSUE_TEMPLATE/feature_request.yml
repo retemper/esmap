@@ -12,9 +12,9 @@ body:
     attributes:
       label: Validations
       options:
-        - label: I have searched the [existing issues](https://github.com/niceplugin/esmap/issues) and this feature has not been requested yet.
+        - label: I have searched the [existing issues](https://github.com/retemper/esmap/issues) and this feature has not been requested yet.
           required: true
-        - label: I have read the [Contributing guide](https://github.com/niceplugin/esmap/blob/main/CONTRIBUTING.md).
+        - label: I have read the [Contributing guide](https://github.com/retemper/esmap/blob/main/CONTRIBUTING.md).
           required: true
 
   - type: textarea
