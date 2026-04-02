@@ -1,6 +1,6 @@
 {
   "name": "@esmap/shared",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Shared types, schemas, and utilities for the esmap import map framework",
   "type": "module",
   "exports": {

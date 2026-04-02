@@ -1,6 +1,6 @@
 {
   "name": "@esmap/server",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Import map serving server with deployment API and concurrency-safe updates",
   "type": "module",
   "exports": {
