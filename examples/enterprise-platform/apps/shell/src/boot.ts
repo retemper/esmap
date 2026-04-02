@@ -1,5 +1,5 @@
 /**
- * Enterprise Platform Host — unified bootstrap.
+ * Enterprise Platform Shell — unified bootstrap.
  *
  * Demo points:
  * 1. Full plugin composition with createEsmap (guard, sandbox, keepAlive, domIsolation, prefetch, communication)
@@ -120,7 +120,7 @@ const comm = communicationPlugin<PlatformEvents, PlatformState>({
   },
 });
 
-// Auth MFE -> Host bridge: forwards CustomEvents to eventBus
+// Auth MFE -> Shell bridge: forwards CustomEvents to eventBus
 // Uses window CustomEvent as a bridge for loose coupling between MFEs.
 window.addEventListener('esmap:auth:login', (e: Event) => {
   if (e instanceof CustomEvent) {
@@ -245,7 +245,7 @@ async function boot(): Promise<void> {
           container: '#app-auth',
         },
         // Navigation bar: always visible after authentication
-        // (nav is rendered directly by host, not a separate MFE)
+        // (nav is rendered directly by shell, not a separate MFE)
 
         // Dashboard: main page + nested Parcel demo (keepAlive -> dedicated container)
         '@enterprise/dashboard': {
@@ -401,7 +401,7 @@ async function boot(): Promise<void> {
 
   log(`${esmap.registry.getApps().length} apps registered`);
 
-  // ─── Render host's own navigation bar ───
+  // ─── Render shell's own navigation bar ───
   renderNav();
 
   // ─── Start ───
@@ -423,7 +423,7 @@ async function boot(): Promise<void> {
   }, 1000);
 }
 
-/** Renders the host's own navigation bar in the DOM (managed directly by host, not an MFE) */
+/** Renders the shell's own navigation bar in the DOM (managed directly by shell, not an MFE) */
 function renderNav(): void {
   const nav = document.getElementById('app-nav');
   if (!nav) return;

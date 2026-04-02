@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Framework boot', () => {
-  test('loads host page and boots the framework', async ({ page }) => {
+  test('셸 페이지를 로드하고 프레임워크를 부트한다', async ({ page }) => {
     await page.goto('/');
 
     // Navigation bar (app-nav) should be mounted — it's always-active

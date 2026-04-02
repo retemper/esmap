@@ -65,7 +65,7 @@ __ESMAP__.clearOverrides();
 // Refresh -> checkout loads from local dev server, everything else from production
 ```
 
-## Host App Integration Example
+## Shell App Integration Example
 
 ```ts
 import { loadImportMap } from '@esmap/runtime';

@@ -224,7 +224,7 @@ describe('createDevtoolsInspector', () => {
           ],
         ],
       ]);
-      const loaded = new Map([['react', { version: '18.2.0', module: {}, from: 'host' }]]);
+      const loaded = new Map([['react', { version: '18.2.0', module: {}, from: 'shell' }]]);
 
       const inspector = createDevtoolsInspector();
       inspector.connect({
@@ -240,7 +240,7 @@ describe('createDevtoolsInspector', () => {
       expect(groupSpy).toHaveBeenCalledWith(expect.stringContaining('registered: 2, loaded: 1'));
       expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('react'));
       expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('singleton'));
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('from: host'));
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('from: shell'));
       expect(groupEndSpy).toHaveBeenCalled();
     });
 

@@ -45,7 +45,7 @@ interface ReadyGate {
  *
  * @example
  * ```ts
- * // Create gate in the host app
+ * // Create gate in the shell app
  * const gate = createReadyGate({ timeout: 5000 });
  * gate.register('auth');
  * gate.register('config');

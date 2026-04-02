@@ -17,8 +17,8 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const DIST_DIR = resolve(__dirname, '../../../dist');
 const DATA_DIR = resolve(__dirname, '../../../data');
 
-/** HOST_BASE is the host Vite dev server's /apps endpoint (resolved from the host origin when import map is injected with relative paths) */
-const HOST_BASE = '/apps';
+/** SHELL_BASE is the shell Vite dev server's /apps endpoint (resolved from the shell origin when import map is injected with relative paths) */
+const SHELL_BASE = '/apps';
 
 /** Whether the --dev flag is set. In dev mode, MFE apps point to individual Vite dev servers. */
 const isDev = process.argv.includes('--dev');
@@ -66,7 +66,7 @@ async function seed(): Promise<void> {
     for (const dep of sharedManifests) {
       const entryFile = dep.exports['.'];
       if (entryFile) {
-        imports[dep.name] = `${HOST_BASE}/shared/${entryFile}`;
+        imports[dep.name] = `${SHELL_BASE}/shared/${entryFile}`;
       }
     }
   } catch {
@@ -78,7 +78,7 @@ async function seed(): Promise<void> {
     const dsManifestPath = join(DIST_DIR, 'design-system', 'esmap-manifest.json');
     const dsContent = await readFile(dsManifestPath, 'utf-8');
     const dsManifest: MfeManifest = JSON.parse(dsContent);
-    imports[dsManifest.name] = `${HOST_BASE}/design-system/${dsManifest.entry}`;
+    imports[dsManifest.name] = `${SHELL_BASE}/design-system/${dsManifest.entry}`;
   } catch {
     console.warn('[seed] design-system manifest not found, skipping');
   }
@@ -108,7 +108,7 @@ async function seed(): Promise<void> {
     for (const appDir of appDirs) {
       const result = await readManifest(appDir);
       if (result) {
-        imports[result.name] = `${HOST_BASE}/${appDir}/${result.entry}`;
+        imports[result.name] = `${SHELL_BASE}/${appDir}/${result.entry}`;
       }
     }
   }

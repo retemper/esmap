@@ -7,7 +7,7 @@ const DEMO_USERS = [
 ] as const;
 
 /**
- * Renders a login form and propagates authentication success to the host via CustomEvent.
+ * Renders a login form and propagates authentication success to the shell via CustomEvent.
  * Uses window CustomEvent as a bridge for loose coupling between MFEs.
  */
 export function LoginForm(): ReactNode {
@@ -22,8 +22,8 @@ export function LoginForm(): ReactNode {
     setTimeout(() => {
       const user = DEMO_USERS[selectedUser];
 
-      // Propagate authentication completion event to host's eventBus
-      // CustomEvent bridge: loose coupling between MFE and host
+      // Propagate authentication completion event to shell's eventBus
+      // CustomEvent bridge: loose coupling between MFE and shell
       window.dispatchEvent(
         new CustomEvent('esmap:auth:login', {
           detail: { userId: user.id, name: user.name },

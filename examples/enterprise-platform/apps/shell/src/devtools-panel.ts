@@ -424,12 +424,12 @@ const PANEL_CSS = `
     fill: none;
     opacity: 0.5;
   }
-  .topo-host {
+  .topo-shell {
     fill: #161b22;
     stroke: #58a6ff;
     stroke-width: 2;
   }
-  .topo-host-label {
+  .topo-shell-label {
     font-family: 'SF Mono', monospace;
     font-size: 12px;
     fill: #58a6ff;
@@ -1328,7 +1328,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       };
     }
 
-    // ─── Edges: Host -> App (with arrows) ───
+    // ─── Edges: Shell -> App (with arrows) ───
     const nodeWidth = 108;
     const nodeHeight = 44;
 
@@ -1340,7 +1340,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       const angle = angleBetween(cx, cy, pos.x, pos.y);
       const endX = pos.x - Math.cos(angle) * (nodeWidth / 2 + 4);
       const endY = pos.y - Math.sin(angle) * (nodeHeight / 2 + 4);
-      const startX = cx + Math.cos(angle) * 28; // Outside host circle
+      const startX = cx + Math.cos(angle) * 28; // Outside shell circle
       const startY = cy + Math.sin(angle) * 28;
 
       const line = svgEl('line', {
@@ -1351,11 +1351,11 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         class: 'topo-edge',
         'marker-end': 'url(#arrow-marker)',
       });
-      line.setAttribute('data-from', 'host');
+      line.setAttribute('data-from', 'shell');
       line.setAttribute('data-to', appDef.name);
 
       // Edge thickness based on traffic volume
-      const trafficKey = `host→${appDef.name}`;
+      const trafficKey = `shell→${appDef.name}`;
       const traffic = edgeTraffic[trafficKey] ?? 0;
       if (traffic > 0) {
         const thickness = Math.min(1.5 + traffic * 0.3, 4);
@@ -1473,14 +1473,14 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       }
     }
 
-    // ─── Host node (center) ───
-    const hostGroup = svgEl('g');
-    const hostCircle = svgEl('circle', { cx, cy, r: 26, class: 'topo-host' });
-    hostGroup.appendChild(hostCircle);
-    const hostLabel = svgEl('text', { x: cx, y: cy - 3, class: 'topo-host-label' });
-    hostLabel.textContent = 'Host';
-    hostGroup.appendChild(hostLabel);
-    const hostSubLabel = svgEl('text', {
+    // ─── Shell node (center) ───
+    const shellGroup = svgEl('g');
+    const shellCircle = svgEl('circle', { cx, cy, r: 26, class: 'topo-shell' });
+    shellGroup.appendChild(shellCircle);
+    const shellLabel = svgEl('text', { x: cx, y: cy - 3, class: 'topo-shell-label' });
+    shellLabel.textContent = 'Shell';
+    shellGroup.appendChild(shellLabel);
+    const shellSubLabel = svgEl('text', {
       x: cx,
       y: cy + 10,
       'text-anchor': 'middle',
@@ -1489,9 +1489,9 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       'font-size': '7',
       'font-family': "'SF Mono', monospace",
     });
-    hostSubLabel.textContent = 'esmap';
-    hostGroup.appendChild(hostSubLabel);
-    topoSvg.appendChild(hostGroup);
+    shellSubLabel.textContent = 'esmap';
+    shellGroup.appendChild(shellSubLabel);
+    topoSvg.appendChild(shellGroup);
 
     // ─── App nodes ───
     for (const appDef of APP_TOPOLOGY) {
@@ -1653,8 +1653,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
             })()
           : '';
 
-        const inboundKey = `host→${appDef.name}`;
-        const outboundKey = `${appDef.name}→host`;
+        const inboundKey = `shell→${appDef.name}`;
+        const outboundKey = `${appDef.name}→shell`;
         const inboundCount = edgeTraffic[inboundKey] ?? 0;
         const outboundCount = edgeTraffic[outboundKey] ?? 0;
 
@@ -1662,8 +1662,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
           <div class="topo-tooltip-title">${appDef.name}</div>
           <div class="topo-tooltip-row"><span class="topo-tooltip-label">Status</span><span class="topo-tooltip-value" style="color:${statusColor}">${status}</span></div>
           <div class="topo-tooltip-row"><span class="topo-tooltip-label">Container</span><span class="topo-tooltip-value">${appDef.container}</span></div>
-          <div class="topo-tooltip-row"><span class="topo-tooltip-label">Host → App</span><span class="topo-tooltip-value">${inboundCount} events</span></div>
-          <div class="topo-tooltip-row"><span class="topo-tooltip-label">App → Host</span><span class="topo-tooltip-value">${outboundCount} events</span></div>
+          <div class="topo-tooltip-row"><span class="topo-tooltip-label">Shell → App</span><span class="topo-tooltip-value">${inboundCount} events</span></div>
+          <div class="topo-tooltip-row"><span class="topo-tooltip-label">App → Shell</span><span class="topo-tooltip-value">${outboundCount} events</span></div>
           <div style="margin-top:6px;padding-top:6px;border-top:1px solid #21262d">${perfRows}</div>
           ${prefetchRows}
         `;
@@ -1716,9 +1716,9 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     if (topologyPanel.style.display === 'none') return;
 
     const fromPos =
-      fromApp === 'host' ? { x: centerCache.x, y: centerCache.y } : nodePositionsCache[fromApp];
+      fromApp === 'shell' ? { x: centerCache.x, y: centerCache.y } : nodePositionsCache[fromApp];
     const toPos =
-      toApp === 'host' ? { x: centerCache.x, y: centerCache.y } : nodePositionsCache[toApp];
+      toApp === 'shell' ? { x: centerCache.x, y: centerCache.y } : nodePositionsCache[toApp];
 
     if (!fromPos || !toPos) return;
 
@@ -1788,8 +1788,8 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   flowArrowSvg.classList.add('flow-arrow-overlay');
   flowSwimlanes.appendChild(flowArrowSvg);
 
-  // Create swim lanes (Host + each app)
-  const allLanes = ['Host', ...APP_TOPOLOGY.map((a) => a.short)];
+  // Create swim lanes (Shell + each app)
+  const allLanes = ['Shell', ...APP_TOPOLOGY.map((a) => a.short)];
   const laneElements: Record<string, HTMLElement> = {};
 
   for (const laneName of allLanes) {
@@ -1811,7 +1811,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
   /** Maps an app name to a lane name */
   function toLaneName(appName: string): string {
-    if (appName === 'host') return 'Host';
+    if (appName === 'shell') return 'Shell';
     const found = APP_TOPOLOGY.find((a) => a.name === appName);
     return found ? found.short : shortName(appName);
   }
@@ -2126,7 +2126,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
   registry.onStatusChange((event) => {
     statusCache[event.appName] = event.to;
 
-    const trafficKey = `host→${event.appName}`;
+    const trafficKey = `shell→${event.appName}`;
     edgeTraffic[trafficKey] = (edgeTraffic[trafficKey] ?? 0) + 1;
 
     addEvent({
@@ -2171,12 +2171,12 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
     // Topology visual effects
     pulseNode(event.appName, CATEGORY_COLORS.lifecycle);
-    animateParticle('host', event.appName, CATEGORY_COLORS.lifecycle);
+    animateParticle('shell', event.appName, CATEGORY_COLORS.lifecycle);
 
     // Record flow
     addFlow({
       timestamp: Date.now(),
-      from: 'host',
+      from: 'shell',
       to: event.appName,
       event: `${event.from} → ${event.to}`,
       category: 'lifecycle',
@@ -2196,13 +2196,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         appName: '@enterprise/auth',
       });
       pulseNode('@enterprise/auth', CATEGORY_COLORS.auth);
-      animateParticle('@enterprise/auth', 'host', CATEGORY_COLORS.auth);
-      const authLoginKey = `@enterprise/auth→host`;
+      animateParticle('@enterprise/auth', 'shell', CATEGORY_COLORS.auth);
+      const authLoginKey = `@enterprise/auth→shell`;
       edgeTraffic[authLoginKey] = (edgeTraffic[authLoginKey] ?? 0) + 1;
       addFlow({
         timestamp: Date.now(),
         from: '@enterprise/auth',
-        to: 'host',
+        to: 'shell',
         event: 'auth:login',
         category: 'auth',
       });
@@ -2216,13 +2216,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         appName: '@enterprise/auth',
       });
       pulseNode('@enterprise/auth', CATEGORY_COLORS.auth);
-      animateParticle('@enterprise/auth', 'host', CATEGORY_COLORS.auth);
-      const authLogoutKey = `@enterprise/auth→host`;
+      animateParticle('@enterprise/auth', 'shell', CATEGORY_COLORS.auth);
+      const authLogoutKey = `@enterprise/auth→shell`;
       edgeTraffic[authLogoutKey] = (edgeTraffic[authLogoutKey] ?? 0) + 1;
       addFlow({
         timestamp: Date.now(),
         from: '@enterprise/auth',
-        to: 'host',
+        to: 'shell',
         event: 'auth:logout',
         category: 'auth',
       });
@@ -2236,13 +2236,13 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
         appName: '@enterprise/activity-feed',
       });
       pulseNode('@enterprise/activity-feed', CATEGORY_COLORS.lifecycle);
-      animateParticle('@enterprise/activity-feed', 'host', CATEGORY_COLORS.lifecycle);
-      const activityKey = `@enterprise/activity-feed→host`;
+      animateParticle('@enterprise/activity-feed', 'shell', CATEGORY_COLORS.lifecycle);
+      const activityKey = `@enterprise/activity-feed→shell`;
       edgeTraffic[activityKey] = (edgeTraffic[activityKey] ?? 0) + 1;
       addFlow({
         timestamp: Date.now(),
         from: '@enterprise/activity-feed',
-        to: 'host',
+        to: 'shell',
         event: 'activity:new',
         category: 'lifecycle',
       });
@@ -2301,7 +2301,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
       detail: `${_from.pathname} → ${to.pathname}`,
     });
 
-    // Record route change as Host -> target app in flow
+    // Record route change as Shell -> target app in flow
     const targetApp = APP_TOPOLOGY.find((a) => {
       const path = a.name === '@enterprise/dashboard' ? '/dashboard' : `/${a.short.toLowerCase()}`;
       return to.pathname === path || (to.pathname === '/' && a.name === '@enterprise/dashboard');
@@ -2309,7 +2309,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
     if (targetApp) {
       addFlow({
         timestamp: now,
-        from: 'host',
+        from: 'shell',
         to: targetApp.name,
         event: `route → ${to.pathname}`,
         category: 'route',
@@ -2628,7 +2628,7 @@ export function createDevtoolsPanel(config: DevtoolsPanelConfig): DevtoolsPanel 
 
         const fromEl = document.createElement('span');
         fromEl.style.cssText = 'color:#7d8590;min-width:100px';
-        fromEl.textContent = candidate.from ? shortName(candidate.from) : 'host';
+        fromEl.textContent = candidate.from ? shortName(candidate.from) : 'shell';
         row.appendChild(fromEl);
 
         const verEl = document.createElement('span');

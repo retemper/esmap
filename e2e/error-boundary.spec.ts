@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Error boundary', () => {
-  test('handles broken app route gracefully without crashing the host', async ({ page }) => {
+  test('깨진 앱 라우트를 셸 크래시 없이 정상 처리한다', async ({ page }) => {
     await page.goto('/broken');
 
     // The framework should not crash — nav should still work

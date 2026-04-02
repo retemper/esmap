@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 /**
  * Playwright E2E configuration.
- * Runs against the multi-mfe example (host + 4 MFE apps).
+ * Runs against the multi-mfe example (shell + 4 MFE apps).
  */
 export default defineConfig({
   testDir: './e2e',

@@ -3,7 +3,7 @@
  *
  * Demo points:
  * - Renders a login form
- * - On login success, eventBus.emit('auth:login') -> host's ReadyGate.markReady('auth')
+ * - On login success, eventBus.emit('auth:login') -> shell's ReadyGate.markReady('auth')
  * - Propagates auth state to other MFEs via scoped communication
  */
 import { createReactMfeApp } from '@esmap/react';

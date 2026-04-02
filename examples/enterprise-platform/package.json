@@ -19,7 +19,7 @@
     "seed": "tsx packages/platform-server/src/seed.ts",
     "seed:dev": "tsx packages/platform-server/src/seed.ts --dev",
     "server": "tsx packages/platform-server/src/server.ts",
-    "dev:host": "vite --config apps/host/vite.config.ts",
+    "dev:shell": "vite --config apps/shell/vite.config.ts",
     "dev:auth": "vite --config apps/auth/vite.config.ts",
     "dev:dashboard": "vite --config apps/dashboard/vite.config.ts",
     "dev:team-directory": "vite --config apps/team-directory/vite.config.ts",
@@ -28,8 +28,8 @@
     "dev:notifications": "vite --config apps/notifications/vite.config.ts",
     "dev:legacy-settings": "vite --config apps/legacy-settings/vite.config.ts",
     "dev:clean-ports": "for port in 3100 3101 3102 3103 3104 3105 3106 3107 3200; do lsof -ti :$port | xargs kill -9 2>/dev/null; done; sleep 1",
-    "dev": "pnpm dev:clean-ports && pnpm build:shared-deps && pnpm build:design-system && pnpm seed:dev && concurrently -n server,host,auth,dash,team,feed,task,notif,legacy -c blue,green,yellow,cyan,magenta,red,white,gray,#ff8800 \"pnpm run server\" \"pnpm dev:host\" \"pnpm dev:auth\" \"pnpm dev:dashboard\" \"pnpm dev:team-directory\" \"pnpm dev:activity-feed\" \"pnpm dev:task-board\" \"pnpm dev:notifications\" \"pnpm dev:legacy-settings\"",
-    "dev:build": "pnpm build && pnpm seed && concurrently \"pnpm run server\" \"pnpm dev:host\"",
+    "dev": "pnpm dev:clean-ports && pnpm build:shared-deps && pnpm build:design-system && pnpm seed:dev && concurrently -n server,shell,auth,dash,team,feed,task,notif,legacy -c blue,green,yellow,cyan,magenta,red,white,gray,#ff8800 \"pnpm run server\" \"pnpm dev:shell\" \"pnpm dev:auth\" \"pnpm dev:dashboard\" \"pnpm dev:team-directory\" \"pnpm dev:activity-feed\" \"pnpm dev:task-board\" \"pnpm dev:notifications\" \"pnpm dev:legacy-settings\"",
+    "dev:build": "pnpm build && pnpm seed && concurrently \"pnpm run server\" \"pnpm dev:shell\"",
     "test": "echo 'no unit tests — this is an integration demo'"
   },
   "dependencies": {

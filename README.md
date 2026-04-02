@@ -70,7 +70,7 @@ export default defineConfig({
 });
 ```
 
-**3. Set up the host**
+**3. Set up the shell**
 
 ```ts
 import { loadImportMap, AppRegistry, Router } from '@esmap/runtime';
@@ -106,7 +106,7 @@ esmap rollback --server http://localhost:3000 --name @myorg/checkout
 Most micro-frontend solutions couple you to a specific bundler or invent custom module protocols. **esmap** builds on [W3C Import Maps](https://wicg.github.io/import-maps/) — a browser-native standard — so your MFEs are just ESM modules that the browser resolves natively.
 
 - **Any bundler** — Vite plugin included, but not required
-- **Independent deploys** — update one MFE without rebuilding the host
+- **Independent deploys** — update one MFE without rebuilding the shell
 - **JS + CSS isolation** — proxy sandbox, scoped styles, global pollution detection
 - **Race-condition-safe routing** — stale navigations are automatically discarded
 - **Type-safe communication** — event bus with full TypeScript inference

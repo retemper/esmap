@@ -13,7 +13,7 @@ export interface SandboxPluginOptions {
   readonly allowList?: readonly PropertyKey[];
   /**
    * List of app names to exclude from sandboxing.
-   * Host apps or trusted apps can be excluded.
+   * Shell apps or trusted apps can be excluded.
    */
   readonly exclude?: readonly string[];
 }

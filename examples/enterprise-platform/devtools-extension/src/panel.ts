@@ -335,7 +335,7 @@ const flowStatsEl = document.getElementById('flow-stats')!;
 const flowCanvas = document.getElementById('flow-canvas')!;
 const flowLanes = document.getElementById('flow-lanes')!;
 
-const allLaneNames = ['Host', ...APP_TOPOLOGY.map((a) => a.short)];
+const allLaneNames = ['Shell', ...APP_TOPOLOGY.map((a) => a.short)];
 const laneContentEls: Record<string, HTMLElement> = {};
 
 for (const name of allLaneNames) {
@@ -516,7 +516,7 @@ function renderTopology(): void {
     positions[app.name] = { x: cx + rx * Math.cos(rad), y: cy + ry * Math.sin(rad) };
   }
 
-  // Host→App edges
+  // Shell→App edges
   for (const app of APP_TOPOLOGY) {
     const pos = positions[app.name];
     if (!pos) continue;
@@ -629,7 +629,7 @@ function renderTopology(): void {
     topoSvg.appendChild(prob);
   }
 
-  // Host node
+  // Shell node
   const hg = svg('g');
   hg.appendChild(
     svg('circle', { cx, cy, r: 28, fill: '#161b22', stroke: '#58a6ff', 'stroke-width': 2 }),
@@ -643,7 +643,7 @@ function renderTopology(): void {
     'font-size': '13',
     'font-weight': '700',
   });
-  hl.textContent = 'Host';
+  hl.textContent = 'Shell';
   hg.appendChild(hl);
   const hs = svg('text', {
     x: cx,
@@ -865,12 +865,12 @@ function renderFlow(): void {
   for (const flow of state.flows) {
     const x = (flow.timestamp - startTime) * pixelsPerMs + 20;
     const fromLane =
-      flow.from === 'host'
-        ? 'Host'
+      flow.from === 'shell'
+        ? 'Shell'
         : (APP_TOPOLOGY.find((a) => a.name === flow.from)?.short ?? short(flow.from));
     const toLane =
-      flow.to === 'host'
-        ? 'Host'
+      flow.to === 'shell'
+        ? 'Shell'
         : (APP_TOPOLOGY.find((a) => a.name === flow.to)?.short ?? short(flow.to));
 
     const fromEl = laneContentEls[fromLane];
@@ -1119,7 +1119,7 @@ function renderDeps(): void {
 
       const fromEl = document.createElement('span');
       fromEl.style.cssText = 'color:#7d8590;min-width:80px';
-      fromEl.textContent = candidate['from'] ? short(String(candidate['from'])) : 'host';
+      fromEl.textContent = candidate['from'] ? short(String(candidate['from'])) : 'shell';
       row.appendChild(fromEl);
 
       const verEl = document.createElement('span');
@@ -1226,7 +1226,7 @@ function handleMessage(msg: Record<string, unknown>): void {
       });
       state.flows.push({
         timestamp: ts,
-        from: 'host',
+        from: 'shell',
         to: appName,
         event: `${from} → ${to}`,
         category: 'lifecycle',
@@ -1271,7 +1271,7 @@ function handleMessage(msg: Record<string, unknown>): void {
       addEvent({ timestamp: ts, category, name: event, detail: payload, appName });
 
       if (appName) {
-        state.flows.push({ timestamp: ts, from: appName, to: 'host', event, category });
+        state.flows.push({ timestamp: ts, from: appName, to: 'shell', event, category });
         if (state.flows.length > MAX_FLOWS) state.flows.shift();
         if (activeTab.value === 'flow') renderFlow();
       }
@@ -1324,7 +1324,7 @@ function handleMessage(msg: Record<string, unknown>): void {
       if (targetApp) {
         state.flows.push({
           timestamp: ts,
-          from: 'host',
+          from: 'shell',
           to: targetApp.name,
           event: `route → ${to}`,
           category: 'route',

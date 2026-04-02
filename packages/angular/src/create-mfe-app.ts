@@ -34,7 +34,7 @@ export interface AngularMfeAppOptions {
 export function createAngularMfeApp(options: AngularMfeAppOptions): MfeApp {
   const ref: { appRef: ApplicationRef | null } = { appRef: null };
 
-  /** Writable signal that holds the latest props from the host */
+  /** Writable signal that holds the latest props from the shell */
   const propsSignal = signal<Readonly<Record<string, unknown>>>({});
 
   return {
