@@ -1,6 +1,6 @@
 {
   "name": "@esmap/vue",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Vue 3 adapter for esmap — lifecycle wrapper for Vue applications",
   "type": "module",
   "exports": {

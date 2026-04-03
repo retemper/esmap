@@ -1,6 +1,6 @@
 {
   "name": "@esmap/communication",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Inter-app communication primitives: event bus, global state, and app props",
   "type": "module",
   "exports": {

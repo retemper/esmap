@@ -1,6 +1,6 @@
 {
   "name": "@esmap/monitor",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Performance monitoring for MFE loading, bootstrapping, and mounting",
   "type": "module",
   "exports": {

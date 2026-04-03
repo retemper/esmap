@@ -1,6 +1,6 @@
 {
   "name": "@esmap/runtime",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Browser runtime for import map loading, MFE lifecycle, and routing",
   "type": "module",
   "exports": {
