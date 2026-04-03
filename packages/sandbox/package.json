@@ -30,5 +30,10 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retemper/esmap",
+    "directory": "packages/sandbox"
   }
 }
