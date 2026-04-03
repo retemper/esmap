@@ -5,6 +5,10 @@ node_modules/
 dist/
 *.tsbuildinfo
 
+# VitePress
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
 # Coverage
 coverage/
 
