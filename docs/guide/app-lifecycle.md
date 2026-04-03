@@ -12,12 +12,12 @@ bootstrap → mount → (update) → unmount
 
 ## Lifecycle functions
 
-| Function      | When                         | Required |
-| ------------- | ---------------------------- | -------- |
-| `bootstrap()` | Called once, before first mount | No       |
-| `mount(el)`   | Called when the route matches | Yes      |
-| `update(props)` | Called when props change    | No       |
-| `unmount(el)` | Called when leaving the route | Yes      |
+| Function        | When                            | Required |
+| --------------- | ------------------------------- | -------- |
+| `bootstrap()`   | Called once, before first mount | No       |
+| `mount(el)`     | Called when the route matches   | Yes      |
+| `update(props)` | Called when props change        | No       |
+| `unmount(el)`   | Called when leaving the route   | Yes      |
 
 ## Example
 

@@ -10,12 +10,12 @@ This page is under construction.
 
 ```html
 <script type="importmap">
-{
-  "imports": {
-    "@myorg/checkout": "https://cdn.example.com/checkout-v2.js",
-    "react": "https://esm.sh/react@18"
+  {
+    "imports": {
+      "@myorg/checkout": "https://cdn.example.com/checkout-v2.js",
+      "react": "https://esm.sh/react@18"
+    }
   }
-}
 </script>
 ```
 

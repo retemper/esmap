@@ -24,6 +24,6 @@ features:
     details: Proxy sandbox, snapshot sandbox, scoped styles, and global pollution detection.
   - title: Type-safe communication
     details: Event bus with full TypeScript inference. Global state and app props built in.
-  - title: "~17.5 kB gzip total"
+  - title: '~17.5 kB gzip total'
     details: Use only what you need — each package has zero cross-dependencies.
 ---

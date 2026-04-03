@@ -101,9 +101,7 @@ export default defineConfig({
         },
       ],
     },
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/retemper/esmap' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/retemper/esmap' }],
     search: {
       provider: 'local',
     },
