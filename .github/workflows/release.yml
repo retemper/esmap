@@ -22,6 +22,8 @@ jobs:
       contents: write
       pull-requests: write
       id-token: write
+    outputs:
+      published: ${{ steps.changesets.outputs.published }}
     steps:
       # Pinned to SHA for supply-chain safety
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -38,6 +40,14 @@ jobs:
 
       - run: pnpm build
 
+      - name: Generate GitHub App token
+        id: app-token
+        # Pinned to SHA for supply-chain safety (v2)
+        uses: actions/create-github-app-token@df432a79ed5b9c4df69d4b81f4a1e153157bb1f2
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - name: Create release PR or publish to npm
         id: changesets
         # Pinned to SHA for supply-chain safety (v1.7.0)
@@ -48,7 +58,7 @@ jobs:
           title: 'chore: version packages'
           commit: 'chore: version packages'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -68,3 +78,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
+
+  deploy-docs:
+    needs: release
+    if: needs.release.outputs.published == 'true'
+    uses: ./.github/workflows/docs.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
