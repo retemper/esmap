@@ -43,7 +43,7 @@ jobs:
       - name: Generate GitHub App token
         id: app-token
         # Pinned to SHA for supply-chain safety (v2)
-        uses: actions/create-github-app-token@df432a79ed5b9c4df69d4b81f4a1e153157bb1f2
+        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e
         with:
           app-id: ${{ secrets.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
