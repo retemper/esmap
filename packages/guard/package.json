@@ -1,6 +1,6 @@
 {
   "name": "@esmap/guard",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "CSS isolation and global pollution guards for micro-frontends",
   "type": "module",
   "exports": {

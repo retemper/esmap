@@ -1,6 +1,6 @@
 {
   "name": "@esmap/sandbox",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "JavaScript sandbox implementations for micro-frontend isolation",
   "type": "module",
   "exports": {

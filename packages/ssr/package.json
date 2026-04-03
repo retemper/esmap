@@ -1,6 +1,6 @@
 {
   "name": "@esmap/ssr",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Server-side rendering support for esmap micro-frontends with import map resolution on Node.js",
   "type": "module",
   "exports": {
