@@ -1,6 +1,6 @@
 {
   "name": "@esmap/angular",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Angular adapter for esmap — lifecycle wrapper for Angular applications",
   "type": "module",
   "exports": {
@@ -44,5 +44,10 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retemper/esmap",
+    "directory": "packages/angular"
   }
 }

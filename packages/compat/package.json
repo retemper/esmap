@@ -1,6 +1,6 @@
 {
   "name": "@esmap/compat",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Compatibility layer for migrating from Webpack Module Federation to import maps",
   "type": "module",
   "exports": {
@@ -33,5 +33,10 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retemper/esmap",
+    "directory": "packages/compat"
   }
 }

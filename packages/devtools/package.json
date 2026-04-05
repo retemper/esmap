@@ -1,6 +1,6 @@
 {
   "name": "@esmap/devtools",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Developer tools for import map overrides — test local MFE builds against production",
   "type": "module",
   "exports": {
@@ -33,5 +33,10 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retemper/esmap",
+    "directory": "packages/devtools"
   }
 }
