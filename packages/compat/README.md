@@ -74,7 +74,7 @@ const sharedImports = convertMfSharedToImports(
 ## Migration Guide
 
 1. Convert existing MF config with `convertMfToImportMap()`
-2. Load the import map in your host using `@esmap/runtime`
+2. Load the import map in your shell using `@esmap/runtime`
 3. Remote apps keep their existing build output as-is
 4. Incrementally migrate each remote to ESM builds
 5. Remove `@esmap/compat` when migration is complete

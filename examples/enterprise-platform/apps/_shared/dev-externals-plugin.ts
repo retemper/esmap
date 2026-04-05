@@ -7,7 +7,7 @@ const MONOREPO_ROOT = resolve(__dirname, '../..');
 /**
  * Bare specifier-to-source-path mappings for packages that exist only in the
  * monorepo (not in node_modules).  In production builds these are marked
- * `external` and resolved at runtime via the host's import map.  In dev mode
+ * `external` and resolved at runtime via the shell's import map.  In dev mode
  * Vite cannot resolve them, so we point to the original source entry so that
  * Vite can transform and serve them with HMR.
  */

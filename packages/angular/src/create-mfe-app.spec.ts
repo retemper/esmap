@@ -80,7 +80,7 @@ describe('createAngularMfeApp', () => {
     expect(mockAppRef.bootstrap).toHaveBeenCalledWith(TestComponent, expect.any(HTMLElement));
   });
 
-  it('creates a host element with the component selector on mount', async () => {
+  it('컴포넌트 셀렉터로 wrapper 엘리먼트를 생성하여 마운트한다', async () => {
     const mockAppRef = createMockAppRef();
     vi.mocked(createApplication).mockResolvedValue(mockAppRef as never);
 

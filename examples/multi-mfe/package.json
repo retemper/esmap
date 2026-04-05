@@ -10,7 +10,7 @@
     "build:home": "vite build --config apps/app-home/vite.config.ts",
     "build:settings": "vite build --config apps/app-settings/vite.config.ts",
     "build:react-dashboard": "vite build --config apps/app-react-dashboard/vite.config.ts",
-    "dev": "vite --config host/vite.config.ts",
+    "dev": "vite --config vite.config.ts",
     "preview": "pnpm build:apps && pnpm dev",
     "build": "echo 'use pnpm preview to run'",
     "test": "echo 'no unit tests — this is an integration demo'"

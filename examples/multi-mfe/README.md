@@ -17,7 +17,7 @@ Open `http://localhost:5173` in your browser.
 
 ```
 multi-mfe/
-├── host/src/boot.ts        # Host app — integrates all packages
+├── src/boot.ts             # Bootstrap entry — any app can be the orchestrator
 ├── apps/
 │   ├── app-nav/            # Navigation MFE (Vanilla JS)
 │   ├── app-home/           # Home MFE (Vanilla JS)
