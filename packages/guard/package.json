@@ -1,6 +1,6 @@
 {
   "name": "@esmap/guard",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "CSS isolation and global pollution guards for micro-frontends",
   "type": "module",
   "exports": {
@@ -30,5 +30,10 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retemper/esmap",
+    "directory": "packages/guard"
   }
 }

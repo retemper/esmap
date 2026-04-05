@@ -1,6 +1,6 @@
 {
   "name": "@esmap/react",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "React adapter for esmap — lifecycle wrapper, hooks, and Parcel component",
   "type": "module",
   "exports": {
@@ -45,5 +45,10 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/retemper/esmap",
+    "directory": "packages/react"
   }
 }
