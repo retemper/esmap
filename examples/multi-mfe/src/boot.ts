@@ -1,8 +1,8 @@
 /**
- * Host app bootstrap — based on @esmap/core.
+ * Bootstrap entry — any app can call createEsmap() to become the orchestrator.
  *
- * Example of how 340 lines of manual wire-up code became concise with the
- * @esmap/core kernel + plugin system. A single createEsmap() initializes the entire framework.
+ * There is no dedicated "host" concept in esmap. Whichever script calls
+ * createEsmap() wires the kernel, and every registered app is a peer.
  */
 
 import {

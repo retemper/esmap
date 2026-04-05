@@ -1,7 +1,7 @@
 import { InjectionToken, type Signal } from '@angular/core';
 
 /**
- * Injection token for esmap props passed from the host application.
+ * Injection token for esmap props passed from the shell application.
  * Angular components inject this to receive cross-framework props.
  *
  * @example

@@ -150,7 +150,7 @@ describe('createWebVitalsTracker', () => {
     tracker.destroy();
   });
 
-  it('attributes CLS to __host__ when outside an MFE', () => {
+  it('MFE 컨테이너 외부의 CLS를 __shell__로 귀속시킨다', () => {
     const orphan = document.createElement('div');
     document.body.appendChild(orphan);
     const tracker = createWebVitalsTracker();
@@ -158,7 +158,7 @@ describe('createWebVitalsTracker', () => {
     emitEntries('layout-shift', [createLayoutShiftEntry(0.1, 100, [{ node: orphan }])]);
 
     const clsMap = tracker.getMetric('CLS');
-    expect(clsMap.get('__host__')).toBe(0.1);
+    expect(clsMap.get('__shell__')).toBe(0.1);
 
     tracker.destroy();
   });

@@ -12,7 +12,7 @@ interface AppProps<T extends Record<string, unknown>> {
 }
 
 /**
- * Manages properties passed from host to remote apps.
+ * Manages properties passed from shell to remote apps.
  * @param initial - initial property object
  * @returns app property instance
  */

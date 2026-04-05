@@ -4,44 +4,31 @@ import { readFile } from 'node:fs/promises';
 
 export default defineConfig({
   root: __dirname,
-  cacheDir: resolve(__dirname, '../../node_modules/.vite/deps-host'),
   server: {
     port: 3100,
-    strictPort: true,
     fs: {
-      allow: [resolve(__dirname, '../../..')],
+      allow: [resolve(__dirname, '../..')],
     },
   },
   plugins: [
     {
       name: 'serve-mfe-apps',
       configureServer(server) {
-        const distDir = resolve(__dirname, '../../dist');
+        const distAppsDir = resolve(__dirname, 'dist/apps');
 
-        /**
-         * Routes /apps/* requests to subdirectories under dist/.
-         * Structure: /apps/{appName}/{fileName} -> dist/apps/{appName}/{fileName}
-         *            /apps/shared/{fileName}    -> dist/shared/{fileName}
-         *            /apps/design-system/{file} -> dist/design-system/{file}
-         */
+        // Route /apps/* requests to dist/apps/*
         server.middlewares.use(async (req, res, next) => {
           if (!req.url?.startsWith('/apps/')) {
             next();
             return;
           }
 
+          // Remove query string (Vite may append ?import etc.)
           const urlPath = req.url.split('?')[0];
-          const relativePath = urlPath.slice(6); // Remove '/apps/'
-
-          // shared/, design-system/ are at dist root, others under dist/apps/
-          const isInfra =
-            relativePath.startsWith('shared/') || relativePath.startsWith('design-system/');
-          const filePath = isInfra
-            ? resolve(distDir, relativePath)
-            : resolve(distDir, 'apps', relativePath);
+          const filePath = resolve(distAppsDir, urlPath.slice(6));
 
           // Prevent directory traversal
-          if (!filePath.startsWith(distDir)) {
+          if (!filePath.startsWith(distAppsDir)) {
             next();
             return;
           }
@@ -58,6 +45,8 @@ export default defineConfig({
             res.setHeader('Access-Control-Allow-Origin', '*');
             res.end(content);
           } catch {
+            // For non-existent app JS file requests, return a JS module that throws an error instead of HTML fallback.
+            // This allows AppRegistry's error boundary to properly catch the error.
             const ext = filePath.split('.').pop();
             if (ext === 'js') {
               res.setHeader('Content-Type', 'application/javascript');

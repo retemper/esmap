@@ -110,7 +110,7 @@ import { createAppProps } from '@esmap/communication';
 
 const appProps = createAppProps({ userId: '', permissions: [] as string[] });
 
-// Host sets props
+// Shell sets props
 appProps.setProps({ userId: '123', permissions: ['read', 'write'] });
 
 // MFE reads props (frozen copy)

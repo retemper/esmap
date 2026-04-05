@@ -70,8 +70,8 @@ const CLS_SESSION_GAP = 1000;
 /** Maximum length for CLS session window (ms) */
 const CLS_SESSION_MAX_WINDOW = 5000;
 
-/** Host app name used when attribution fails */
-const HOST_APP_NAME = '__host__';
+/** Shell app name used when attribution fails */
+const SHELL_APP_NAME = '__shell__';
 
 /**
  * Finds the closest MFE scope name from an element.
@@ -254,7 +254,7 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
     for (const entry of entries) {
       if (!hasLcpElement(entry)) continue;
 
-      const appName = findAppScope(entry.element, scopeAttribute) ?? HOST_APP_NAME;
+      const appName = findAppScope(entry.element, scopeAttribute) ?? SHELL_APP_NAME;
       lcpPerApp.set(appName, entry.startTime);
 
       const appEntries = lcpEntriesPerApp.get(appName) ?? [];
@@ -279,7 +279,7 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
       if (!hasEventTarget(entry)) continue;
       if (entry.interactionId === 0) continue;
 
-      const appName = findAppScope(entry.target, scopeAttribute) ?? HOST_APP_NAME;
+      const appName = findAppScope(entry.target, scopeAttribute) ?? SHELL_APP_NAME;
       const state = inpPerApp.get(appName) ?? createInpState();
       inpPerApp.set(appName, state);
 
@@ -304,7 +304,7 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
    * Infers the app name from layout-shift sources.
    * @param sources - list of LayoutShiftAttribution
    * @param attr - scope attribute name
-   * @returns app name, or HOST_APP_NAME if unidentifiable
+   * @returns app name, or SHELL_APP_NAME if unidentifiable
    */
   const resolveAppFromShiftSources = (
     sources: readonly LayoutShiftSource[],
@@ -314,7 +314,7 @@ function createWebVitalsTracker(options?: WebVitalsOptions): WebVitalsTracker {
       const appName = findAppScope(source.node, attr);
       if (appName) return appName;
     }
-    return HOST_APP_NAME;
+    return SHELL_APP_NAME;
   };
 
   const tryObserve = (type: string, callback: (entries: PerformanceEntryList) => void): void => {
