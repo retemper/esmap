@@ -186,8 +186,7 @@ export default defineConfig({
           '/ko/api/': apiSidebarKo,
         },
         editLink: {
-          pattern:
-            'https://github.com/retemper/esmap/edit/main/docs/:path',
+          pattern: 'https://github.com/retemper/esmap/edit/main/docs/:path',
           text: '이 페이지 편집 제안하기',
         },
         footer: {
@@ -212,8 +211,7 @@ export default defineConfig({
   },
   themeConfig: {
     logo: {
-      light:
-        'https://raw.githubusercontent.com/retemper/esmap/main/.github/logo-light.svg',
+      light: 'https://raw.githubusercontent.com/retemper/esmap/main/.github/logo-light.svg',
       dark: 'https://raw.githubusercontent.com/retemper/esmap/main/.github/logo-dark.svg',
     },
     nav: [
@@ -237,15 +235,12 @@ export default defineConfig({
       '/guide/': guideSidebar,
       '/api/': apiSidebar,
     },
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/retemper/esmap' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/retemper/esmap' }],
     search: {
       provider: 'local',
     },
     editLink: {
-      pattern:
-        'https://github.com/retemper/esmap/edit/main/docs/:path',
+      pattern: 'https://github.com/retemper/esmap/edit/main/docs/:path',
     },
     footer: {
       message: 'Released under the MIT License.',

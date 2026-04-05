@@ -6,16 +6,16 @@
 
 ## 비교
 
-|                     | Module Federation | single-spa     | qiankun          | esmap              |
-| ------------------- | ----------------- | -------------- | ---------------- | ------------------ |
-| **표준**            | Webpack 전용      | 커스텀 로더    | single-spa 래핑  | W3C Import Maps    |
-| **번들러**          | Webpack만 가능    | 모두 가능      | 모두 가능        | 모두 가능          |
-| **모듈 형식**       | Webpack chunks    | SystemJS / ESM | SystemJS         | 네이티브 ESM       |
-| **JS 격리**         | 없음              | 없음           | Proxy sandbox    | Proxy + Snapshot   |
-| **CSS 격리**        | 없음              | 없음           | Shadow DOM       | Scoped + detection |
-| **배포 서버**       | 없음              | 없음           | 없음             | 내장               |
-| **개발자 도구**     | 없음              | Inspector      | 없음             | 내장               |
-| **배포 결합도**     | 빌드 시점         | 빌드 시점      | 빌드 시점        | 배포 시점          |
+|                 | Module Federation | single-spa     | qiankun         | esmap              |
+| --------------- | ----------------- | -------------- | --------------- | ------------------ |
+| **표준**        | Webpack 전용      | 커스텀 로더    | single-spa 래핑 | W3C Import Maps    |
+| **번들러**      | Webpack만 가능    | 모두 가능      | 모두 가능       | 모두 가능          |
+| **모듈 형식**   | Webpack chunks    | SystemJS / ESM | SystemJS        | 네이티브 ESM       |
+| **JS 격리**     | 없음              | 없음           | Proxy sandbox   | Proxy + Snapshot   |
+| **CSS 격리**    | 없음              | 없음           | Shadow DOM      | Scoped + detection |
+| **배포 서버**   | 없음              | 없음           | 없음            | 내장               |
+| **개발자 도구** | 없음              | Inspector      | 없음            | 내장               |
+| **배포 결합도** | 빌드 시점         | 빌드 시점      | 빌드 시점       | 배포 시점          |
 
 ## 아키텍처
 
@@ -56,22 +56,22 @@ Foundation
 
 ### 브라우저
 
-| 패키지                 | 크기 (gzip) | 설명                                                    |
-| ---------------------- | ----------- | ------------------------------------------------------- |
+| 패키지                 | 크기 (gzip) | 설명                                                            |
+| ---------------------- | ----------- | --------------------------------------------------------------- |
 | `@esmap/runtime`       | 8.2 kB      | Import map 로더, 앱 레지스트리, 라우터, 에러 바운더리, 프리페치 |
-| `@esmap/react`         | 1.5 kB      | React 어댑터 — `createReactMfeApp()`, 훅, `<EsmapParcel>` |
-| `@esmap/communication` | 1.1 kB      | 타입 안전한 이벤트 버스, 글로벌 상태, 앱 props           |
-| `@esmap/sandbox`       | 1.9 kB      | Proxy 샌드박스, Snapshot 샌드박스                        |
-| `@esmap/guard`         | 2.7 kB      | CSS 스코핑, 글로벌 오염 감지                             |
-| `@esmap/devtools`      | 1.0 kB      | 로컬 개발을 위한 import map 오버라이드                   |
-| `@esmap/monitor`       | 1.1 kB      | 라이프사이클 단계별 성능 추적                            |
+| `@esmap/react`         | 1.5 kB      | React 어댑터 — `createReactMfeApp()`, 훅, `<EsmapParcel>`       |
+| `@esmap/communication` | 1.1 kB      | 타입 안전한 이벤트 버스, 글로벌 상태, 앱 props                  |
+| `@esmap/sandbox`       | 1.9 kB      | Proxy 샌드박스, Snapshot 샌드박스                               |
+| `@esmap/guard`         | 2.7 kB      | CSS 스코핑, 글로벌 오염 감지                                    |
+| `@esmap/devtools`      | 1.0 kB      | 로컬 개발을 위한 import map 오버라이드                          |
+| `@esmap/monitor`       | 1.1 kB      | 라이프사이클 단계별 성능 추적                                   |
 
 ### 빌드 & 서버
 
-| 패키지               | 설명                                                       |
-| -------------------- | ---------------------------------------------------------- |
-| `@esmap/cli`         | CLI — generate, deploy, rollback                           |
-| `@esmap/vite-plugin` | Vite 플러그인 — 매니페스트 생성, ESM externals             |
-| `@esmap/server`      | Import map 서버 — 배포 API, 롤백, 이력 관리               |
-| `@esmap/config`      | 설정 스키마, 로딩, 유효성 검사                             |
+| 패키지               | 설명                                                              |
+| -------------------- | ----------------------------------------------------------------- |
+| `@esmap/cli`         | CLI — generate, deploy, rollback                                  |
+| `@esmap/vite-plugin` | Vite 플러그인 — 매니페스트 생성, ESM externals                    |
+| `@esmap/server`      | Import map 서버 — 배포 API, 롤백, 이력 관리                       |
+| `@esmap/config`      | 설정 스키마, 로딩, 유효성 검사                                    |
 | `@esmap/compat`      | 마이그레이션 레이어 — Webpack Module Federation에서 import maps로 |
