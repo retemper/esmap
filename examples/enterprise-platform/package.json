@@ -16,6 +16,7 @@
     "build:notifications": "vite build --config apps/notifications/vite.config.ts",
     "build:legacy-settings": "vite build --config apps/legacy-settings/vite.config.ts",
     "build": "pnpm build:shared-deps && pnpm build:design-system && pnpm build:apps",
+    "type-check": "tsc --noEmit",
     "seed": "tsx packages/platform-server/src/seed.ts",
     "seed:dev": "tsx packages/platform-server/src/seed.ts --dev",
     "server": "tsx packages/platform-server/src/server.ts",
