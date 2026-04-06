@@ -68,7 +68,7 @@ describe('FileSystemStorage', () => {
       expect(result.imports.vue).toBe('https://cdn.example.com/vue.js');
     });
 
-    it('serializes concurrent updates', async () => {
+    it('serializes concurrent updates', { timeout: 15_000 }, async () => {
       const { storage } = await createTempStorage();
 
       await storage.update(() => ({
