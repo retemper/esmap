@@ -8,6 +8,7 @@
     "demo": "tsx src/demo.ts",
     "demo:migration": "tsx src/demo-migration.ts",
     "build": "echo 'no build needed'",
+    "type-check": "tsc --noEmit",
     "test": "echo 'no tests'"
   },
   "dependencies": {

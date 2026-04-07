@@ -123,7 +123,7 @@ async function boot(): Promise<void> {
         },
       },
       shared: {},
-      server: { port: 3000, storage: { type: 'filesystem', path: './data' } },
+      server: { port: 3000, storage: 'filesystem', storageOptions: { path: './data' } },
     },
     importMap,
     plugins: [
