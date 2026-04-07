@@ -12,9 +12,5 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": [
-    "src/**/*.ts",
-    "apps/**/*.ts",
-    "apps/**/*.tsx"
-  ]
+  "include": ["src/**/*.ts", "apps/**/*.ts", "apps/**/*.tsx"]
 }
