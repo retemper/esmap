@@ -1,3 +1,7 @@
+---
+description: "API reference for @esmap/sandbox — proxy sandbox and snapshot sandbox for JS isolation."
+---
+
 # @esmap/sandbox
 
 ::: warning WIP

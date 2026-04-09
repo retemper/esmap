@@ -1,5 +1,6 @@
 ---
 layout: home
+description: 브라우저 네이티브 W3C Import Maps 기반 마이크로 프론트엔드 프레임워크. 빌드 타임 생성, 브라우저 런타임, 배포 서버, 개발자 도구를 하나의 프레임워크로 제공합니다.
 
 hero:
   name: esmap

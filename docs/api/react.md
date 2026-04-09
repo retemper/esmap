@@ -1,3 +1,7 @@
+---
+description: "API reference for @esmap/react — createReactMfeApp, React hooks, and EsmapParcel component."
+---
+
 # @esmap/react
 
 ::: warning WIP

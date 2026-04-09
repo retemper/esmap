@@ -1,3 +1,7 @@
+---
+description: "esmap이 무엇인지 알아보세요 — 브라우저 네이티브 W3C Import Maps 기반 마이크로 프론트엔드 프레임워크."
+---
+
 # esmap이란?
 
 **esmap**은 [W3C Import Maps](https://wicg.github.io/import-maps/) 위에 구축된 마이크로 프론트엔드 프레임워크입니다. Import Maps는 모듈 해석을 위한 브라우저 네이티브 표준입니다.

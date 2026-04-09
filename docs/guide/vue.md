@@ -1,3 +1,7 @@
+---
+description: "Integrate esmap with Vue applications using the Vue adapter."
+---
+
 # Vue
 
 ::: warning WIP

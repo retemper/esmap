@@ -1,3 +1,7 @@
+---
+description: "Run the esmap deploy server for import map management, versioned deploys, and rollbacks."
+---
+
 # Server
 
 ::: warning WIP

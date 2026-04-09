@@ -154,6 +154,14 @@ export default defineConfig({
   description: 'Micro-frontends on native import maps',
   base: '/esmap/',
   cleanUrls: true,
+  sitemap: {
+    hostname: 'https://retemper.github.io/esmap/',
+  },
+  head: [
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:site_name', content: 'esmap' }],
+    ['meta', { name: 'twitter:card', content: 'summary' }],
+  ],
   locales: {
     root: {
       label: 'English',

@@ -1,3 +1,7 @@
+---
+description: "@esmap/react API 레퍼런스 — createReactMfeApp, React 훅, EsmapParcel 컴포넌트."
+---
+
 # @esmap/react
 
 ::: warning 작성 중

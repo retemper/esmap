@@ -1,3 +1,7 @@
+---
+description: "esmap CLI로 매니페스트 생성, 마이크로 프론트엔드 배포, 롤백을 관리하세요."
+---
+
 # CLI
 
 ::: warning 작성 중

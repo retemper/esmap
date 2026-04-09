@@ -1,3 +1,7 @@
+---
+description: "API reference for @esmap/guard — CSS scoping and global pollution detection."
+---
+
 # @esmap/guard
 
 ::: warning WIP

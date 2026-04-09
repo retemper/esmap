@@ -1,3 +1,7 @@
+---
+description: "Integrate esmap with Angular applications using the Angular adapter."
+---
+
 # Angular
 
 ::: warning WIP
