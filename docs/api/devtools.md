@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/devtools — import map override for local development.'
+---
+
 # @esmap/devtools
 
 ::: warning WIP

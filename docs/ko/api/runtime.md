@@ -1,3 +1,7 @@
+---
+description: '@esmap/runtime API 레퍼런스 — import map 로더, 앱 레지스트리, 라우터, 에러 바운더리, 프리페치.'
+---
+
 # @esmap/runtime
 
 ::: warning 작성 중

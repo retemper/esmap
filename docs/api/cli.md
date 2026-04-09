@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/cli — generate manifests, deploy, and rollback commands.'
+---
+
 # @esmap/cli
 
 ::: warning WIP

@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/ssr — server-side rendering support for esmap micro-frontends.'
+---
+
 # @esmap/ssr
 
 ::: warning WIP

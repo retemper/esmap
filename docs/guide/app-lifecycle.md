@@ -1,3 +1,7 @@
+---
+description: 'Learn the esmap app lifecycle — bootstrap, mount, unmount, and update hooks for micro-frontends.'
+---
+
 # App Lifecycle
 
 ::: warning WIP

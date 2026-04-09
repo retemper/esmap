@@ -1,3 +1,7 @@
+---
+description: '@esmap/monitor API 레퍼런스 — 라이프사이클 단계별 성능 추적.'
+---
+
 # @esmap/monitor
 
 ::: warning 작성 중

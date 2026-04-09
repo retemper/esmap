@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/angular — Angular adapter for esmap micro-frontends.'
+---
+
 # @esmap/angular
 
 ::: warning WIP

@@ -1,3 +1,7 @@
+---
+description: 'esmap 앱 라이프사이클 — bootstrap, mount, unmount, update 훅을 알아보세요.'
+---
+
 # 앱 라이프사이클
 
 ::: warning 작성 중

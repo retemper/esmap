@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/communication — type-safe event bus, global state, and app props.'
+---
+
 # @esmap/communication
 
 ::: warning WIP

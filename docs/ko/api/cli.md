@@ -1,3 +1,7 @@
+---
+description: '@esmap/cli API 레퍼런스 — 매니페스트 생성, 배포, 롤백 명령어.'
+---
+
 # @esmap/cli
 
 ::: warning 작성 중

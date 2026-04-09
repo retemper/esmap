@@ -1,3 +1,7 @@
+---
+description: 'Migrate from Webpack Module Federation to esmap with the compatibility layer.'
+---
+
 # Migration from Module Federation
 
 ::: warning WIP

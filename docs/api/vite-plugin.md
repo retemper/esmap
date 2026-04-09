@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/vite-plugin — manifest generation and ESM externals for Vite.'
+---
+
 # @esmap/vite-plugin
 
 ::: warning WIP

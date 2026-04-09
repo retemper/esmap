@@ -1,3 +1,7 @@
+---
+description: 'Integrate esmap with React using createReactMfeApp, hooks, and the EsmapParcel component.'
+---
+
 # React
 
 ::: warning WIP

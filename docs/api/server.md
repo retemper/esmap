@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/server — deploy API, rollback, and import map history.'
+---
+
 # @esmap/server
 
 ::: warning WIP

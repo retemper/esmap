@@ -1,3 +1,7 @@
+---
+description: '@esmap/vue API 레퍼런스 — esmap 마이크로 프론트엔드용 Vue 어댑터.'
+---
+
 # @esmap/vue
 
 ::: warning 작성 중

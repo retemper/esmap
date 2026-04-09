@@ -1,5 +1,6 @@
 ---
 layout: home
+description: A micro-frontend framework built on browser-native W3C Import Maps. Build-time generation, browser runtime, deploy server, and devtools in one framework.
 
 hero:
   name: esmap

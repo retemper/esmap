@@ -1,3 +1,7 @@
+---
+description: '@esmap/ssr API 레퍼런스 — esmap 마이크로 프론트엔드 서버 사이드 렌더링 지원.'
+---
+
 # @esmap/ssr
 
 ::: warning 작성 중
