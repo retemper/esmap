@@ -1,5 +1,5 @@
 ---
-description: "import map 관리, 버전 배포, 롤백을 위한 esmap 배포 서버를 실행하세요."
+description: 'import map 관리, 버전 배포, 롤백을 위한 esmap 배포 서버를 실행하세요.'
 ---
 
 # 서버

@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/config — configuration schema, loading, and validation."
+description: 'API reference for @esmap/config — configuration schema, loading, and validation.'
 ---
 
 # @esmap/config

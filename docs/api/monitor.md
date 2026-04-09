@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/monitor — performance tracking per lifecycle phase."
+description: 'API reference for @esmap/monitor — performance tracking per lifecycle phase.'
 ---
 
 # @esmap/monitor

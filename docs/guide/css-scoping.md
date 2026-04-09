@@ -1,5 +1,5 @@
 ---
-description: "Prevent CSS conflicts between micro-frontends with scoped styles and global pollution detection."
+description: 'Prevent CSS conflicts between micro-frontends with scoped styles and global pollution detection.'
 ---
 
 # CSS Scoping

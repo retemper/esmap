@@ -1,5 +1,5 @@
 ---
-description: "Understand W3C Import Maps — the browser-native standard esmap builds on for module resolution."
+description: 'Understand W3C Import Maps — the browser-native standard esmap builds on for module resolution.'
 ---
 
 # Import Maps

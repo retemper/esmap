@@ -1,5 +1,5 @@
 ---
-description: "Learn what esmap is — a micro-frontend framework built on browser-native W3C Import Maps for module resolution."
+description: 'Learn what esmap is — a micro-frontend framework built on browser-native W3C Import Maps for module resolution.'
 ---
 
 # What is esmap?

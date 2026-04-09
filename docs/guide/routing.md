@@ -1,5 +1,5 @@
 ---
-description: "Configure how the esmap router activates and deactivates micro-frontends based on URL patterns."
+description: 'Configure how the esmap router activates and deactivates micro-frontends based on URL patterns.'
 ---
 
 # Routing

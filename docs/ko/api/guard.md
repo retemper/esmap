@@ -1,5 +1,5 @@
 ---
-description: "@esmap/guard API 레퍼런스 — CSS 스코핑과 전역 오염 감지."
+description: '@esmap/guard API 레퍼런스 — CSS 스코핑과 전역 오염 감지.'
 ---
 
 # @esmap/guard

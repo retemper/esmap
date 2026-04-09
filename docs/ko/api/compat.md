@@ -1,5 +1,5 @@
 ---
-description: "@esmap/compat API 레퍼런스 — Webpack Module Federation에서 import map으로의 마이그레이션 레이어."
+description: '@esmap/compat API 레퍼런스 — Webpack Module Federation에서 import map으로의 마이그레이션 레이어.'
 ---
 
 # @esmap/compat

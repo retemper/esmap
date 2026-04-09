@@ -1,5 +1,5 @@
 ---
-description: "Vue 어댑터를 사용하여 esmap과 Vue 애플리케이션을 통합하세요."
+description: 'Vue 어댑터를 사용하여 esmap과 Vue 애플리케이션을 통합하세요.'
 ---
 
 # Vue

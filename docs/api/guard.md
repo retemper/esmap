@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/guard — CSS scoping and global pollution detection."
+description: 'API reference for @esmap/guard — CSS scoping and global pollution detection.'
 ---
 
 # @esmap/guard

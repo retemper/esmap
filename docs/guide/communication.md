@@ -1,5 +1,5 @@
 ---
-description: "Type-safe inter-app communication in esmap using event bus, global state, and app props."
+description: 'Type-safe inter-app communication in esmap using event bus, global state, and app props.'
 ---
 
 # Communication

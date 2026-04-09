@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/compat — migration layer from Webpack Module Federation to import maps."
+description: 'API reference for @esmap/compat — migration layer from Webpack Module Federation to import maps.'
 ---
 
 # @esmap/compat

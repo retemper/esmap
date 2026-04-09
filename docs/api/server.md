@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/server — deploy API, rollback, and import map history."
+description: 'API reference for @esmap/server — deploy API, rollback, and import map history.'
 ---
 
 # @esmap/server

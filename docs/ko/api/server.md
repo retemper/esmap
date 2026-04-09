@@ -1,5 +1,5 @@
 ---
-description: "@esmap/server API 레퍼런스 — 배포 API, 롤백, import map 이력."
+description: '@esmap/server API 레퍼런스 — 배포 API, 롤백, import map 이력.'
 ---
 
 # @esmap/server

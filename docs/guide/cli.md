@@ -1,5 +1,5 @@
 ---
-description: "Use the esmap CLI to generate manifests, deploy micro-frontends, and manage rollbacks."
+description: 'Use the esmap CLI to generate manifests, deploy micro-frontends, and manage rollbacks.'
 ---
 
 # CLI

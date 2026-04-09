@@ -1,5 +1,5 @@
 ---
-description: "esmap Vite 플러그인으로 매니페스트 생성과 ESM externals를 구성하세요."
+description: 'esmap Vite 플러그인으로 매니페스트 생성과 ESM externals를 구성하세요.'
 ---
 
 # Vite 플러그인

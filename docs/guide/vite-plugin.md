@@ -1,5 +1,5 @@
 ---
-description: "Use the esmap Vite plugin for manifest generation and ESM externals configuration."
+description: 'Use the esmap Vite plugin for manifest generation and ESM externals configuration.'
 ---
 
 # Vite Plugin

@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/runtime — import map loader, app registry, router, error boundary, and prefetch."
+description: 'API reference for @esmap/runtime — import map loader, app registry, router, error boundary, and prefetch.'
 ---
 
 # @esmap/runtime

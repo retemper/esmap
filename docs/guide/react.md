@@ -1,5 +1,5 @@
 ---
-description: "Integrate esmap with React using createReactMfeApp, hooks, and the EsmapParcel component."
+description: 'Integrate esmap with React using createReactMfeApp, hooks, and the EsmapParcel component.'
 ---
 
 # React

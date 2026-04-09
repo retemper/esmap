@@ -1,5 +1,5 @@
 ---
-description: "@esmap/angular API 레퍼런스 — esmap 마이크로 프론트엔드용 Angular 어댑터."
+description: '@esmap/angular API 레퍼런스 — esmap 마이크로 프론트엔드용 Angular 어댑터.'
 ---
 
 # @esmap/angular

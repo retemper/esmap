@@ -1,5 +1,5 @@
 ---
-description: "@esmap/sandbox API 레퍼런스 — JS 격리를 위한 프록시 샌드박스와 스냅샷 샌드박스."
+description: '@esmap/sandbox API 레퍼런스 — JS 격리를 위한 프록시 샌드박스와 스냅샷 샌드박스.'
 ---
 
 # @esmap/sandbox

@@ -1,5 +1,5 @@
 ---
-description: "createReactMfeApp, 훅, EsmapParcel 컴포넌트로 esmap과 React를 통합하세요."
+description: 'createReactMfeApp, 훅, EsmapParcel 컴포넌트로 esmap과 React를 통합하세요.'
 ---
 
 # React

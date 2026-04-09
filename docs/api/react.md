@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/react — createReactMfeApp, React hooks, and EsmapParcel component."
+description: 'API reference for @esmap/react — createReactMfeApp, React hooks, and EsmapParcel component.'
 ---
 
 # @esmap/react

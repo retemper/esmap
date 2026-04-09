@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/ssr — server-side rendering support for esmap micro-frontends."
+description: 'API reference for @esmap/ssr — server-side rendering support for esmap micro-frontends.'
 ---
 
 # @esmap/ssr

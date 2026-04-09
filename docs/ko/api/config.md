@@ -1,5 +1,5 @@
 ---
-description: "@esmap/config API 레퍼런스 — 설정 스키마, 로딩, 유효성 검사."
+description: '@esmap/config API 레퍼런스 — 설정 스키마, 로딩, 유효성 검사.'
 ---
 
 # @esmap/config

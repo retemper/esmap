@@ -1,5 +1,5 @@
 ---
-description: "API reference for @esmap/vue — Vue adapter for esmap micro-frontends."
+description: 'API reference for @esmap/vue — Vue adapter for esmap micro-frontends.'
 ---
 
 # @esmap/vue

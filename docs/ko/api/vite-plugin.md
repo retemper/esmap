@@ -1,5 +1,5 @@
 ---
-description: "@esmap/vite-plugin API 레퍼런스 — Vite용 매니페스트 생성과 ESM externals."
+description: '@esmap/vite-plugin API 레퍼런스 — Vite용 매니페스트 생성과 ESM externals.'
 ---
 
 # @esmap/vite-plugin

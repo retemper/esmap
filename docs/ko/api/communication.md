@@ -1,5 +1,5 @@
 ---
-description: "@esmap/communication API 레퍼런스 — 타입 안전한 이벤트 버스, 글로벌 상태, 앱 props."
+description: '@esmap/communication API 레퍼런스 — 타입 안전한 이벤트 버스, 글로벌 상태, 앱 props.'
 ---
 
 # @esmap/communication

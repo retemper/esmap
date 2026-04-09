@@ -1,5 +1,5 @@
 ---
-description: "Isolate JavaScript globals between micro-frontends using proxy and snapshot sandboxes."
+description: 'Isolate JavaScript globals between micro-frontends using proxy and snapshot sandboxes.'
 ---
 
 # JS Sandbox
