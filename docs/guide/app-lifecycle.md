@@ -1,8 +1,5 @@
 # App Lifecycle
 
-::: warning WIP
-This page is under construction.
-:::
 
 Every micro-frontend in esmap follows a standard lifecycle:
 

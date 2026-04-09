@@ -1,8 +1,5 @@
 # React
 
-::: warning WIP
-This page is under construction.
-:::
 
 `@esmap/react` provides a React adapter for esmap micro-frontends.
 

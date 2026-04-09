@@ -1,8 +1,5 @@
 # 통신
 
-::: warning 작성 중
-이 페이지는 작성 중입니다.
-:::
 
 `@esmap/communication`은 타입 안전한 MFE 간 통신을 제공합니다.
 

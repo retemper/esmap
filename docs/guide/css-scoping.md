@@ -1,8 +1,5 @@
 # CSS Scoping
 
-::: warning WIP
-This page is under construction.
-:::
 
 `@esmap/guard` prevents CSS leakage between micro-frontends.
 

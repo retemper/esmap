@@ -1,8 +1,5 @@
 # Routing
 
-::: warning WIP
-This page is under construction.
-:::
 
 esmap's router activates and deactivates MFEs based on the browser URL.
 

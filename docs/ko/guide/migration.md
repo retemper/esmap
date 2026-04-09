@@ -1,8 +1,5 @@
 # Module Federation에서 마이그레이션
 
-::: warning 작성 중
-이 페이지는 작성 중입니다.
-:::
 
 `@esmap/compat`는 Webpack Module Federation에서 esmap import maps로의 마이그레이션 레이어를 제공합니다.
 

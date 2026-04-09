@@ -1,8 +1,5 @@
 # CLI
 
-::: warning WIP
-This page is under construction.
-:::
 
 `@esmap/cli` provides command-line tools for generating, deploying, and managing micro-frontends.
 

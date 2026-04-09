@@ -1,8 +1,5 @@
 # Import Maps
 
-::: warning WIP
-This page is under construction.
-:::
 
 ## What are Import Maps?
 
