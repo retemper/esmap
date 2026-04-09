@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/runtime — import map loader, app registry, router, error boundary, and prefetch.'
+---
+
 # @esmap/runtime
 
 Core runtime for esmap micro-frontends. Handles import map loading, application registry, client-side routing, error boundaries, and resource prefetching. (8.2 kB gzip)

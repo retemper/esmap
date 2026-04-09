@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/config — configuration schema, loading, and validation.'
+---
+
 # @esmap/config
 
 Configuration utilities for esmap. Defines the configuration schema, handles loading from multiple sources, and validates settings at startup to catch misconfigurations early.

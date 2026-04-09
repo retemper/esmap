@@ -1,3 +1,7 @@
+---
+description: 'Isolate JavaScript globals between micro-frontends using proxy and snapshot sandboxes.'
+---
+
 # JS Sandbox
 
 `@esmap/sandbox` provides JavaScript isolation between micro-frontends.

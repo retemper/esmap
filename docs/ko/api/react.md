@@ -1,3 +1,7 @@
+---
+description: '@esmap/react API 레퍼런스 — createReactMfeApp, React 훅, EsmapParcel 컴포넌트.'
+---
+
 # @esmap/react
 
 esmap용 React 어댑터입니다. React 마이크로 프론트엔드를 등록하는 `createReactMfeApp()`, 라이프사이클 훅, 자식 애플리케이션을 임베드하는 `EsmapParcel` 컴포넌트를 제공합니다. (1.5 kB gzip)

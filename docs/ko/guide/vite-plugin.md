@@ -1,3 +1,7 @@
+---
+description: 'esmap Vite 플러그인으로 매니페스트 생성과 ESM externals를 구성하세요.'
+---
+
 # Vite 플러그인
 
 `@esmap/vite-plugin`은 마이크로 프론트엔드 빌드를 위한 Vite 통합을 제공합니다. 세 가지 플러그인을 제공합니다:

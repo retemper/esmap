@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/devtools — import map override for local development.'
+---
+
 # @esmap/devtools
 
 Developer tools for esmap. Enables import map overrides so individual micro-frontends can be pointed to a local development server without redeploying the host application. (1.0 kB gzip)

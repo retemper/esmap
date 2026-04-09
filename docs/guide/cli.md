@@ -1,3 +1,7 @@
+---
+description: 'Use the esmap CLI to generate manifests, deploy micro-frontends, and manage rollbacks.'
+---
+
 # CLI
 
 `@esmap/cli` provides command-line tools for generating, deploying, and managing micro-frontends.

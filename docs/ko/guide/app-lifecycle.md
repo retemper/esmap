@@ -1,3 +1,7 @@
+---
+description: 'esmap 앱 라이프사이클 — bootstrap, mount, unmount, update 훅을 알아보세요.'
+---
+
 # 앱 라이프사이클
 
 esmap의 모든 마이크로 프론트엔드는 표준 라이프사이클을 따릅니다:

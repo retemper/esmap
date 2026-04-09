@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/compat — migration layer from Webpack Module Federation to import maps.'
+---
+
 # @esmap/compat
 
 Migration compatibility layer for esmap. Provides adapters and utilities to incrementally migrate existing Webpack Module Federation setups to native import maps without a full rewrite.

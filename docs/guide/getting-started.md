@@ -1,3 +1,7 @@
+---
+description: 'Install esmap packages, write your first micro-frontend, configure the build, and deploy in minutes.'
+---
+
 # Getting Started
 
 ## Installation

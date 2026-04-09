@@ -1,3 +1,7 @@
+---
+description: 'Learn what esmap is — a micro-frontend framework built on browser-native W3C Import Maps for module resolution.'
+---
+
 # What is esmap?
 
 **esmap** is a micro-frontend framework built on [W3C Import Maps](https://wicg.github.io/import-maps/) — a browser-native standard for module resolution.

@@ -1,3 +1,7 @@
+---
+description: '프록시 샌드박스와 스냅샷 샌드박스로 마이크로 프론트엔드 간 JavaScript 전역 변수를 격리하세요.'
+---
+
 # JS 샌드박스
 
 `@esmap/sandbox`는 마이크로 프론트엔드 간 JavaScript 격리를 제공합니다.

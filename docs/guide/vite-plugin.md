@@ -1,3 +1,7 @@
+---
+description: 'Use the esmap Vite plugin for manifest generation and ESM externals configuration.'
+---
+
 # Vite Plugin
 
 `@esmap/vite-plugin` provides Vite integration for building micro-frontends. It exports three plugins:

@@ -1,3 +1,7 @@
+---
+description: 'Prevent CSS conflicts between micro-frontends with scoped styles and global pollution detection.'
+---
+
 # CSS Scoping
 
 `@esmap/guard` prevents CSS leakage between micro-frontends.

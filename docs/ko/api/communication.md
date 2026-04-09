@@ -1,3 +1,7 @@
+---
+description: '@esmap/communication API 레퍼런스 — 타입 안전한 이벤트 버스, 글로벌 상태, 앱 props.'
+---
+
 # @esmap/communication
 
 타입 안전한 애플리케이션 간 통신 레이어입니다. 디커플링된 메시징을 위한 이벤트 버스, 글로벌 공유 상태 관리, 애플리케이션 props 전달을 포함합니다. (1.1 kB gzip)

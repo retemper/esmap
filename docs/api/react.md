@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/react — createReactMfeApp, React hooks, and EsmapParcel component.'
+---
+
 # @esmap/react
 
 React adapter for esmap. Provides `createReactMfeApp()` to register React micro-frontends, lifecycle hooks, and the `EsmapParcel` component for embedding child applications. (1.5 kB gzip)

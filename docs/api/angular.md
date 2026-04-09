@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/angular — Angular adapter for esmap micro-frontends.'
+---
+
 # @esmap/angular
 
 Angular adapter for esmap. Provides utilities to register and mount Angular micro-frontend applications within the esmap runtime. Requires Angular 17+ standalone component API.

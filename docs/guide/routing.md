@@ -1,3 +1,7 @@
+---
+description: 'Configure how the esmap router activates and deactivates micro-frontends based on URL patterns.'
+---
+
 # Routing
 
 esmap's router activates and deactivates MFEs based on the browser URL.

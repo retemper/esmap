@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/vite-plugin — manifest generation and ESM externals for Vite.'
+---
+
 # @esmap/vite-plugin
 
 Vite plugin for esmap. Handles manifest generation for import map deployments, builds shared dependencies as individual ESM modules, and scopes CSS at build time.

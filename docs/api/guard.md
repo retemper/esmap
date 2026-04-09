@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/guard — CSS scoping and global pollution detection.'
+---
+
 # @esmap/guard
 
 Runtime guardrails for micro-frontends. Provides CSS scoping to prevent style leakage between applications and global pollution detection to catch unintended side effects. (2.7 kB gzip)

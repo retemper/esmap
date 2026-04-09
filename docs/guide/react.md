@@ -1,3 +1,7 @@
+---
+description: 'Integrate esmap with React using createReactMfeApp, hooks, and the EsmapParcel component.'
+---
+
 # React
 
 `@esmap/react` provides a React adapter for esmap micro-frontends.

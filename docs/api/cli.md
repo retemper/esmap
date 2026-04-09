@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/cli — generate manifests, deploy, and rollback commands.'
+---
+
 # @esmap/cli
 
 Command-line interface for esmap. Provides commands to generate import maps, deploy micro-frontend builds, rollback to previous versions, and analyze dependency conflicts.

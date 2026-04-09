@@ -1,3 +1,7 @@
+---
+description: '호환성 레이어를 사용하여 Webpack Module Federation에서 esmap으로 마이그레이션하세요.'
+---
+
 # Module Federation에서 마이그레이션
 
 `@esmap/compat`는 Webpack Module Federation에서 esmap import maps로의 마이그레이션 레이어를 제공합니다.

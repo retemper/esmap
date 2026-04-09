@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/vue — Vue adapter for esmap micro-frontends.'
+---
+
 # @esmap/vue
 
 Vue adapter for esmap. Provides utilities to register and mount Vue micro-frontend applications within the esmap runtime.

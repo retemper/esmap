@@ -1,3 +1,7 @@
+---
+description: 'createReactMfeApp, 훅, EsmapParcel 컴포넌트로 esmap과 React를 통합하세요.'
+---
+
 # React
 
 `@esmap/react`는 esmap 마이크로 프론트엔드를 위한 React 어댑터를 제공합니다.

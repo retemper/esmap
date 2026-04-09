@@ -1,3 +1,7 @@
+---
+description: 'import map 관리, 버전 배포, 롤백을 위한 esmap 배포 서버를 실행하세요.'
+---
+
 # 서버
 
 `@esmap/server`는 런타임에 import map을 관리하는 배포 서버입니다.

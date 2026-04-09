@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/ssr — server-side rendering support for esmap micro-frontends.'
+---
+
 # @esmap/ssr
 
 Server-side rendering support for esmap. Enables micro-frontend applications to be rendered on the server for improved initial load performance and SEO.

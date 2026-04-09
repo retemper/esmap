@@ -1,3 +1,7 @@
+---
+description: 'API reference for @esmap/server — deploy API, rollback, and import map history.'
+---
+
 # @esmap/server
 
 Import map server for esmap. Exposes a deploy API for publishing new import map entries, rollback support for reverting to previous versions, and a history endpoint for auditing changes.
