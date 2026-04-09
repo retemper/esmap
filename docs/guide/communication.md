@@ -4,10 +4,6 @@ description: 'Type-safe inter-app communication in esmap using event bus, global
 
 # Communication
 
-::: warning WIP
-This page is under construction.
-:::
-
 `@esmap/communication` provides type-safe inter-MFE communication.
 
 ## Event Bus

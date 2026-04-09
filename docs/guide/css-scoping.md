@@ -4,10 +4,6 @@ description: 'Prevent CSS conflicts between micro-frontends with scoped styles a
 
 # CSS Scoping
 
-::: warning WIP
-This page is under construction.
-:::
-
 `@esmap/guard` prevents CSS leakage between micro-frontends.
 
 ## Scoped Styles

@@ -4,10 +4,6 @@ description: 'Learn the esmap app lifecycle — bootstrap, mount, unmount, and u
 
 # App Lifecycle
 
-::: warning WIP
-This page is under construction.
-:::
-
 Every micro-frontend in esmap follows a standard lifecycle:
 
 ```

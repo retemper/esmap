@@ -4,10 +4,6 @@ description: 'esmap의 기반인 W3C Import Maps 브라우저 네이티브 모�
 
 # Import Maps
 
-::: warning 작성 중
-이 페이지는 작성 중입니다.
-:::
-
 ## Import Maps란?
 
 [Import Maps](https://wicg.github.io/import-maps/)는 JavaScript 모듈 지정자(specifier)의 해석 방식을 제어할 수 있는 W3C 브라우저 표준입니다.

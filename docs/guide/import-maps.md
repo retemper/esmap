@@ -4,10 +4,6 @@ description: 'Understand W3C Import Maps — the browser-native standard esmap b
 
 # Import Maps
 
-::: warning WIP
-This page is under construction.
-:::
-
 ## What are Import Maps?
 
 [Import Maps](https://wicg.github.io/import-maps/) are a W3C browser standard that lets you control how JavaScript module specifiers are resolved.

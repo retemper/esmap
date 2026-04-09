@@ -4,10 +4,6 @@ description: 'Run the esmap deploy server for import map management, versioned d
 
 # Server
 
-::: warning WIP
-This page is under construction.
-:::
-
 `@esmap/server` is a deploy server that manages import maps at runtime.
 
 ## Overview

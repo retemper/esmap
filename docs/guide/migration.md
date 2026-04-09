@@ -4,10 +4,6 @@ description: 'Migrate from Webpack Module Federation to esmap with the compatibi
 
 # Migration from Module Federation
 
-::: warning WIP
-This page is under construction.
-:::
-
 `@esmap/compat` provides a migration layer from Webpack Module Federation to esmap import maps.
 
 ## Overview

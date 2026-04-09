@@ -4,10 +4,6 @@ description: 'Integrate esmap with React using createReactMfeApp, hooks, and the
 
 # React
 
-::: warning WIP
-This page is under construction.
-:::
-
 `@esmap/react` provides a React adapter for esmap micro-frontends.
 
 ## Creating a React MFE

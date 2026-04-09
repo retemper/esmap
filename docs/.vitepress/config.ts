@@ -12,6 +12,7 @@ const guideSidebar: DefaultTheme.SidebarItem[] = [
   {
     text: 'Core Concepts',
     items: [
+      { text: 'Unified Kernel', link: '/guide/core' },
       { text: 'Import Maps', link: '/guide/import-maps' },
       { text: 'App Lifecycle', link: '/guide/app-lifecycle' },
       { text: 'Routing', link: '/guide/routing' },
@@ -51,6 +52,7 @@ const apiSidebar: DefaultTheme.SidebarItem[] = [
   {
     text: 'Browser',
     items: [
+      { text: '@esmap/core', link: '/api/core' },
       { text: '@esmap/runtime', link: '/api/runtime' },
       { text: '@esmap/react', link: '/api/react' },
       { text: '@esmap/vue', link: '/api/vue' },
@@ -86,6 +88,7 @@ const guideSidebarKo: DefaultTheme.SidebarItem[] = [
   {
     text: '핵심 개념',
     items: [
+      { text: '통합 커널', link: '/ko/guide/core' },
       { text: 'Import Maps', link: '/ko/guide/import-maps' },
       { text: '앱 라이프사이클', link: '/ko/guide/app-lifecycle' },
       { text: '라우팅', link: '/ko/guide/routing' },
@@ -125,6 +128,7 @@ const apiSidebarKo: DefaultTheme.SidebarItem[] = [
   {
     text: '브라우저',
     items: [
+      { text: '@esmap/core', link: '/ko/api/core' },
       { text: '@esmap/runtime', link: '/ko/api/runtime' },
       { text: '@esmap/react', link: '/ko/api/react' },
       { text: '@esmap/vue', link: '/ko/api/vue' },
