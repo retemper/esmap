@@ -1,6 +1,5 @@
 # React
 
-
 `@esmap/react`는 esmap 마이크로 프론트엔드를 위한 React 어댑터를 제공합니다.
 
 ## React MFE 만들기

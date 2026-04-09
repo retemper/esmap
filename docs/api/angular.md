@@ -13,7 +13,7 @@ pnpm add @esmap/angular
 ### `createAngularMfeApp`
 
 ```ts
-function createAngularMfeApp(options: AngularMfeAppOptions): MfeApp
+function createAngularMfeApp(options: AngularMfeAppOptions): MfeApp;
 ```
 
 Converts an Angular standalone component into an esmap MfeApp lifecycle. Props are delivered via the `ESMAP_PROPS` injection token as a read-only Signal.
@@ -23,7 +23,7 @@ Converts an Angular standalone component into an esmap MfeApp lifecycle. Props a
 ### `ESMAP_PROPS`
 
 ```ts
-const ESMAP_PROPS: InjectionToken<Signal<Readonly<Record<string, unknown>>>>
+const ESMAP_PROPS: InjectionToken<Signal<Readonly<Record<string, unknown>>>>;
 ```
 
 Injection token for esmap props passed from the shell application. Angular components inject this to receive cross-framework props as a Signal.
@@ -32,7 +32,7 @@ Injection token for esmap props passed from the shell application. Angular compo
 
 ### `AngularMfeAppOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `rootComponent` | `Type<unknown>` | Root Angular standalone component to bootstrap |
-| `providers` | `Provider[]` | Additional providers to register at the application level |
+| Property        | Type            | Description                                               |
+| --------------- | --------------- | --------------------------------------------------------- |
+| `rootComponent` | `Type<unknown>` | Root Angular standalone component to bootstrap            |
+| `providers`     | `Provider[]`    | Additional providers to register at the application level |

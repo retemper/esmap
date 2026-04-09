@@ -1,6 +1,5 @@
 # Import Maps
 
-
 ## Import Maps란?
 
 [Import Maps](https://wicg.github.io/import-maps/)는 JavaScript 모듈 지정자(specifier)의 해석 방식을 제어할 수 있는 W3C 브라우저 표준입니다.

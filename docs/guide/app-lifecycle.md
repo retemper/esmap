@@ -1,6 +1,5 @@
 # App Lifecycle
 
-
 Every micro-frontend in esmap follows a standard lifecycle:
 
 ```

@@ -13,7 +13,7 @@ pnpm add -D @esmap/cli
 ### `generateImportMap`
 
 ```ts
-function generateImportMap(input: GenerateInput): GenerateResult
+function generateImportMap(input: GenerateInput): GenerateResult;
 ```
 
 매니페스트 정보를 기반으로 import map을 생성합니다.
@@ -23,7 +23,7 @@ function generateImportMap(input: GenerateInput): GenerateResult
 ```ts
 function analyzeDependencyConflicts(
   apps: readonly AppDependencyDeclaration[],
-): DependencyAnalysisResult
+): DependencyAnalysisResult;
 ```
 
 여러 앱의 의존성 선언을 분석하여 버전 충돌을 감지합니다.
@@ -33,7 +33,7 @@ function analyzeDependencyConflicts(
 ```ts
 function extractDeclarationsFromManifests(
   manifests: Record<string, unknown>[],
-): AppDependencyDeclaration[]
+): AppDependencyDeclaration[];
 ```
 
 매니페스트 파일들에서 의존성 선언을 추출합니다.
@@ -42,28 +42,28 @@ function extractDeclarationsFromManifests(
 
 ### `GenerateInput`
 
-| 속성 | 타입 | 설명 |
-| --- | --- | --- |
+| 속성        | 타입            | 설명                |
+| ----------- | --------------- | ------------------- |
 | `manifests` | `MfeManifest[]` | MFE 매니페스트 목록 |
-| `cdnBase` | `string` | CDN 기본 URL |
+| `cdnBase`   | `string`        | CDN 기본 URL        |
 
 ### `GenerateResult`
 
-| 속성 | 타입 | 설명 |
-| --- | --- | --- |
+| 속성        | 타입        | 설명              |
+| ----------- | ----------- | ----------------- |
 | `importMap` | `ImportMap` | 생성된 import map |
 
 ### `AppDependencyDeclaration`
 
-| 속성 | 타입 | 설명 |
-| --- | --- | --- |
-| `appName` | `string` | 앱 이름 |
+| 속성           | 타입                     | 설명               |
+| -------------- | ------------------------ | ------------------ |
+| `appName`      | `string`                 | 앱 이름            |
 | `dependencies` | `Record<string, string>` | 의존성과 버전 범위 |
 
 ### `DependencyAnalysisResult`
 
-| 속성 | 타입 | 설명 |
-| --- | --- | --- |
+| 속성        | 타입                   | 설명             |
+| ----------- | ---------------------- | ---------------- |
 | `conflicts` | `DependencyConflict[]` | 감지된 충돌 목록 |
 
 ## CLI 명령어

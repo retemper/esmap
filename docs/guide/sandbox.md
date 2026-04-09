@@ -22,18 +22,18 @@ sandbox.deactivate();
 
 ### Options
 
-| Option | Type | Description |
-| --- | --- | --- |
-| `name` | `string` | Identifying name for the sandbox instance |
+| Option      | Type            | Description                                                                                                                  |
+| ----------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `name`      | `string`        | Identifying name for the sandbox instance                                                                                    |
 | `allowList` | `PropertyKey[]` | Properties to read directly from the real `window` (defaults: `document`, `location`, `navigator`, `console`, `fetch`, etc.) |
 
 ### Instance Methods
 
-| Method | Returns | Description |
-| --- | --- | --- |
-| `activate()` | `void` | Activates the sandbox |
-| `deactivate()` | `void` | Deactivates the sandbox |
-| `isActive()` | `boolean` | Returns whether the sandbox is active |
+| Method               | Returns         | Description                                      |
+| -------------------- | --------------- | ------------------------------------------------ |
+| `activate()`         | `void`          | Activates the sandbox                            |
+| `deactivate()`       | `void`          | Deactivates the sandbox                          |
+| `isActive()`         | `boolean`       | Returns whether the sandbox is active            |
 | `getModifiedProps()` | `PropertyKey[]` | Returns a list of property names modified so far |
 
 ### `proxy`
@@ -91,8 +91,8 @@ Namespaced `localStorage`/`sessionStorage` wrapper that prevents key collisions 
 import { createScopedStorage } from '@esmap/sandbox';
 
 const storage = createScopedStorage({ scope: 'checkout' });
-storage.setItem('cart', '[]');   // actual key: "checkout:cart"
-storage.getItem('cart');          // reads "checkout:cart"
-storage.keys();                   // all keys in "checkout:" scope
-storage.clear();                  // removes only "checkout:*" keys
+storage.setItem('cart', '[]'); // actual key: "checkout:cart"
+storage.getItem('cart'); // reads "checkout:cart"
+storage.keys(); // all keys in "checkout:" scope
+storage.clear(); // removes only "checkout:*" keys
 ```

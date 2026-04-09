@@ -37,13 +37,13 @@ Generates a manifest JSON file during build that describes the MFE's entry point
 
 ### Options
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `name` | `string` | *(required)* | MFE app name (e.g., `"@myorg/checkout"`) |
-| `version` | `string` | from `package.json` | MFE app version |
-| `shared` | `string[]` | `[]` | Shared dependency names. Also set as Vite externals |
-| `internal` | `string[]` | `[]` | Internal package dependencies |
-| `outputFileName` | `string` | `"esmap-manifest.json"` | Output file name |
+| Option           | Type       | Default                 | Description                                         |
+| ---------------- | ---------- | ----------------------- | --------------------------------------------------- |
+| `name`           | `string`   | _(required)_            | MFE app name (e.g., `"@myorg/checkout"`)            |
+| `version`        | `string`   | from `package.json`     | MFE app version                                     |
+| `shared`         | `string[]` | `[]`                    | Shared dependency names. Also set as Vite externals |
+| `internal`       | `string[]` | `[]`                    | Internal package dependencies                       |
+| `outputFileName` | `string`   | `"esmap-manifest.json"` | Output file name                                    |
 
 ## `esmapSharedDeps`
 
@@ -51,11 +51,11 @@ Builds shared dependencies as individual ESM modules with content-hashed file na
 
 ### Options
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `deps` | `Record<string, string>` | *(required)* | Dependency entries. Key = package name, value = import specifier |
-| `outDir` | `string` | `"dist"` | Build output directory |
-| `outputFileName` | `string` | `"shared-deps-manifest.json"` | Manifest output file name |
+| Option           | Type                     | Default                       | Description                                                      |
+| ---------------- | ------------------------ | ----------------------------- | ---------------------------------------------------------------- |
+| `deps`           | `Record<string, string>` | _(required)_                  | Dependency entries. Key = package name, value = import specifier |
+| `outDir`         | `string`                 | `"dist"`                      | Build output directory                                           |
+| `outputFileName` | `string`                 | `"shared-deps-manifest.json"` | Manifest output file name                                        |
 
 ## `esmapCssScope`
 
@@ -65,11 +65,11 @@ CSS Modules files (`.module.css`) are automatically skipped since they already h
 
 ### Options
 
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `appName` | `string` | *(required)* | App name used for CSS scoping |
-| `exclude` | `(string \| RegExp)[]` | `[]` | File patterns to exclude from scoping |
-| `namespaceKeyframes` | `boolean` | `true` | Whether to namespace `@keyframes` names |
+| Option               | Type                   | Default      | Description                             |
+| -------------------- | ---------------------- | ------------ | --------------------------------------- |
+| `appName`            | `string`               | _(required)_ | App name used for CSS scoping           |
+| `exclude`            | `(string \| RegExp)[]` | `[]`         | File patterns to exclude from scoping   |
+| `namespaceKeyframes` | `boolean`              | `true`       | Whether to namespace `@keyframes` names |
 
 ### Example
 
@@ -78,5 +78,5 @@ esmapCssScope({
   appName: 'checkout',
   exclude: [/node_modules/, 'global.css'],
   namespaceKeyframes: true,
-})
+});
 ```

@@ -1,6 +1,5 @@
 # 통신
 
-
 `@esmap/communication`은 타입 안전한 MFE 간 통신을 제공합니다.
 
 ## 이벤트 버스

@@ -1,6 +1,5 @@
 # CLI
 
-
 `@esmap/cli` provides command-line tools for generating, deploying, and managing micro-frontends.
 
 ## Installation

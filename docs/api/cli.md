@@ -35,7 +35,7 @@ Analyzes dependency conflicts across all MFE apps. Reports incompatible version 
 ### `generateImportMap`
 
 ```ts
-function generateImportMap(input: GenerateInput): GenerateResult
+function generateImportMap(input: GenerateInput): GenerateResult;
 ```
 
 Generates an import map JSON from config and manifests. Resolves CDN URLs for app entries and shared dependencies, and produces modulepreload hints.
@@ -45,7 +45,7 @@ Generates an import map JSON from config and manifests. Resolves CDN URLs for ap
 ```ts
 function analyzeDependencyConflicts(
   declarations: readonly AppDependencyDeclaration[],
-): DependencyAnalysisResult
+): DependencyAnalysisResult;
 ```
 
 Analyzes shared dependency version declarations across all MFE apps and identifies incompatible ranges. Produces both errors (incompatible majors) and warnings (potentially incompatible minors).
@@ -55,7 +55,7 @@ Analyzes shared dependency version declarations across all MFE apps and identifi
 ```ts
 function extractDeclarationsFromManifests(
   manifestPaths: readonly string[],
-): Promise<readonly AppDependencyDeclaration[]>
+): Promise<readonly AppDependencyDeclaration[]>;
 ```
 
 Reads MFE manifest files from disk and extracts dependency version declarations for analysis.
@@ -64,33 +64,33 @@ Reads MFE manifest files from disk and extracts dependency version declarations 
 
 ### `GenerateInput`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `config` | `EsmapConfig` | Framework configuration |
-| `manifests` | `Record<string, MfeManifest>` | Per-app manifests |
+| Property          | Type                                       | Description                 |
+| ----------------- | ------------------------------------------ | --------------------------- |
+| `config`          | `EsmapConfig`                              | Framework configuration     |
+| `manifests`       | `Record<string, MfeManifest>`              | Per-app manifests           |
 | `sharedManifests` | `Record<string, SharedDependencyManifest>` | Shared dependency manifests |
 
 ### `GenerateResult`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `importMap` | `ImportMap` | Generated import map object |
-| `json` | `string` | Pretty-printed JSON string |
-| `preloadHints` | `Record<string, string[]>` | Per-app modulepreload URLs |
+| Property       | Type                       | Description                 |
+| -------------- | -------------------------- | --------------------------- |
+| `importMap`    | `ImportMap`                | Generated import map object |
+| `json`         | `string`                   | Pretty-printed JSON string  |
+| `preloadHints` | `Record<string, string[]>` | Per-app modulepreload URLs  |
 
 ### `DependencyConflict`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `dependencyName` | `string` | Name of the conflicting dependency |
-| `apps` | `{ appName: string; versionRange: string }[]` | Apps involved in the conflict |
-| `severity` | `'error' \| 'warning'` | Conflict severity |
-| `message` | `string` | Human-readable description |
+| Property         | Type                                          | Description                        |
+| ---------------- | --------------------------------------------- | ---------------------------------- |
+| `dependencyName` | `string`                                      | Name of the conflicting dependency |
+| `apps`           | `{ appName: string; versionRange: string }[]` | Apps involved in the conflict      |
+| `severity`       | `'error' \| 'warning'`                        | Conflict severity                  |
+| `message`        | `string`                                      | Human-readable description         |
 
 ### `DependencyAnalysisResult`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `conflicts` | `DependencyConflict[]` | Incompatible conflicts (errors) |
-| `warnings` | `DependencyConflict[]` | Potentially incompatible conflicts |
-| `summary` | `string` | Human-readable summary |
+| Property    | Type                   | Description                        |
+| ----------- | ---------------------- | ---------------------------------- |
+| `conflicts` | `DependencyConflict[]` | Incompatible conflicts (errors)    |
+| `warnings`  | `DependencyConflict[]` | Potentially incompatible conflicts |
+| `summary`   | `string`               | Human-readable summary             |

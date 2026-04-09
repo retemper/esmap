@@ -13,7 +13,7 @@ pnpm add @esmap/vue
 ### `createVueMfeApp`
 
 ```ts
-function createVueMfeApp(options: VueMfeAppOptions): MfeApp
+function createVueMfeApp(options: VueMfeAppOptions): MfeApp;
 ```
 
 Vue 3 컴포넌트를 esmap MfeApp 라이프사이클로 변환합니다. createApp/unmount를 자동 관리하여 메모리 누수를 방지합니다.
@@ -22,7 +22,7 @@ Vue 3 컴포넌트를 esmap MfeApp 라이프사이클로 변환합니다. create
 
 ### `VueMfeAppOptions`
 
-| 속성 | 타입 | 설명 |
-| --- | --- | --- |
-| `rootComponent` | `Component` | 마운트할 Vue 컴포넌트 |
-| `wrapWith` | `Component` | 래퍼 컴포넌트 (예: 플러그인 프로바이더). default 슬롯을 렌더링해야 합니다 |
+| 속성            | 타입        | 설명                                                                      |
+| --------------- | ----------- | ------------------------------------------------------------------------- |
+| `rootComponent` | `Component` | 마운트할 Vue 컴포넌트                                                     |
+| `wrapWith`      | `Component` | 래퍼 컴포넌트 (예: 플러그인 프로바이더). default 슬롯을 렌더링해야 합니다 |

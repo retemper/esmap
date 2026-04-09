@@ -48,29 +48,29 @@ await esmap.start();
 
 ## EsmapOptions
 
-| 속성 | 타입 | 설명 |
-|---|---|---|
-| `config` | `EsmapConfig` | 앱 목록, 공유 의존성, CDN 베이스 등. **필수.** |
-| `importMap` | `ImportMap` | 인라인으로 로드하거나 URL에서 해석합니다. |
-| `router` | `RouterOptions` | `baseUrl`, `onNoMatch` 등 라우터 설정. |
-| `disablePerf` | `boolean` | 자동 성능 추적 비활성화. 기본값 `false`. |
-| `disableDevtools` | `boolean` | devtools 연동 비활성화. 기본값 `false`. |
-| `plugins` | `EsmapPlugin[]` | 설치 순서대로 실행되며, `destroy()` 시 역순으로 정리됩니다. |
+| 속성              | 타입            | 설명                                                        |
+| ----------------- | --------------- | ----------------------------------------------------------- |
+| `config`          | `EsmapConfig`   | 앱 목록, 공유 의존성, CDN 베이스 등. **필수.**              |
+| `importMap`       | `ImportMap`     | 인라인으로 로드하거나 URL에서 해석합니다.                   |
+| `router`          | `RouterOptions` | `baseUrl`, `onNoMatch` 등 라우터 설정.                      |
+| `disablePerf`     | `boolean`       | 자동 성능 추적 비활성화. 기본값 `false`.                    |
+| `disableDevtools` | `boolean`       | devtools 연동 비활성화. 기본값 `false`.                     |
+| `plugins`         | `EsmapPlugin[]` | 설치 순서대로 실행되며, `destroy()` 시 역순으로 정리됩니다. |
 
 ## EsmapInstance
 
 반환된 인스턴스는 모든 하위 시스템과 두 개의 라이프사이클 메서드를 노출합니다:
 
-| 속성 | 타입 | 설명 |
-|---|---|---|
-| `registry` | `AppRegistry` | 앱 등록, 로드, 마운트/언마운트. |
-| `router` | `Router` | URL 기반 앱 활성화. |
-| `hooks` | `LifecycleHooks` | load, bootstrap, mount, unmount, update에 대한 before/after 훅. |
-| `perf` | `PerfTracker` | 자동 라이프사이클 계측. |
-| `prefetch` | `PrefetchController` | 리소스 프리페칭 컨트롤러. |
-| `sharedModules` | `SharedModuleRegistry` | MFE 간 의존성 공유 및 버전 협상. |
-| `start()` | `Promise<void>` | eager 공유 모듈 로드를 대기하고, 프리페칭을 시작하고, 라우터를 시작하여 초기 라우트를 처리합니다. |
-| `destroy()` | `Promise<void>` | 라우터와 프리페처를 중지하고, 플러그인 정리를 역순으로 실행하고, 모든 앱을 언마운트하고, 성능 데이터를 초기화합니다. |
+| 속성            | 타입                   | 설명                                                                                                                 |
+| --------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `registry`      | `AppRegistry`          | 앱 등록, 로드, 마운트/언마운트.                                                                                      |
+| `router`        | `Router`               | URL 기반 앱 활성화.                                                                                                  |
+| `hooks`         | `LifecycleHooks`       | load, bootstrap, mount, unmount, update에 대한 before/after 훅.                                                      |
+| `perf`          | `PerfTracker`          | 자동 라이프사이클 계측.                                                                                              |
+| `prefetch`      | `PrefetchController`   | 리소스 프리페칭 컨트롤러.                                                                                            |
+| `sharedModules` | `SharedModuleRegistry` | MFE 간 의존성 공유 및 버전 협상.                                                                                     |
+| `start()`       | `Promise<void>`        | eager 공유 모듈 로드를 대기하고, 프리페칭을 시작하고, 라우터를 시작하여 초기 라우트를 처리합니다.                    |
+| `destroy()`     | `Promise<void>`        | 라우터와 프리페처를 중지하고, 플러그인 정리를 역순으로 실행하고, 모든 앱을 언마운트하고, 성능 데이터를 초기화합니다. |
 
 ## 플러그인 시스템
 
@@ -122,8 +122,8 @@ const esmap = createEsmap({
   config,
   plugins: [
     guardPlugin({
-      cssStrategy: 'attribute',    // 'attribute' | 'shadow'
-      observeDynamic: true,        // 동적 스타일 추가 감시
+      cssStrategy: 'attribute', // 'attribute' | 'shadow'
+      observeDynamic: true, // 동적 스타일 추가 감시
       detectGlobalPollution: true, // window 속성 오염 감지
       globalAllowList: ['__MY_GLOBAL__'],
       onGlobalViolation: (appName, property) => {
@@ -146,7 +146,7 @@ const esmap = createEsmap({
   plugins: [
     sandboxPlugin({
       allowList: ['__webpack_public_path__'],
-      exclude: ['shell-app'],  // 신뢰할 수 있는 앱은 샌드박싱 제외
+      exclude: ['shell-app'], // 신뢰할 수 있는 앱은 샌드박싱 제외
     }),
   ],
 });
@@ -195,8 +195,8 @@ const esmap = createEsmap({
   config,
   plugins: [
     keepAlivePlugin({
-      apps: ['dashboard', 'settings'],  // 필수
-      maxCached: 3,  // 초과 시 LRU 방식으로 제거; 기본값 Infinity
+      apps: ['dashboard', 'settings'], // 필수
+      maxCached: 3, // 초과 시 LRU 방식으로 제거; 기본값 Infinity
     }),
   ],
 });
@@ -213,7 +213,7 @@ const esmap = createEsmap({
   config,
   plugins: [
     domIsolationPlugin({
-      exclude: ['gnb'],  // 전체 document 접근이 필요한 앱
+      exclude: ['gnb'], // 전체 document 접근이 필요한 앱
       globalSelectors: ['#global-modal', '[data-esmap-global]'],
     }),
   ],
@@ -228,8 +228,8 @@ const esmap = createEsmap({
 import { createEsmap, intelligentPrefetchPlugin } from '@esmap/core';
 
 const prefetch = intelligentPrefetchPlugin({
-  prefetchDelay: 1000,  // 네비게이션 후 프리페칭까지 대기 시간(ms)
-  excludeContainers: ['#header'],  // 현재 앱 판단 시 제외할 컨테이너
+  prefetchDelay: 1000, // 네비게이션 후 프리페칭까지 대기 시간(ms)
+  excludeContainers: ['#header'], // 현재 앱 판단 시 제외할 컨테이너
 });
 
 const esmap = createEsmap({

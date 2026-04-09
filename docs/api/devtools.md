@@ -13,7 +13,7 @@ pnpm add @esmap/devtools
 ### `getOverrides`
 
 ```ts
-function getOverrides(): readonly OverrideEntry[]
+function getOverrides(): readonly OverrideEntry[];
 ```
 
 Reads the current override list from `localStorage`. Returns an empty array on parse failure.
@@ -21,7 +21,7 @@ Reads the current override list from `localStorage`. Returns an empty array on p
 ### `setOverride`
 
 ```ts
-function setOverride(specifier: string, url: string): void
+function setOverride(specifier: string, url: string): void;
 ```
 
 Adds or updates an override. Overwrites the URL if the same specifier already exists.
@@ -29,7 +29,7 @@ Adds or updates an override. Overwrites the URL if the same specifier already ex
 ### `removeOverride`
 
 ```ts
-function removeOverride(specifier: string): void
+function removeOverride(specifier: string): void;
 ```
 
 Removes the override for a specific module specifier.
@@ -37,7 +37,7 @@ Removes the override for a specific module specifier.
 ### `clearOverrides`
 
 ```ts
-function clearOverrides(): void
+function clearOverrides(): void;
 ```
 
 Removes all active overrides from `localStorage`.
@@ -45,7 +45,7 @@ Removes all active overrides from `localStorage`.
 ### `applyOverrides`
 
 ```ts
-function applyOverrides(importMap: ImportMap): ImportMap
+function applyOverrides(importMap: ImportMap): ImportMap;
 ```
 
 Merges active overrides into an import map, returning a new map with overridden URLs.
@@ -53,7 +53,7 @@ Merges active overrides into an import map, returning a new map with overridden 
 ### `hasActiveOverrides`
 
 ```ts
-function hasActiveOverrides(): boolean
+function hasActiveOverrides(): boolean;
 ```
 
 Returns whether any overrides are currently active.
@@ -61,7 +61,7 @@ Returns whether any overrides are currently active.
 ### `installDevtoolsApi`
 
 ```ts
-function installDevtoolsApi(): void
+function installDevtoolsApi(): void;
 ```
 
 Installs the devtools API singleton on `window.__ESMAP__` for browser console access.
@@ -69,7 +69,7 @@ Installs the devtools API singleton on `window.__ESMAP__` for browser console ac
 ### `createDevtoolsOverlay`
 
 ```ts
-function createDevtoolsOverlay(options?: OverlayOptions): DevtoolsOverlay
+function createDevtoolsOverlay(options?: OverlayOptions): DevtoolsOverlay;
 ```
 
 Creates a visual debug overlay that displays MFE app status, performance metrics, and active overrides. Toggled via keyboard shortcut.
@@ -77,7 +77,7 @@ Creates a visual debug overlay that displays MFE app status, performance metrics
 ### `createDevtoolsInspector`
 
 ```ts
-function createDevtoolsInspector(): DevtoolsInspector
+function createDevtoolsInspector(): DevtoolsInspector;
 ```
 
 Creates a runtime state inspector for examining event bus, shared module, and app registry state from the browser console.
@@ -86,39 +86,39 @@ Creates a runtime state inspector for examining event bus, shared module, and ap
 
 ### `OverrideEntry`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `specifier` | `string` | Original module specifier (e.g. `"@flex/checkout"`) |
-| `url` | `string` | Replacement URL (e.g. `"http://localhost:5173/checkout.js"`) |
+| Property    | Type     | Description                                                  |
+| ----------- | -------- | ------------------------------------------------------------ |
+| `specifier` | `string` | Original module specifier (e.g. `"@flex/checkout"`)          |
+| `url`       | `string` | Replacement URL (e.g. `"http://localhost:5173/checkout.js"`) |
 
 ### `EsmapDevtoolsApi`
 
-| Method | Signature | Description |
-| --- | --- | --- |
-| `overrides` | `() => void` | Prints active overrides to console |
-| `override` | `(specifier: string, url: string) => void` | Overrides a module URL |
-| `removeOverride` | `(specifier: string) => void` | Removes an override |
-| `clearOverrides` | `() => void` | Removes all overrides |
-| `isOverriding` | `() => boolean` | Whether any overrides are active |
-| `inspect` | `DevtoolsInspector` | Runtime state inspector |
+| Method           | Signature                                  | Description                        |
+| ---------------- | ------------------------------------------ | ---------------------------------- |
+| `overrides`      | `() => void`                               | Prints active overrides to console |
+| `override`       | `(specifier: string, url: string) => void` | Overrides a module URL             |
+| `removeOverride` | `(specifier: string) => void`              | Removes an override                |
+| `clearOverrides` | `() => void`                               | Removes all overrides              |
+| `isOverriding`   | `() => boolean`                            | Whether any overrides are active   |
+| `inspect`        | `DevtoolsInspector`                        | Runtime state inspector            |
 
 ### `DevtoolsOverlay`
 
-| Method | Signature | Description |
-| --- | --- | --- |
-| `show` | `() => void` | Shows the overlay |
-| `hide` | `() => void` | Hides the overlay |
-| `toggle` | `() => void` | Toggles visibility |
-| `update` | `(apps: OverlayAppInfo[]) => void` | Updates displayed app info |
-| `destroy` | `() => void` | Removes the overlay and event listeners |
-| `visible` | `boolean` | Whether currently visible |
+| Method    | Signature                          | Description                             |
+| --------- | ---------------------------------- | --------------------------------------- |
+| `show`    | `() => void`                       | Shows the overlay                       |
+| `hide`    | `() => void`                       | Hides the overlay                       |
+| `toggle`  | `() => void`                       | Toggles visibility                      |
+| `update`  | `(apps: OverlayAppInfo[]) => void` | Updates displayed app info              |
+| `destroy` | `() => void`                       | Removes the overlay and event listeners |
+| `visible` | `boolean`                          | Whether currently visible               |
 
 ### `OverlayOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `triggerKey` | `string` | Keyboard shortcut to toggle (default: `"Alt+Shift+D"`) |
-| `position` | `'top-left' \| 'top-right' \| 'bottom-left' \| 'bottom-right'` | Initial position (default: `'bottom-right'`) |
+| Property     | Type                                                           | Description                                            |
+| ------------ | -------------------------------------------------------------- | ------------------------------------------------------ |
+| `triggerKey` | `string`                                                       | Keyboard shortcut to toggle (default: `"Alt+Shift+D"`) |
+| `position`   | `'top-left' \| 'top-right' \| 'bottom-left' \| 'bottom-right'` | Initial position (default: `'bottom-right'`)           |
 
 ### `DevtoolsInspector`
 

@@ -22,18 +22,18 @@ sandbox.deactivate();
 
 ### 옵션
 
-| 옵션 | 타입 | 설명 |
-| --- | --- | --- |
-| `name` | `string` | 샌드박스 인스턴스 식별 이름 |
+| 옵션        | 타입            | 설명                                                                                                       |
+| ----------- | --------------- | ---------------------------------------------------------------------------------------------------------- |
+| `name`      | `string`        | 샌드박스 인스턴스 식별 이름                                                                                |
 | `allowList` | `PropertyKey[]` | 실제 `window`에서 직접 읽을 속성 목록 (기본값: `document`, `location`, `navigator`, `console`, `fetch` 등) |
 
 ### 인스턴스 메서드
 
-| 메서드 | 반환값 | 설명 |
-| --- | --- | --- |
-| `activate()` | `void` | 샌드박스를 활성화합니다 |
-| `deactivate()` | `void` | 샌드박스를 비활성화합니다 |
-| `isActive()` | `boolean` | 샌드박스의 활성 상태를 반환합니다 |
+| 메서드               | 반환값          | 설명                                        |
+| -------------------- | --------------- | ------------------------------------------- |
+| `activate()`         | `void`          | 샌드박스를 활성화합니다                     |
+| `deactivate()`       | `void`          | 샌드박스를 비활성화합니다                   |
+| `isActive()`         | `boolean`       | 샌드박스의 활성 상태를 반환합니다           |
 | `getModifiedProps()` | `PropertyKey[]` | 지금까지 수정된 속성 이름 목록을 반환합니다 |
 
 ### `proxy`
@@ -91,8 +91,8 @@ MFE 간 키 충돌을 방지하는 네임스페이스 기반 `localStorage`/`ses
 import { createScopedStorage } from '@esmap/sandbox';
 
 const storage = createScopedStorage({ scope: 'checkout' });
-storage.setItem('cart', '[]');   // 실제 키: "checkout:cart"
-storage.getItem('cart');          // "checkout:cart"를 읽음
-storage.keys();                   // "checkout:" 스코프의 모든 키
-storage.clear();                  // "checkout:*" 키만 삭제
+storage.setItem('cart', '[]'); // 실제 키: "checkout:cart"
+storage.getItem('cart'); // "checkout:cart"를 읽음
+storage.keys(); // "checkout:" 스코프의 모든 키
+storage.clear(); // "checkout:*" 키만 삭제
 ```

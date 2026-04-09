@@ -1,6 +1,5 @@
 # CSS Scoping
 
-
 `@esmap/guard` prevents CSS leakage between micro-frontends.
 
 ## Scoped Styles

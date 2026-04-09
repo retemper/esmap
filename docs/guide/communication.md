@@ -1,6 +1,5 @@
 # Communication
 
-
 `@esmap/communication` provides type-safe inter-MFE communication.
 
 ## Event Bus

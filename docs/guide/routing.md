@@ -1,6 +1,5 @@
 # Routing
 
-
 esmap's router activates and deactivates MFEs based on the browser URL.
 
 ## Basic usage

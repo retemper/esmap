@@ -48,29 +48,29 @@ Calling `createEsmap(options)` performs the following in order:
 
 ## EsmapOptions
 
-| Property | Type | Description |
-|---|---|---|
-| `config` | `EsmapConfig` | App list, shared dependencies, CDN base, etc. **Required.** |
-| `importMap` | `ImportMap` | Loaded inline or resolved from a URL. |
-| `router` | `RouterOptions` | `baseUrl`, `onNoMatch`, and other router settings. |
-| `disablePerf` | `boolean` | Disable automatic performance tracking. Default `false`. |
-| `disableDevtools` | `boolean` | Disable devtools integration. Default `false`. |
-| `plugins` | `EsmapPlugin[]` | Plugins executed in install order, cleaned up in reverse during `destroy()`. |
+| Property          | Type            | Description                                                                  |
+| ----------------- | --------------- | ---------------------------------------------------------------------------- |
+| `config`          | `EsmapConfig`   | App list, shared dependencies, CDN base, etc. **Required.**                  |
+| `importMap`       | `ImportMap`     | Loaded inline or resolved from a URL.                                        |
+| `router`          | `RouterOptions` | `baseUrl`, `onNoMatch`, and other router settings.                           |
+| `disablePerf`     | `boolean`       | Disable automatic performance tracking. Default `false`.                     |
+| `disableDevtools` | `boolean`       | Disable devtools integration. Default `false`.                               |
+| `plugins`         | `EsmapPlugin[]` | Plugins executed in install order, cleaned up in reverse during `destroy()`. |
 
 ## EsmapInstance
 
 The returned instance exposes every subsystem plus two lifecycle methods:
 
-| Property | Type | Description |
-|---|---|---|
-| `registry` | `AppRegistry` | Registers, loads, mounts, and unmounts apps. |
-| `router` | `Router` | URL-based app activation. |
-| `hooks` | `LifecycleHooks` | Before/after hooks for load, bootstrap, mount, unmount, update. |
-| `perf` | `PerfTracker` | Automatic lifecycle instrumentation. |
-| `prefetch` | `PrefetchController` | Resource prefetching controller. |
-| `sharedModules` | `SharedModuleRegistry` | Dependency sharing and version negotiation between MFEs. |
-| `start()` | `Promise<void>` | Waits for eager shared modules, starts prefetching, starts the router, and handles the initial route. |
-| `destroy()` | `Promise<void>` | Stops the router and prefetcher, runs plugin cleanups in reverse order, unmounts all apps, and clears performance data. |
+| Property        | Type                   | Description                                                                                                             |
+| --------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `registry`      | `AppRegistry`          | Registers, loads, mounts, and unmounts apps.                                                                            |
+| `router`        | `Router`               | URL-based app activation.                                                                                               |
+| `hooks`         | `LifecycleHooks`       | Before/after hooks for load, bootstrap, mount, unmount, update.                                                         |
+| `perf`          | `PerfTracker`          | Automatic lifecycle instrumentation.                                                                                    |
+| `prefetch`      | `PrefetchController`   | Resource prefetching controller.                                                                                        |
+| `sharedModules` | `SharedModuleRegistry` | Dependency sharing and version negotiation between MFEs.                                                                |
+| `start()`       | `Promise<void>`        | Waits for eager shared modules, starts prefetching, starts the router, and handles the initial route.                   |
+| `destroy()`     | `Promise<void>`        | Stops the router and prefetcher, runs plugin cleanups in reverse order, unmounts all apps, and clears performance data. |
 
 ## Plugin System
 
@@ -122,8 +122,8 @@ const esmap = createEsmap({
   config,
   plugins: [
     guardPlugin({
-      cssStrategy: 'attribute',    // 'attribute' | 'shadow'
-      observeDynamic: true,        // watch for dynamic style additions
+      cssStrategy: 'attribute', // 'attribute' | 'shadow'
+      observeDynamic: true, // watch for dynamic style additions
       detectGlobalPollution: true, // detect window property pollution
       globalAllowList: ['__MY_GLOBAL__'],
       onGlobalViolation: (appName, property) => {
@@ -146,7 +146,7 @@ const esmap = createEsmap({
   plugins: [
     sandboxPlugin({
       allowList: ['__webpack_public_path__'],
-      exclude: ['shell-app'],  // skip sandboxing for trusted apps
+      exclude: ['shell-app'], // skip sandboxing for trusted apps
     }),
   ],
 });
@@ -195,8 +195,8 @@ const esmap = createEsmap({
   config,
   plugins: [
     keepAlivePlugin({
-      apps: ['dashboard', 'settings'],  // required
-      maxCached: 3,  // LRU eviction when exceeded; default Infinity
+      apps: ['dashboard', 'settings'], // required
+      maxCached: 3, // LRU eviction when exceeded; default Infinity
     }),
   ],
 });
@@ -213,7 +213,7 @@ const esmap = createEsmap({
   config,
   plugins: [
     domIsolationPlugin({
-      exclude: ['gnb'],  // apps that need full document access
+      exclude: ['gnb'], // apps that need full document access
       globalSelectors: ['#global-modal', '[data-esmap-global]'],
     }),
   ],
@@ -228,8 +228,8 @@ Predictive prefetching based on navigation patterns. Records route transitions a
 import { createEsmap, intelligentPrefetchPlugin } from '@esmap/core';
 
 const prefetch = intelligentPrefetchPlugin({
-  prefetchDelay: 1000,  // ms after navigation before prefetching
-  excludeContainers: ['#header'],  // ignore when determining current app
+  prefetchDelay: 1000, // ms after navigation before prefetching
+  excludeContainers: ['#header'], // ignore when determining current app
 });
 
 const esmap = createEsmap({

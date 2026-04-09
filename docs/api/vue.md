@@ -13,7 +13,7 @@ pnpm add @esmap/vue
 ### `createVueMfeApp`
 
 ```ts
-function createVueMfeApp(options: VueMfeAppOptions): MfeApp
+function createVueMfeApp(options: VueMfeAppOptions): MfeApp;
 ```
 
 Converts a Vue 3 component into an esmap MfeApp lifecycle. Manages `createApp`/`unmount` automatically to prevent memory leaks. Props are delivered via a reactive `ref` so updates trigger Vue reactivity.
@@ -22,7 +22,7 @@ Converts a Vue 3 component into an esmap MfeApp lifecycle. Manages `createApp`/`
 
 ### `VueMfeAppOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `rootComponent` | `Component` | Vue component to mount |
-| `wrapWith` | `Component` | Wrapper component (e.g. plugin provider). Must render a default slot. |
+| Property        | Type        | Description                                                           |
+| --------------- | ----------- | --------------------------------------------------------------------- |
+| `rootComponent` | `Component` | Vue component to mount                                                |
+| `wrapWith`      | `Component` | Wrapper component (e.g. plugin provider). Must render a default slot. |

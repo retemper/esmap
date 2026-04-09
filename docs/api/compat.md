@@ -16,7 +16,7 @@ pnpm add @esmap/compat
 function convertMfToImportMap(
   remotes: readonly MfRemoteConfig[],
   options: MfToImportMapOptions,
-): ImportMap
+): ImportMap;
 ```
 
 Converts Module Federation remote configurations into import map format. Maps each remote app's scope as a bare specifier to its build artifact URL, including exposed submodule entries.
@@ -27,7 +27,7 @@ Converts Module Federation remote configurations into import map format. Maps ea
 function convertMfSharedToImports(
   shared: Record<string, string>,
   cdnBase: string,
-): Record<string, string>
+): Record<string, string>;
 ```
 
 Generates import map entries for shared libraries from an MF shared dependency configuration (name-to-version mapping).
@@ -36,23 +36,23 @@ Generates import map entries for shared libraries from an MF shared dependency c
 
 ### `MfRemoteConfig`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | `string` | App name (e.g. `"flexCheckout"`) |
-| `scope` | `string` | Scope name (e.g. `"@flex/checkout"`) |
-| `remoteEntryUrl` | `string` | App entry point URL (remoteEntry.js) |
-| `exposes` | `MfExposedModule[]` | List of exposed modules |
+| Property         | Type                | Description                          |
+| ---------------- | ------------------- | ------------------------------------ |
+| `name`           | `string`            | App name (e.g. `"flexCheckout"`)     |
+| `scope`          | `string`            | Scope name (e.g. `"@flex/checkout"`) |
+| `remoteEntryUrl` | `string`            | App entry point URL (remoteEntry.js) |
+| `exposes`        | `MfExposedModule[]` | List of exposed modules              |
 
 ### `MfExposedModule`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `key` | `string` | Expose key (e.g. `"./Button"`) |
-| `path` | `string` | File path (e.g. `"./src/components/Button.tsx"`) |
+| Property | Type     | Description                                      |
+| -------- | -------- | ------------------------------------------------ |
+| `key`    | `string` | Expose key (e.g. `"./Button"`)                   |
+| `path`   | `string` | File path (e.g. `"./src/components/Button.tsx"`) |
 
 ### `MfToImportMapOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `cdnBase` | `string` | CDN base URL |
+| Property      | Type     | Description                                                  |
+| ------------- | -------- | ------------------------------------------------------------ |
+| `cdnBase`     | `string` | CDN base URL                                                 |
 | `pathPattern` | `string` | Per-app artifact path pattern (default: `"{scope}/{entry}"`) |

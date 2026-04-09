@@ -14,19 +14,19 @@ pnpm add @esmap/runtime
 
 ```ts
 class AppRegistry {
-  constructor(options?: AppRegistryOptions)
-  getApps(): readonly RegisteredApp[]
-  getApp(name: string): RegisteredApp | undefined
-  registerApp(options: RegisterAppOptions): void
-  unregisterApp(name: string): Promise<void>
-  loadApp(name: string): Promise<void>
-  mountApp(name: string): Promise<void>
-  unmountApp(name: string): Promise<void>
-  setKeepAlive(name: string, enabled: boolean): void
-  isKeepAlive(name: string): boolean
-  onStatusChange(listener: (event: AppStatusChangeEvent) => void): () => void
-  getRetryCount(name: string): number
-  destroy(): Promise<void>
+  constructor(options?: AppRegistryOptions);
+  getApps(): readonly RegisteredApp[];
+  getApp(name: string): RegisteredApp | undefined;
+  registerApp(options: RegisterAppOptions): void;
+  unregisterApp(name: string): Promise<void>;
+  loadApp(name: string): Promise<void>;
+  mountApp(name: string): Promise<void>;
+  unmountApp(name: string): Promise<void>;
+  setKeepAlive(name: string, enabled: boolean): void;
+  isKeepAlive(name: string): boolean;
+  onStatusChange(listener: (event: AppStatusChangeEvent) => void): () => void;
+  getRetryCount(name: string): number;
+  destroy(): Promise<void>;
 }
 ```
 
@@ -36,17 +36,17 @@ Registry that manages MFE apps. Handles registration, status management, lifecyc
 
 ```ts
 class Router {
-  constructor(registry: RouterRegistry, options?: RouterOptions)
-  start(): Promise<void>
-  stop(): void
-  push(url: string): void
-  replace(url: string): void
-  back(): void
-  forward(): void
-  go(delta: number): void
-  get currentRoute(): RouteContext
-  beforeRouteChange(guard: BeforeRouteChangeGuard): () => void
-  afterRouteChange(guard: AfterRouteChangeGuard): () => void
+  constructor(registry: RouterRegistry, options?: RouterOptions);
+  start(): Promise<void>;
+  stop(): void;
+  push(url: string): void;
+  replace(url: string): void;
+  back(): void;
+  forward(): void;
+  go(delta: number): void;
+  get currentRoute(): RouteContext;
+  beforeRouteChange(guard: BeforeRouteChangeGuard): () => void;
+  afterRouteChange(guard: AfterRouteChangeGuard): () => void;
 }
 ```
 
@@ -56,8 +56,8 @@ Detects URL changes and mounts/unmounts MFEs. Patches History API to intercept p
 
 ```ts
 class TimeoutError extends Error {
-  readonly timeout: number
-  constructor(timeout: number)
+  readonly timeout: number;
+  constructor(timeout: number);
 }
 ```
 
@@ -75,8 +75,8 @@ Error thrown when the circuit breaker is open and requests are blocked.
 
 ```ts
 class SharedVersionConflictError extends Error {
-  readonly moduleName: string
-  constructor(moduleName: string, message: string)
+  readonly moduleName: string;
+  constructor(moduleName: string, message: string);
 }
 ```
 
@@ -87,7 +87,7 @@ Error thrown when shared module version negotiation fails.
 ### `loadImportMap`
 
 ```ts
-function loadImportMap(options: LoaderOptions): Promise<ImportMap>
+function loadImportMap(options: LoaderOptions): Promise<ImportMap>;
 ```
 
 Loads and applies an import map to the DOM. Skips injection if a native import map already exists. Optionally injects modulepreload hints.
@@ -95,11 +95,7 @@ Loads and applies an import map to the DOM. Skips injection if a native import m
 ### `createDefaultFallback`
 
 ```ts
-function createDefaultFallback(
-  appName: string,
-  error: Error,
-  onRetry: () => void,
-): HTMLElement
+function createDefaultFallback(appName: string, error: Error, onRetry: () => void): HTMLElement;
 ```
 
 Creates a default error fallback UI element with a retry button.
@@ -107,10 +103,7 @@ Creates a default error fallback UI element with a retry button.
 ### `renderFallback`
 
 ```ts
-function renderFallback(
-  container: HTMLElement,
-  content: HTMLElement | string,
-): void
+function renderFallback(container: HTMLElement, content: HTMLElement | string): void;
 ```
 
 Renders fallback content into a container element.
@@ -118,7 +111,7 @@ Renders fallback content into a container element.
 ### `mountParcel`
 
 ```ts
-function mountParcel(options: ParcelOptions): Promise<Parcel>
+function mountParcel(options: ParcelOptions): Promise<Parcel>;
 ```
 
 Mounts an app to a DOM element independently of routing, creating a Parcel. Uses LifecycleRunner internally for state transitions.
@@ -126,7 +119,7 @@ Mounts an app to a DOM element independently of routing, creating a Parcel. Uses
 ### `createLifecycleRunner`
 
 ```ts
-function createLifecycleRunner(options: LifecycleRunnerOptions): LifecycleRunner
+function createLifecycleRunner(options: LifecycleRunnerOptions): LifecycleRunner;
 ```
 
 Creates a runner that safely executes MfeApp lifecycle with state transition guards and error handling.
@@ -134,7 +127,7 @@ Creates a runner that safely executes MfeApp lifecycle with state transition gua
 ### `createLifecycleHooks`
 
 ```ts
-function createLifecycleHooks(options?: LifecycleHooksOptions): LifecycleHooks
+function createLifecycleHooks(options?: LifecycleHooksOptions): LifecycleHooks;
 ```
 
 Creates a lifecycle hooks manager for registering and executing global and per-app before/after hooks.
@@ -142,7 +135,7 @@ Creates a lifecycle hooks manager for registering and executing global and per-a
 ### `createPrefetch`
 
 ```ts
-function createPrefetch(options: PrefetchOptions): PrefetchController
+function createPrefetch(options: PrefetchOptions): PrefetchController;
 ```
 
 Creates a smart preloading controller. The `idle` strategy uses `requestIdleCallback`, and `immediate` executes right away.
@@ -150,7 +143,7 @@ Creates a smart preloading controller. The `idle` strategy uses `requestIdleCall
 ### `withTimeout`
 
 ```ts
-function withTimeout<T>(fn: () => Promise<T>, ms: number): Promise<T>
+function withTimeout<T>(fn: () => Promise<T>, ms: number): Promise<T>;
 ```
 
 Applies a timeout to an async function. Throws `TimeoutError` if not completed within the specified time.
@@ -158,7 +151,7 @@ Applies a timeout to an async function. Throws `TimeoutError` if not completed w
 ### `withRetry`
 
 ```ts
-function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): Promise<T>
+function withRetry<T>(fn: () => Promise<T>, options: RetryOptions): Promise<T>;
 ```
 
 Wraps an async function with retry capability. Retries on failure up to the specified count with a delay between each attempt.
@@ -166,10 +159,7 @@ Wraps an async function with retry capability. Retries on failure up to the spec
 ### `withResilience`
 
 ```ts
-function withResilience<T>(
-  fn: () => Promise<T>,
-  options: ResilienceOptions,
-): Promise<T>
+function withResilience<T>(fn: () => Promise<T>, options: ResilienceOptions): Promise<T>;
 ```
 
 Applies both timeout and retry to an async function. Each attempt has an independent timeout.
@@ -177,7 +167,7 @@ Applies both timeout and retry to an async function. Each attempt has an indepen
 ### `createCircuitBreaker`
 
 ```ts
-function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker
+function createCircuitBreaker(options: CircuitBreakerOptions): CircuitBreaker;
 ```
 
 Creates a circuit breaker that opens on consecutive failures to block subsequent requests, then allows a trial request after cooldown.
@@ -185,7 +175,7 @@ Creates a circuit breaker that opens on consecutive failures to block subsequent
 ### `parseSemver`
 
 ```ts
-function parseSemver(version: string): SemverParts
+function parseSemver(version: string): SemverParts;
 ```
 
 Parses a version string (e.g. `"18.3.1"`) into major, minor, and patch components.
@@ -193,7 +183,7 @@ Parses a version string (e.g. `"18.3.1"`) into major, minor, and patch component
 ### `compareVersions`
 
 ```ts
-function compareVersions(a: string, b: string): -1 | 0 | 1
+function compareVersions(a: string, b: string): -1 | 0 | 1;
 ```
 
 Compares two semver version strings. Returns `-1`, `0`, or `1`.
@@ -201,7 +191,7 @@ Compares two semver version strings. Returns `-1`, `0`, or `1`.
 ### `satisfiesRange`
 
 ```ts
-function satisfiesRange(version: string, range: string): boolean
+function satisfiesRange(version: string, range: string): boolean;
 ```
 
 Checks whether a version satisfies a semver range. Supports `^`, `~`, `>=`, and exact match.
@@ -209,7 +199,7 @@ Checks whether a version satisfies a semver range. Supports `^`, `~`, `>=`, and 
 ### `createSharedModuleRegistry`
 
 ```ts
-function createSharedModuleRegistry(): SharedModuleRegistry
+function createSharedModuleRegistry(): SharedModuleRegistry;
 ```
 
 Creates a shared module registry that negotiates versions of shared dependencies registered by multiple MFE apps, selects the optimal version, and shares a single instance.
@@ -219,7 +209,7 @@ Creates a shared module registry that negotiates versions of shared dependencies
 ```ts
 function createIntelligentPrefetch(
   options?: IntelligentPrefetchOptions,
-): IntelligentPrefetchController
+): IntelligentPrefetchController;
 ```
 
 Creates an intelligent prefetch controller that learns user navigation patterns to predict the next visited app and prioritize prefetching.
@@ -227,9 +217,7 @@ Creates an intelligent prefetch controller that learns user navigation patterns 
 ### `createResourceLoader`
 
 ```ts
-function createResourceLoader(
-  options?: ResourceLoaderOptions,
-): ResourceLoader
+function createResourceLoader(options?: ResourceLoaderOptions): ResourceLoader;
 ```
 
 Creates a resource loading pipeline with staged interceptors for fetch, JS transformation, and CSS transformation with caching support.
@@ -237,9 +225,7 @@ Creates a resource loading pipeline with staged interceptors for fetch, JS trans
 ### `createNamespaceGuard`
 
 ```ts
-function createNamespaceGuard(
-  options?: NamespaceGuardOptions,
-): NamespaceGuard
+function createNamespaceGuard(options?: NamespaceGuardOptions): NamespaceGuard;
 ```
 
 Creates a namespace conflict guard for global resources. Tracks ownership and prevents unintended overwrites between MFE apps.
@@ -250,130 +236,130 @@ Creates a namespace conflict guard for global resources. Tracks ownership and pr
 
 Either `importMapUrl` or `inlineImportMap` must be provided.
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `importMapUrl` | `string` | URL to fetch the import map JSON from |
-| `inlineImportMap` | `ImportMap` | Inline import map object |
-| `injectPreload` | `boolean` | Whether to inject modulepreload hints (default: `true`) |
+| Property          | Type        | Description                                             |
+| ----------------- | ----------- | ------------------------------------------------------- |
+| `importMapUrl`    | `string`    | URL to fetch the import map JSON from                   |
+| `inlineImportMap` | `ImportMap` | Inline import map object                                |
+| `injectPreload`   | `boolean`   | Whether to inject modulepreload hints (default: `true`) |
 
 ### `AppRegistryOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `importMap` | `ImportMap` | Import map for resolving bare specifiers to URLs |
+| Property        | Type                   | Description                                       |
+| --------------- | ---------------------- | ------------------------------------------------- |
+| `importMap`     | `ImportMap`            | Import map for resolving bare specifiers to URLs  |
 | `errorBoundary` | `ErrorBoundaryOptions` | Global error boundary options applied to all apps |
 
 ### `RegisterAppOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | `string` | App name (import map specifier) |
-| `activeWhen` | `string \| string[] \| (location: Location) => boolean` | Route matching function or pattern |
-| `container` | `string` | DOM selector for mount target (default: `"#app"`) |
-| `errorBoundary` | `ErrorBoundaryOptions` | Per-app error boundary overrides |
+| Property        | Type                                                    | Description                                       |
+| --------------- | ------------------------------------------------------- | ------------------------------------------------- |
+| `name`          | `string`                                                | App name (import map specifier)                   |
+| `activeWhen`    | `string \| string[] \| (location: Location) => boolean` | Route matching function or pattern                |
+| `container`     | `string`                                                | DOM selector for mount target (default: `"#app"`) |
+| `errorBoundary` | `ErrorBoundaryOptions`                                  | Per-app error boundary overrides                  |
 
 ### `RouterOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `mode` | `'history' \| 'hash'` | Route change detection method (default: `'history'`) |
-| `baseUrl` | `string` | Base path prepended to all routes |
-| `onNoMatch` | `(context: RouteContext) => void` | Handler called when no registered app matches |
+| Property    | Type                              | Description                                          |
+| ----------- | --------------------------------- | ---------------------------------------------------- |
+| `mode`      | `'history' \| 'hash'`             | Route change detection method (default: `'history'`) |
+| `baseUrl`   | `string`                          | Base path prepended to all routes                    |
+| `onNoMatch` | `(context: RouteContext) => void` | Handler called when no registered app matches        |
 
 ### `RouteContext`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `pathname` | `string` | URL pathname |
-| `search` | `string` | Query string |
-| `hash` | `string` | Hash fragment |
+| Property   | Type     | Description   |
+| ---------- | -------- | ------------- |
+| `pathname` | `string` | URL pathname  |
+| `search`   | `string` | Query string  |
+| `hash`     | `string` | Hash fragment |
 
 ### `ParcelOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `app` | `MfeApp \| () => Promise<MfeApp>` | App to mount or async loader |
-| `domElement` | `HTMLElement` | Target DOM element |
-| `props` | `Record<string, unknown>` | Initial props |
+| Property     | Type                              | Description                  |
+| ------------ | --------------------------------- | ---------------------------- |
+| `app`        | `MfeApp \| () => Promise<MfeApp>` | App to mount or async loader |
+| `domElement` | `HTMLElement`                     | Target DOM element           |
+| `props`      | `Record<string, unknown>`         | Initial props                |
 
 ### `LifecyclePhase`
 
 ```ts
-type LifecyclePhase = 'load' | 'bootstrap' | 'mount' | 'unmount' | 'update'
+type LifecyclePhase = 'load' | 'bootstrap' | 'mount' | 'unmount' | 'update';
 ```
 
 ### `PrefetchStrategy`
 
 ```ts
-type PrefetchStrategy = 'idle' | 'immediate'
+type PrefetchStrategy = 'idle' | 'immediate';
 ```
 
 ### `PrefetchOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `strategy` | `PrefetchStrategy` | Prefetch strategy |
-| `apps` | `PrefetchAppConfig[]` | List of apps to prefetch |
+| Property    | Type                                  | Description                           |
+| ----------- | ------------------------------------- | ------------------------------------- |
+| `strategy`  | `PrefetchStrategy`                    | Prefetch strategy                     |
+| `apps`      | `PrefetchAppConfig[]`                 | List of apps to prefetch              |
 | `importMap` | `{ imports: Record<string, string> }` | Import map for name-based prefetching |
 
 ### `RetryOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `retries` | `number` | Maximum number of retries |
-| `delay` | `number` | Delay between retries (ms) |
+| Property  | Type     | Description                |
+| --------- | -------- | -------------------------- |
+| `retries` | `number` | Maximum number of retries  |
+| `delay`   | `number` | Delay between retries (ms) |
 
 ### `ResilienceOptions`
 
 Extends `RetryOptions`.
 
-| Property | Type | Description |
-| --- | --- | --- |
+| Property  | Type     | Description              |
+| --------- | -------- | ------------------------ |
 | `timeout` | `number` | Timeout per attempt (ms) |
 
 ### `CircuitBreakerOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `failureThreshold` | `number` | Consecutive failures to open the circuit |
-| `cooldownMs` | `number` | Wait time (ms) before transitioning to half-open |
-| `onStateChange` | `(from: CircuitState, to: CircuitState) => void` | State transition callback |
+| Property           | Type                                             | Description                                      |
+| ------------------ | ------------------------------------------------ | ------------------------------------------------ |
+| `failureThreshold` | `number`                                         | Consecutive failures to open the circuit         |
+| `cooldownMs`       | `number`                                         | Wait time (ms) before transitioning to half-open |
+| `onStateChange`    | `(from: CircuitState, to: CircuitState) => void` | State transition callback                        |
 
 ### `SharedModuleConfig`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `name` | `string` | Module name (e.g. `"react"`) |
-| `version` | `string` | Provided version |
-| `requiredVersion` | `string` | Required semver range |
-| `singleton` | `boolean` | Whether to enforce a single instance |
-| `eager` | `boolean` | Whether to load immediately at register time |
-| `strictVersion` | `boolean` | Whether to throw on version mismatch |
-| `factory` | `() => Promise<unknown>` | Factory function that creates the module |
-| `fallback` | `() => Promise<unknown>` | Fallback factory for version conflicts |
-| `subpaths` | `Record<string, () => Promise<unknown>>` | Subpath exports mapping |
-| `from` | `string` | Registrant app name |
+| Property          | Type                                     | Description                                  |
+| ----------------- | ---------------------------------------- | -------------------------------------------- |
+| `name`            | `string`                                 | Module name (e.g. `"react"`)                 |
+| `version`         | `string`                                 | Provided version                             |
+| `requiredVersion` | `string`                                 | Required semver range                        |
+| `singleton`       | `boolean`                                | Whether to enforce a single instance         |
+| `eager`           | `boolean`                                | Whether to load immediately at register time |
+| `strictVersion`   | `boolean`                                | Whether to throw on version mismatch         |
+| `factory`         | `() => Promise<unknown>`                 | Factory function that creates the module     |
+| `fallback`        | `() => Promise<unknown>`                 | Fallback factory for version conflicts       |
+| `subpaths`        | `Record<string, () => Promise<unknown>>` | Subpath exports mapping                      |
+| `from`            | `string`                                 | Registrant app name                          |
 
 ### `IntelligentPrefetchOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `maxHistory` | `number` | Max navigation records to keep (default: `200`) |
-| `threshold` | `number` | Minimum transition probability to trigger prefetch (default: `0.1`) |
-| `maxPrefetch` | `number` | Max apps to prefetch (default: `3`) |
-| `persistKey` | `string` | localStorage key for persisting learned data |
+| Property      | Type     | Description                                                         |
+| ------------- | -------- | ------------------------------------------------------------------- |
+| `maxHistory`  | `number` | Max navigation records to keep (default: `200`)                     |
+| `threshold`   | `number` | Minimum transition probability to trigger prefetch (default: `0.1`) |
+| `maxPrefetch` | `number` | Max apps to prefetch (default: `3`)                                 |
+| `persistKey`  | `string` | localStorage key for persisting learned data                        |
 
 ### `ResourceLoaderOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `enableCache` | `boolean` | Whether caching is enabled (default: `true`) |
-| `cacheTtl` | `number` | Cache TTL in ms (default: `300000`) |
-| `fetchTimeout` | `number` | Fetch timeout in ms (default: `30000`, `0` disables) |
+| Property       | Type      | Description                                          |
+| -------------- | --------- | ---------------------------------------------------- |
+| `enableCache`  | `boolean` | Whether caching is enabled (default: `true`)         |
+| `cacheTtl`     | `number`  | Cache TTL in ms (default: `300000`)                  |
+| `fetchTimeout` | `number`  | Fetch timeout in ms (default: `30000`, `0` disables) |
 
 ### `NamespaceGuardOptions`
 
-| Property | Type | Description |
-| --- | --- | --- |
-| `onConflict` | `'warn' \| 'error' \| 'skip'` | Action on conflict detection (default: `'warn'`) |
-| `allowedSharedKeys` | `string[]` | Keys that do not trigger conflicts |
+| Property            | Type                          | Description                                      |
+| ------------------- | ----------------------------- | ------------------------------------------------ |
+| `onConflict`        | `'warn' \| 'error' \| 'skip'` | Action on conflict detection (default: `'warn'`) |
+| `allowedSharedKeys` | `string[]`                    | Keys that do not trigger conflicts               |

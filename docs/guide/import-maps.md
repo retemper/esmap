@@ -1,6 +1,5 @@
 # Import Maps
 
-
 ## What are Import Maps?
 
 [Import Maps](https://wicg.github.io/import-maps/) are a W3C browser standard that lets you control how JavaScript module specifiers are resolved.
