@@ -1,0 +1,12 @@
+# Package manager lockfiles (auto-generated)
+pnpm-lock.yaml
+
+# Build output
+dist/
+**/dist/
+
+# Claude Code user tooling (not project source)
+.claude/
+
+# Gitignored workspace-local content
+.context/
