@@ -18,7 +18,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "lodestar": "lodestar check"
   },
   "dependencies": {
     "@esmap/communication": "workspace:*",

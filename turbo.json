@@ -17,6 +17,10 @@
       "dependsOn": [],
       "outputs": []
     },
+    "lodestar": {
+      "dependsOn": [],
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
